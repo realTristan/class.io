@@ -23,7 +23,7 @@
 						<div id="fade_in_text">
 							<div style="margin: 10px;">
 								<mark style="color: black; background: none; font-weight: 600;">&nbsp;&nbsp;Correct Answer: </mark>
-								<mark style="color: #3f3f46; background: none; font-weight: 600;">&nbsp;{LessonData["hw_solutions"][n]["questions"][i]}</mark>
+								<mark style="color: #3f3f46; background: none; font-weight: 600;">&nbsp;{section.solutions[i]}</mark>
 							</div>
 						</div>
 					</div>

@@ -17,13 +17,8 @@
                     "f(x) = 4x^4 + 7x^3 - 80x^2 - 21x + 270",
                     "f(x) = x^5 - 5x^4 - 7x^3 + 29x^2 + 30x",
                     "f(x) = x^4 + 2x^3 - 23x^2 - 24^x + 144"
-                ]
-            }
-        ],
-        "hw_solutions": [
-            {
-                "title": "1. Factor each of the following fully", 
-                "questions": [
+                ],
+                "solutions": [
                     "(x - 2)(x - 4)(x + 3)", 
                     "(x - 1)(2x + 3)(2x + 5)", 
                     "x(x - 2)(x + 4)(x + 6)", 
@@ -44,28 +39,14 @@
         "hw_full_solutions": "#",
         "hw_questions": [
             {
-                "title": "1. What to do 1", 
+                "title": "1. Task 1", 
                 "questions": [
                     "Question 1",
                     "Question 2",
                     "Question 3",
                     "Question 4"
-                ]
-            },
-            {
-                "title": "2. What to do 2", 
-                "questions": [
-                    "Question 5",
-                    "Question 6",
-                    "Question 7",
-                    "Question 8"
-                ]
-            }
-        ],
-        "hw_solutions": [
-            {
-                "title": "1. What to do 1", 
-                "questions": [
+                ],
+                "solutions": [
                     "Solution 1",
                     "Solution 2",
                     "Solution 3",
@@ -73,8 +54,14 @@
                 ]
             },
             {
-                "title": "2. What to do 2", 
+                "title": "2. Task 2", 
                 "questions": [
+                    "Question 5",
+                    "Question 6",
+                    "Question 7",
+                    "Question 8"
+                ],
+                "solutions": [
                     "Solution 5",
                     "Solution 6",
                     "Solution 7",
