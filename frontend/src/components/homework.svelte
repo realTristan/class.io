@@ -3,7 +3,7 @@
     export let LessonData;
 
 	// Store the alphabet for equations
-	const ALPHABET = "abcdefghijklmnopqrsrtuvwxyz";
+	const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 	// Store drop down display values
 	let dropDownDisplays = [];
