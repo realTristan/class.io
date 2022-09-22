@@ -12,6 +12,13 @@
 - Svelte is 30% faster than other frameworks.
 - Svelte is best when used for designing small apps
 
+# Todo
+- Add a section to select the unit
+- Add a section to submit homework answers
+- Add a section for the teacher to mark homework answers
+- Implement once homework has been marked, it will email the student
+- Implement auto convert png to pdf for homework submissions
+- Implement google oauth login using firebase
 
 # License
 MIT License
