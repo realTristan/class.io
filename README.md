@@ -13,9 +13,15 @@
 - Svelte is best when used for designing small apps
 
 # Todo
+<h2>Major</h2>
+
+- Finish adding all the data for unit 1
 - Add a section to select the unit
 - Add a section to submit homework answers
 - Add a section for the teacher to mark homework answers
+
+<h2> Implementations </h2>
+
 - Implement once homework has been marked, it will email the student
 - Implement auto convert png to pdf for homework submissions
 - Implement google oauth login using firebase
