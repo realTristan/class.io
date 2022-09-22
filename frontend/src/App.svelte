@@ -1,6 +1,55 @@
 <script>
+	import { onMount } from 'svelte';
 	import LessonData from '../course_data.json'
 	import Homework from './components/homework.svelte'
+	
+	// The openCloseEquationSlider() function is used to
+	// open / close the homework question sliders and 
+	// change the contents within said sliders to hidden.
+	function openCloseEquationSlider(equations, solutions, e, i) {
+		// If slider is closed, open it
+		if (e.style.height == '20px' || e.style.height == '') {
+			e.style.height = '60px';
+			e.style.display = "block";
+			solutions[i].style.display = 'block';
+
+			// Close all the other equation solutions
+			for (let n = 0; n < equations.length; n++) {
+				if (n != i) {
+					equations[n].style.height = '20px';
+					solutions[n].style.display = 'none';
+				}
+			}
+		} 
+		// Else, Hide the slider
+		else {
+			e.style.height = '20px';
+			solutions[i].style.display = 'none';
+		}
+	}
+	// Call the contents in this function when
+	// the website is mounted (aka loaded)
+	onMount(() => {
+		let equations = [];
+		let solutions = [];
+
+		// For each of the slide elements
+		document.querySelectorAll("#fade_in_text").forEach((e) => {
+			e.style.display = 'none';
+			solutions.push(e);
+		});
+
+		// For each of the slide elements
+		document.querySelectorAll("#slider").forEach((e, i) => {
+			equations.push(e);
+
+			// Establish the event listener
+			e.addEventListener("click", () => openCloseEquationSlider(
+				equations, solutions, e, i
+			));
+		});
+	});
+
 </script>
 
 <main>
