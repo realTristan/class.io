@@ -1,0 +1,37 @@
+{
+    "lesson_8": {
+        "title": "Lesson #8 | Factor Theorum",
+        "video": {
+            "url": "https://www.youtube.com/embed/oV3-Nbk9bow",
+            "title": "Unit #1 Lesson #8 Factor Theorem"
+        },
+        "note": "https://drive.google.com/file/d/1DVJlB2dntH4L6rCX6NT8W5amSaj4Irbr/view",
+        "hw_full_solutions": "https://drive.google.com/file/d/1J8hK2GPQ5fvN9I5z-SdGpYzQefO99Jgq/view",
+        "hw_questions": [
+            {
+                "title": "1. Factor each of the following fully", 
+                "questions": [
+                    "f(x) = x^3 - 3x^2 - 10x + 24",
+                    "f(x) = 4x^3 + 12x^2 - x - 15",
+                    "f(x) = x^4 + 8x^3 + 4x^2 - 48x",
+                    "f(x) = 4x^4 + 7x^3 - 80x^2 - 21x + 270",
+                    "f(x) = x^5 - 5x^4 - 7x^3 + 29x^2 + 30x",
+                    "f(x) = x^4 + 2x^3 - 23x^2 - 24^x + 144"
+                ]
+            }
+        ],
+        "hw_solutions": [
+            {
+                "title": "1. Factor each of the following fully", 
+                "questions": [
+                    "(x - 2)(x - 4)(x + 3)", 
+                    "(x - 1)(2x + 3)(2x + 5)", 
+                    "x(x - 2)(x + 4)(x + 6)", 
+                    "(x + 2)(x + 5)(4x - 9)(x - 3)", 
+                    "x(x + 2)(x + 1)(x - 3)(x - 5)", 
+                    "(x - 3)(x - 3)(x + 4)(x + 4)"
+                ]
+            }
+        ]
+    }
+}
