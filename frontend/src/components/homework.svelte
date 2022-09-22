@@ -31,10 +31,10 @@
 			dropDownDisplays[i] = "none"
 		}
 	}
-
-	// On Site Mount
+	// Call the contents in this function when
+	// the website is mounted (aka loaded)
 	onMount(() => {
-        // SlideElements
+		// SlideElements
 		let se = [];
 
 		// For each of the slide elements
@@ -50,33 +50,31 @@
 </script>
 
 <main>
-	<div>
-		<!-- Homework Questions -->
-		{#each LessonData["hw_questions"] as section, n}
-            <h3>{section.title}</h3>
-            <div style="margin-left: 20%; margin-right: 20%;">
+	<!-- Homework Questions -->
+	{#each LessonData["hw_questions"] as section, n}
+		<h3>{section.title}</h3>
+		<div style="margin-left: 20%; margin-right: 20%;">
+			<!-- Create new dropdown div for each question -->
+			{#each section.questions as equation, i}
+				<div style="padding: 10px; display: inline-block; cursor: pointer; font-weight: 600;">
+					<div id="slider">
 
-                <!-- Create new dropdown div for each question -->
-                {#each section.questions as equation, i}
-                    <div style="padding: 10px; display: inline-block; cursor: pointer; font-weight: 600;">
-                        <div id="slider">
-
-                            <!-- Set the equation -->
-                            <mark style="color: #3f3f46; background: none; font-weight: 600;">{ALPHABET[i]}) </mark>
-                                {equation}
-                            
-                            <!-- Set the equation solution -->
-                            <div class="fade-in-text" style="display: {dropDownDisplays[i]};">
-                                <div style="margin: 10px;">
-                                    <mark style="color: black; background: none; font-weight: 600;">&nbsp;&nbsp;Correct Answer: </mark>
-                                    <mark style="color: #3f3f46; background: none; font-weight: 600;">&nbsp;{LessonData["hw_solutions"][n]["questions"][i]}</mark>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                {/each}
-            </div>
-		{/each}
+						<!-- Set the equation -->
+						<mark style="color: #3f3f46; background: none; font-weight: 600;">{ALPHABET[i]}) </mark>
+							{equation}
+						
+						<!-- Set the equation solution -->
+						<div class="fade-in-text" style="display: {dropDownDisplays[i]};">
+							<div style="margin: 10px;">
+								<mark style="color: black; background: none; font-weight: 600;">&nbsp;&nbsp;Correct Answer: </mark>
+								<mark style="color: #3f3f46; background: none; font-weight: 600;">&nbsp;{LessonData["hw_solutions"][n]["questions"][i]}</mark>
+							</div>
+						</div>
+					</div>
+				</div>
+			{/each}
+		</div>
+	{/each}
 </main>
 
 <style>
