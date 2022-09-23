@@ -1,6 +1,10 @@
+<svelte:head>
+	<title>Lesson</title>
+</svelte:head>
+
 <script>
 	import { onMount } from 'svelte';
-	import LessonData from '../course_data.json'
+	import JsonData from './course_data.json'
 	import Homework from './components/homework.svelte'
 	
 	// The openCloseEquationSlider() function is used to
@@ -53,14 +57,15 @@
 </script>
 
 <main>
-	{#each Object.entries(LessonData) as [key]}
-		{@const LESSON_TITLE_SPLIT = LessonData[key]["title"].split(" |")}
+	{#each Object.entries(JsonData) as [key]}
+		{@const LESSON_TITLE_SPLIT = JsonData[key]["title"].split(" |")}
 
 		<!-- Example: Lesson #8 Factor Theorum -->
 		<h1>
-			<a style="color: #7c3aed;"
+			<a 
+				style="color: #7c3aed; text-decoration: none;"
 				rel="noopener noreferrer" target="_blank"
-				href={LessonData[key]["note"]}> 
+				href={JsonData[key]["note"]}> 
 				<mark style="color: black; background: none;">
 					<!-- Example: Lesson #8 -->
 					{LESSON_TITLE_SPLIT[0]}
@@ -75,23 +80,24 @@
 			<iframe
 				style="border-radius: 5px;"
 				width="480" height="220" frameborder="0"
-				src={LessonData[key]["video"]["url"]} 
-				title={LessonData[key]["video"]["title"]} 
+				src={JsonData[key]["video"]["url"]} 
+				title={JsonData[key]["video"]["title"]} 
 				allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
 			</iframe>
 		</div>
 
 		<!-- Homework Title -->
 		<h2>
-			<a style="color: #7c3aed;"
+			<a 
+				style="color: #7c3aed; text-decoration: none;"
 				rel="noopener noreferrer" target="_blank"
-				href={LessonData[key]["hw_full_solutions"]}>
+				href={JsonData[key]["hw_full_solutions"]}>
 				<mark style="color: black; background: none;">{LESSON_TITLE_SPLIT[0]}</mark> Homework
 			</a>
 		</h2>
 
 		<!-- Homework Questions -->
-		<Homework LessonData={LessonData[key]}/>
+		<Homework LessonData={JsonData[key]}/>
 		<div class="seperator"></div>
 	{/each}
 </main>
@@ -111,6 +117,7 @@
 		text-align: center;
 		padding: 1em;
 		margin: 0 auto;
+		font-family: 'Poppins', sans-serif;
 	}
 	h1 {
         text-align: center;
