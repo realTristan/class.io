@@ -7,9 +7,9 @@
 
 <main>
 	<!-- Homework Questions -->
-	{#each LessonData["hw_questions"] as section, n}
+	{#each LessonData["hw_questions"] as section}
 		<h3>{section.title}</h3>
-		<div style="margin-left: 20%; margin-right: 20%;">
+		<div style="margin-left: 10%; margin-right: 10%;">
 			<!-- Create new dropdown div for each question -->
 			{#each section.questions as equation, i}
 				<div style="padding: 10px; display: inline-block; cursor: pointer; font-weight: 600;">
@@ -21,7 +21,7 @@
 						
 						<!-- Set the equation solution -->
 						<div id="fade_in_text">
-							<div style="margin: 10px;">
+							<div style="margin: 10px; margin-top: 15px;">
 								<mark style="color: black; background: none; font-weight: 600;">&nbsp;&nbsp;Correct Answer: </mark>
 								<mark style="color: #3f3f46; background: none; font-weight: 600;">&nbsp;{section.solutions[i]}</mark>
 							</div>
@@ -40,6 +40,7 @@
 	}
 	@keyframes fadeIn {
 		0% { opacity: 0; }
+		2% { opacity: 0; }
 		20% { opacity: 1; }
 	}
 	

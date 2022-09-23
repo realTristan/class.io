@@ -73,7 +73,7 @@
 		<!-- Lesson Info -->
 		<div>
 			<iframe 
-				width="780" height="420" frameborder="0"
+				width="480" height="220" frameborder="0"
 				src={LessonData[key]["video"]["url"]} 
 				title={LessonData[key]["video"]["title"]} 
 				allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
@@ -100,8 +100,8 @@
 	.seperator {
 		height: 2px; 
 		background-color: #d4d4d8; 
-		margin-top: 200px; 
-		margin-bottom: 200px; 
+		margin-top: 120px; 
+		margin-bottom: 120px; 
 		margin-left: 100px; 
 		margin-right: 100px;
 	}
