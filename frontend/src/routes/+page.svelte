@@ -19,10 +19,10 @@
     ];
 
     // Configuring the starting unit selection styling
-    var onLoadRandOptNum, onLoadSelection;
+    var staticSelectionNum, staticSelection;
     onMount(() => {
-        onLoadRandOptNum = Math.floor(Math.random() * UNIT_NAMES.length);
-        onLoadSelection = true;
+        staticSelectionNum = Math.floor(Math.random() * UNIT_NAMES.length);
+        staticSelection = true;
     })
 </script>
 
@@ -31,18 +31,17 @@
         <mark style="color: #333; background: none; ">Mr.Simpson's</mark> MHF4UI
     </h1>
     <ul 
-        on:mouseenter={() => { if (onLoadSelection) onLoadSelection = false; }}
-        on:mouseleave={() => { if (!onLoadSelection) {
-            onLoadRandOptNum = Math.floor(Math.random() * UNIT_NAMES.length);
-            onLoadSelection = true;
-        }}}
+        on:mouseenter={() => { if (staticSelection) staticSelection = false; }}
+        on:mouseleave={() => { if (!staticSelection) staticSelection = true; }}
     >
         {#each UNIT_NAMES as unit, i}
             <!-- svelte-ignore a11y-invalid-attribute -->
             <li
-                id={ i == onLoadRandOptNum && onLoadSelection ? "onLoadHover":"" } 
+                on:mouseleave={() => { if (!staticSelection) { staticSelectionNum = i; }}}
+                id={ i == staticSelectionNum && staticSelection ? "onLoadHover":"" }
+                onmouseover="body.style.background='{COLORS[i]}';"
                 style="display: flex; justify-content; center;"
-                onmouseover="body.style.background='{COLORS[i]}';">
+            >
                 <a href="lesson"
                     data-text={unit}>Unit #{i+1}&nbsp;:&nbsp; {unit}
                 </a>
