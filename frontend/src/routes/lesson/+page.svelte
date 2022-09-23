@@ -1,5 +1,5 @@
 <svelte:head>
-	<title>Lesson</title>
+	<title>MHF4UI - Lesson</title>
 </svelte:head>
 
 <script>

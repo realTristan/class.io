@@ -1,43 +1,51 @@
 <svelte:head>
-	<title>Home</title>
+	<title>MHF4UI - Selection</title>
 </svelte:head>
 
 <script>
-    let unitNames = [
-        "Graphing",
-        "Functions",
-        "Algebra",
-        "Computing",
-        "Data",
-        "Polynomials",
-        "Vectors",
-        "Calculus",
-        "Properties"
+    import { onMount } from 'svelte';
+
+    // Unit Names
+    const UNIT_NAMES = [
+        "Graphing", "Functions", "Algebra",
+        "Computing", "Data", "Polynomials",
+        "Vectors", "Calculus", "Properties"
     ];
-    let colors = [
-        "#81ecec",
-        "#ff7675",
-        "#55efc4",
-        "#a29bfe",
-        "#fd79a8",
-        "#ffeaa7",
-        "#81ecec",
-        "#ff7675",
-        "#55efc4"
+    // Unit Colors
+    const COLORS = [
+        "#81ecec", "#ff7675", "#55efc4",
+        "#a29bfe", "#fd79a8", "#ffeaa7",
+        "#81ecec", "#ff7675", "#55efc4"
     ];
+
+    // Configuring the starting unit selection styling
+    var onLoadRandOptNum, onLoadSelection;
+    onMount(() => {
+        onLoadRandOptNum = Math.floor(Math.random() * UNIT_NAMES.length);
+        onLoadSelection = true;
+    })
 </script>
 
 <main>
     <h1 style="color: white; font-weight: 900; letter-spacing: 2px; margin-left: 20px; margin-bottom: -1px;">
         <mark style="color: #333; background: none; ">Mr.Simpson's</mark> MHF4UI
     </h1>
-    <ul>
-        {#each unitNames as unit, i}
+    <ul 
+        on:mouseenter={() => { if (onLoadSelection) onLoadSelection = false; }}
+        on:mouseleave={() => { if (!onLoadSelection) {
+            onLoadRandOptNum = Math.floor(Math.random() * UNIT_NAMES.length);
+            onLoadSelection = true;
+        }}}
+    >
+        {#each UNIT_NAMES as unit, i}
             <!-- svelte-ignore a11y-invalid-attribute -->
             <li
+                id={ i == onLoadRandOptNum && onLoadSelection ? "onLoadHover":"" } 
                 style="display: flex; justify-content; center;"
-                onmouseover="body.style.background='{colors[i]}'">
-                <a href="lesson" data-text={unit}>Unit #{i+1}&nbsp;:&nbsp; {unit}</a>
+                onmouseover="body.style.background='{COLORS[i]}';">
+                <a href="lesson"
+                    data-text={unit}>Unit #{i+1}&nbsp;:&nbsp; {unit}
+                </a>
             </li>
         {/each}
     </ul>
@@ -45,13 +53,23 @@
 
 <style>
 	@import url('https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap'); 
+    main {
+        overflow: hidden;
+        font-family: 'Poppins', sans-serif;
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		padding: 1rem;
+		margin: 0 auto;
+	}
+    /* On Hover Effect */
     ul { position: relative; } 
     ul li {
         list-style: none;
         text-align: center;
     } 
     ul li a {
-        color: #333;
+        color: #0002;
         text-decoration: none;
         font-size: 2.5em;
         padding: 5px 20px;
@@ -65,6 +83,7 @@
         color: #000;
         background: rgba(255,255,255,1);
         border-radius: 10px;
+        letter-spacing: 6px;
     } ul li a:before {
         content: '';
         position: absolute;
@@ -85,16 +104,17 @@
         right: 0px;
         opacity: 1;
         letter-spacing: 10px;
-    } ul li:hover a {
-        letter-spacing: 6px;
     }
-	main {
-        overflow: hidden;
-        font-family: 'Poppins', sans-serif;
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		padding: 1rem;
-		margin: 0 auto;
-	}
+    /* On Page Load Temporary Unit Hover */
+    #onLoadHover:not(:hover) a:before {
+        content: attr(data-text);
+        right: 0px;
+        opacity: 1;
+        letter-spacing: 10px;
+    } #onLoadHover:not(:hover) a {
+        letter-spacing: 6px;
+        color: #000;
+        background: rgba(255,255,255,1);
+        border-radius: 10px;
+    }
 </style>
