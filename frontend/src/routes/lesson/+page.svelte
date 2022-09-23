@@ -125,7 +125,6 @@
         font-size: 4em;
         font-weight: 700;
     }
-
 	/* Scroll Bar */
 	:root::-webkit-scrollbar {
 		width: 20px;
