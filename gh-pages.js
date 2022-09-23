@@ -1,7 +1,7 @@
 import { publish } from 'gh-pages';
 
 publish(
-    'build', 
+    './build', 
     {
         branch: 'gh-pages',
         repo: 'https://github.com/realTristan/MHF4UI.git',

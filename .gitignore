@@ -1,5 +1,10 @@
-/frontend/node_modules/
-/frontend/public/build/
-/server/target
-
 .DS_Store
+node_modules
+/.svelte-kit
+/package
+.env
+.env.*
+!.env.example
+.vercel
+.output
+/server/target
