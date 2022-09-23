@@ -1,18 +1,16 @@
 <script>
     export let LessonData;
-
-	// Store the alphabet for equations
 	const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 </script>
 
 <main>
 	<!-- Homework Questions -->
 	{#each LessonData["hw_questions"] as section}
-		<h3>{section.title}</h3>
+		<h3 style="margin-bottom: -1%; margin-top: 1%;">{section.title}</h3>
 		<div style="margin-left: 10%; margin-right: 10%;">
 			<!-- Create new dropdown div for each question -->
 			{#each section.questions as equation, i}
-				<div style="padding: 10px; display: inline-block; cursor: pointer; font-weight: 600;">
+				<div id="work_div">
 					<div id="slider">
 
 						<!-- Set the equation -->
@@ -34,6 +32,15 @@
 </main>
 
 <style>
+	/* Homework Title Div */
+	#work_div {
+		padding: 10px;
+		cursor: pointer; 
+		float: center; 
+		font-weight: 600; 
+		position: relative;
+	}
+	
 	/* Homework Dropdown Slider Content FadeIn */
 	#fade_in_text {
 		animation: fadeIn 5s;
@@ -53,7 +60,7 @@
 		border-radius: 7px;
 		margin-top: 20px;
 		background-color: white;
-		box-shadow: 0.5px 0.5px 10px 0.5px rgba(0, 0, 0, 0.1);
+		box-shadow: 0.5px 0.5px 10px 0.5px rgba(0, 0, 0, 0.09);
 		padding: 12px 16px;
 		z-index: 1;
 		height: 20px;

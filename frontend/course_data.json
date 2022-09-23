@@ -56,10 +56,10 @@
             {
                 "title": "2. Task 2", 
                 "questions": [
-                    "Question 5",
-                    "Question 6",
-                    "Question 7",
-                    "Question 8"
+                    "Question 5: Max 100 Characters",
+                    "Question 6: Max 100 Characters",
+                    "Question 7: Max 100 Characters",
+                    "Question 8: Max 100 Characters"
                 ],
                 "solutions": [
                     "Solution 5",
