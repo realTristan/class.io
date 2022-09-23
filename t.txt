@@ -28,19 +28,21 @@
 </script>
 
 <main>
-    <h1 style="color: white; font-weight: 900; letter-spacing: 2px; margin-left: 20px; margin-bottom: -1px;">
-        <mark style="color: #333; background: none; ">Mr.Simpson's</mark> MHF4UI
+    <h1 style="color: #7c3aed; font-weight: 900; letter-spacing: 2px; margin-left: 20px; margin-bottom: -1px;">
+        <mark style="color: black; background: none;">Mr.Simpson's</mark> MHF4UI
     </h1>
-    <ul>
-        {#each unitNames as unit, i}
-            <!-- svelte-ignore a11y-invalid-attribute -->
-            <li
-                style="display: flex; justify-content; center;"
-                onmouseover="body.style.background='{colors[i]}'">
-                <a href="lesson" data-text={unit}>Unit #{i+1}&nbsp;:&nbsp; {unit}</a>
-            </li>
-        {/each}
-    </ul>
+    <div>
+        <ul>
+            {#each unitNames as unit, i}
+                <!-- svelte-ignore a11y-invalid-attribute -->
+                <li style="display: flex; justify-content; center; letter-spacing: 1px;">
+                    <a href="/lesson/{unit.toLowerCase()}" data-text={unit} style="color: #7c3aed;">
+                        <mark style="color: black; background: none;">&nbsp; >>&nbsp; Unit #{i+1}&nbsp&nbsp </mark>{unit}
+                    </a>
+                </li>
+            {/each}
+        </ul>
+    </div>
 </main>
 
 <style>
@@ -58,13 +60,8 @@
         display: inline-flex;
         font-weight: 900;
         transition: 0.5s;
-        letter-spacing: 2px;
     } ul:hover li a { 
         color: #0002;
-    } ul li:hover a {
-        color: #000;
-        background: rgba(255,255,255,1);
-        border-radius: 10px;
     } ul li a:before {
         content: '';
         position: absolute;
@@ -86,7 +83,7 @@
         opacity: 1;
         letter-spacing: 10px;
     } ul li:hover a {
-        letter-spacing: 6px;
+        letter-spacing: 5px;
     }
 	main {
         overflow: hidden;
