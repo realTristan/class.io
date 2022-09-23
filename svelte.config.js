@@ -8,7 +8,10 @@ const config = {
 			assets: 'build',
 			fallback: null
 		})
-	}
+	},
+	paths: {
+		base: "/MHF4UI/",
+	},
 };
 
 export default config;
