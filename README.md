@@ -1,6 +1,6 @@
 # MHF4UI ![Stars](https://img.shields.io/github/stars/realTristan/MHF4UI?color=brightgreen) ![Watchers](https://img.shields.io/github/watchers/realTristan/MHF4UI?label=Watchers)
 
-<img width="945" height="500" alt="Screen Shot 2022-09-23 at 10 15 39 AM" src="https://user-images.githubusercontent.com/75189508/191981360-b7159cb5-a1e5-45e5-9799-563cf74766bf.png">
+<img width="1045" height="500" alt="Screen Shot 2022-09-23 at 10 15 39 AM" src="https://user-images.githubusercontent.com/75189508/191981360-b7159cb5-a1e5-45e5-9799-563cf74766bf.png">
 
 # About
 <h3>Why Rust?</h3>
