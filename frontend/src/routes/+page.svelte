@@ -38,7 +38,7 @@
             <!-- svelte-ignore a11y-invalid-attribute -->
             <li
                 on:mouseleave={() => { if (!staticSelection) { staticSelectionNum = i; }}}
-                id={ i == staticSelectionNum && staticSelection ? "onLoadHover":"" }
+                id={ i == staticSelectionNum && staticSelection ? "staticSelectionHover":"" }
                 onmouseover="body.style.background='{COLORS[i]}';"
                 style="display: flex; justify-content; center;"
             >
@@ -105,12 +105,12 @@
         letter-spacing: 10px;
     }
     /* On Page Load Temporary Unit Hover */
-    #onLoadHover:not(:hover) a:before {
+    #staticSelectionHover:not(:hover) a:before {
         content: attr(data-text);
         right: 0px;
         opacity: 1;
         letter-spacing: 10px;
-    } #onLoadHover:not(:hover) a {
+    } #staticSelectionHover:not(:hover) a {
         letter-spacing: 6px;
         color: #000;
         background: rgba(255,255,255,1);
