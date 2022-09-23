@@ -6,7 +6,7 @@ publish(
         branch: 'gh-pages',
         repo: 'https://github.com/realTristan/MHF4UI.git',
         user: {
-            name: 'Tristan Simpson',
+            name: 'realTristan',
             email: 'heytristaann@gmail.com'
         },
         dotfiles: true

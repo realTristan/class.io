@@ -5,7 +5,7 @@
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
-		"deploy": "node ./gh-pages.js"
+		"deploy": "node ./gh-pages.js -d build -t true"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "next",
