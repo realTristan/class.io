@@ -72,7 +72,8 @@
 		
 		<!-- Lesson Info -->
 		<div>
-			<iframe 
+			<iframe
+				style="border-radius: 5px;"
 				width="480" height="220" frameborder="0"
 				src={LessonData[key]["video"]["url"]} 
 				title={LessonData[key]["video"]["title"]} 
