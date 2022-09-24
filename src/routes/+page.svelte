@@ -6,7 +6,8 @@
     import { onMount } from 'svelte';
 
     // Declare Variables
-    var staticSelectionNum, staticSelection, previousTimer, pageBody;
+    var previousTimer, pageBody;
+    let staticSelection = true;
 
     // Unit Names
     const UNIT_NAMES = [
@@ -22,11 +23,8 @@
     ];
 
     // Configuring the starting unit selection styling
-    onMount(() => {
-        staticSelectionNum = Math.floor(Math.random() * UNIT_NAMES.length);
-        staticSelection = true;
-        pageBody = document.getElementsByTagName('body')[0];
-    })
+    onMount(() => { pageBody = document.getElementsByTagName('body')[0]; })
+    let staticSelectionNum = Math.floor(Math.random() * UNIT_NAMES.length);
 </script>
 
 <main>
