@@ -14,7 +14,6 @@ pub struct User {
 
 // Database Implemenetation that contains all the
 // functions for manipulating the sqlite db data
-#[allow(dead_code)]
 impl Database {
     // Initialize a new database connection
     pub async fn init() -> Database {
