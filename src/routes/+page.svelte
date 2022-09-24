@@ -75,7 +75,7 @@
     ul li {
         list-style: none;
         text-align: center;
-    } 
+    }
     ul li a {
         color: #0002;
         text-decoration: none;
