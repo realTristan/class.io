@@ -5,6 +5,9 @@
 <script>
     import { onMount } from 'svelte';
 
+    // Declare Variables
+    var staticSelectionNum, staticSelection, previousTimer, pageBody;
+
     // Unit Names
     const UNIT_NAMES = [
         "Graphing", "Functions", "Algebra",
@@ -19,10 +22,10 @@
     ];
 
     // Configuring the starting unit selection styling
-    var staticSelectionNum, staticSelection;
     onMount(() => {
         staticSelectionNum = Math.floor(Math.random() * UNIT_NAMES.length);
         staticSelection = true;
+        pageBody = document.getElementsByTagName('body')[0];
     })
 </script>
 
@@ -30,7 +33,7 @@
     <h1 style="color: white; font-weight: 900; letter-spacing: 2px; margin-left: 20px; margin-bottom: -1px;">
         <mark style="color: #333; background: none; ">Mr.Simpson's</mark> MHF4UI
     </h1>
-    <ul 
+    <ul
         on:mouseenter={() => { if (staticSelection) staticSelection = false; }}
         on:mouseleave={() => { if (!staticSelection) staticSelection = true; }}
     >
@@ -38,8 +41,14 @@
             <!-- svelte-ignore a11y-invalid-attribute -->
             <li
                 on:mouseleave={() => { if (!staticSelection) { staticSelectionNum = i; }}}
+                on:mouseenter={() => {
+                    // Use a timer to prevent users from having a goddamn
+                    // epilepsy seizure when they swipe their mouse
+                    // over all the units really fast.
+                    clearTimeout(previousTimer);
+                    previousTimer = setTimeout(function(){ pageBody.style.backgroundColor = COLORS[i] }, 60);
+                }}
                 id={ i == staticSelectionNum && staticSelection ? "staticSelectionHover":"" }
-                onmouseover="body.style.background='{COLORS[i]}';"
                 style="display: flex; justify-content; center;"
             >
                 <a href="lesson"
