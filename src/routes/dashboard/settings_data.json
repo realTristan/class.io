@@ -1,0 +1,15 @@
+{
+    "Require Student Login": "This option requires oncoming students to login to their email account before being able to access the content on your course page.",
+    "Student Whitelist": "Whitelist users based on their email account. 'Require Login' must be enabled.",
+    "View Student Submissions": "View student homework submissions, Remove all submissions from a student, Remove all submissions from a certain year, Convert the homework submissions into a pdf, Email the student once their homework has been marked.",
+    "Units": "Trigonometry, Algrebra, Button to add more.",
+    "": "",
+    "Analytics": "Teacher can see a graph of homework student submissions, How many people visit their course, etc.",
+    ".": "",
+    "Lock Units": "Area to lock which units the students can access",
+    "Announcements": "Add an area for announcements",
+    "Homework": "The teacher can either do custom homework questions or just post an image",
+    "Lessons": "The teacher can hide certain lessons until they've been taught in class",
+    "Course Selection": "Add an area to select which course to modify",
+    "Graduation Certificate": "A fun little way to generate a cerificate for the course"
+}
