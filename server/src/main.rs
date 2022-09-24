@@ -1,19 +1,18 @@
-use std::sync::Mutex;
-use rusqlite::{Connection, Result};
 #[macro_use] extern crate rocket;
+use std::sync::Mutex;
 
 // Database Struct for globalizing it's
 // connection variable
-struct Database {
-    conn: rusqlite::Connection,
-}
+struct Database { conn: rusqlite::Connection }
 
 // Store The User data as a struct
+#[derive(Debug)]
 struct User {
-    hash: String,   // The user hash (aka: the user id)
-    name: String,   // The user name
-    rsl: i8,        // Whether the user has "Require Student Login" Enabled
-    analytics: i8,  // Whether the user has "Analytics" Enabled
+    id:         i8,         // Row Increment ID
+    hash:       String,     // The user hash (aka: the user id)
+    name:       String,     // The user name
+    rsl:        i8,         // Whether the user has "Require Student Login" Enabled
+    analytics:  i8          // Whether the user has "Analytics" Enabled
 }
 
 // Database Implemenetation that contains all the
@@ -21,7 +20,7 @@ struct User {
 impl Database {
     // The function to create the primary database table
     // and add a test value into said table
-    fn establish_database(&self) -> Result<()> {
+    fn establish_database(&self) -> rusqlite::Result<()> {
         // Create New Database: (user_hash, user_name, require_student_login[bool], analytics[bool])
         let _ = &self.conn.execute(
             "CREATE TABLE users (id INTEGER PRIMARY KEY, user_hash TEXT NOT NULL, user_name TEXT NOT NULL, rsl INTEGER, analytics INTEGER)", 
@@ -39,25 +38,26 @@ impl Database {
     // query all the users within the database and print
     // their user_hashes to the screen. This function is primarily
     // used for testing purposes.
-    fn query_users(&self) -> Result<String> {
-        let prep = &mut self.conn.prepare("SELECT user_hash, user_name, rsl, analytics FROM users")?;
-        let users = prep.query_map([], |row| {
+    fn query_users(&self) -> rusqlite::Result<Vec<User>> {
+        // Prepare the sqlite query command
+        let prep = &mut self.conn.prepare("SELECT id, user_hash, user_name, rsl, analytics FROM users")?;
+        // Iterate over the queried users
+        let r = prep.query_map([], |r| {
             Ok(User {
-                hash: row.get(0)?,
-                name: row.get(1)?,
-                rsl: row.get(2)?,
-                analytics: row.get(3)?,
+                id:         r.get(0)?,
+                hash:       r.get(1)?,
+                name:       r.get(2)?,
+                rsl:        r.get(3)?,
+                analytics:  r.get(4)?,
             })
         })?;
-
-        // Print the user hash id's
-        let _ = users.into_iter().map(|u| {
-            let _user = u.unwrap();
-            println!("Found user {:?}: {:?}", _user.hash, _user.name);
-        });
+        // Result array
+        let res = r.into_iter()
+            .map(|f| { f.unwrap()} )
+            .collect();
 
         // Return success notifier
-        return Ok("test".to_string())
+        return Ok(res)
     }
 }
 
@@ -68,13 +68,17 @@ fn verify(db: &rocket::State<Mutex<Database>>, user_hash: &str, auth_token: &str
     let r = db.query_users();
 
     // Return the user_hash and auth_token
-    return format!("User Hash: {}\nAuth Token: {}\nTest: {}", user_hash, auth_token, r.unwrap())
+    return format!("User Hash: {}\nAuth Token: {}\nTest: {:?}", user_hash, auth_token, r.unwrap())
+}
+
+fn init_database() -> rusqlite::Result<Database> {
+    return Ok(Database{ conn: rusqlite::Connection::open_in_memory()? });
 }
 
 // Launch Endpoints
 #[launch]
 fn rocket() -> _ {
-    let db: Database = Database { conn: Connection::open_in_memory().unwrap() };
+    let db: Database = init_database().unwrap();
     let _ = db.establish_database();
 
     // Build the API Endpoints
