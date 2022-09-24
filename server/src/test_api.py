@@ -14,10 +14,12 @@ def sha256_encode(v: str):
 generated_auth:str = f"{USER_HASH}:{int(time.time())}:{SUPER_SECRET_CODE}"
 # // Encode that string using SHA256 encryption
 auth_token = sha256_encode(generated_auth)
+# // Track api latency
+start_time = time.time()
 
 # // Send the http request to the api
 r = requests.get(f"http://127.0.0.1:8000/user/info/{USER_HASH}/{auth_token}")
-print(f" >> Response: {r.text}")
+print(f" >> Response: {time.time()-start_time} -> {r.text}")
 # {
     # "auth_token": "1ed4c5700b434be84953a6052dfd0357aecf99480a0a8d2415528ce19bb9383c", 
     # "user_hash": "822f3d5b9c91b570a4f1848c5d147b4709d2fb96", 
