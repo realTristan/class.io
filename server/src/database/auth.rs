@@ -10,7 +10,6 @@ static SUPER_SECRET_CODE: &str = "super_secret_code";
 // tokens so that abusers can't access the api using
 // a previous token.
 lazy_static::lazy_static! {
-    #[derive(Debug)]
     static ref TOKEN_STORAGE: Mutex<HashMap<String, Vec<String>>> = {
         Mutex::new(HashMap::new())
     };    
@@ -71,8 +70,6 @@ fn storage_handler(user_hash: &str, auth_token: &str, time: &u64) -> bool {
         mut_storage.push(auth_token.to_string());
         return true;
     }
-    // Debugging
-    println!("\n\nUser Token Storage: {:?}\n\n", token_storage);
     return false;
 }
 
