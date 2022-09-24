@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "advanced_funcs_server"
+name = "server"
 version = "0.1.0"
