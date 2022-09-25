@@ -132,7 +132,7 @@ fn storage_handler(user_hash: &str, auth_token: &str, time: &u64) -> bool {
     let mut_storage: &mut Vec<String> = mut_storage.unwrap();
 
     // Get the last storage wipe time
-    let last_wipe_time: u64 = mut_storage.first().unwrap().parse().unwrap();
+    let last_wipe_time: u64 = mut_storage[0].parse().unwrap();
 
     // If the last wipe happened over 8 seconds ago,
     // wipe the users token storage to prevent an
@@ -141,7 +141,7 @@ fn storage_handler(user_hash: &str, auth_token: &str, time: &u64) -> bool {
     // know what'll happen lmao.
     if time > &(last_wipe_time+8) {
         mut_storage.clear();
-        mut_storage.push(time.to_string());
+        mut_storage[0] = time.to_string();
     }
     
     // After the users current token storage has or hasn't been
