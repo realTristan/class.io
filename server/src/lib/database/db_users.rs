@@ -1,7 +1,5 @@
-#![allow(dead_code)]
-
-// Library Usages
-use super::db_handler;
+// External Crates Usages
+use super::db_handler::Database;
 
 // Store User data as a struct
 pub struct User {
@@ -14,7 +12,7 @@ pub struct User {
 
 // Database Implemenetation that contains all the
 // functions for manipulating the user db data
-impl db_handler::Database {
+impl Database {
     // The insert_test_user() function is used to
     // insert a fake user for testing the backend
     // database functions
@@ -45,5 +43,13 @@ impl db_handler::Database {
             email: r.email,
             registration_date: r.registration_date
         }
+    }
+
+    // The update_user_name() function is used to 
+    // modify the incoming users profile name.
+    pub async fn update_user_name(&self, user_hash: &str, new_name: &str) {
+        sqlx::query!("UPDATE users SET user_name=? WHERE user_hash=?",
+            new_name, user_hash
+        ).execute(&self.conn).await.unwrap();
     }
 }

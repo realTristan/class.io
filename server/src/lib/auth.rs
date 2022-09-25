@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 // Library Usages
 use std::collections::HashMap;
 use std::sync::Mutex;
@@ -10,8 +8,6 @@ use std::sync::Mutex;
 static SUPER_SECRET_CODE: &str = "super_secret_code";
 static SUPER_SECRET_BEARER_CODE: &str = "super_secret_bearer_code";
 
-// BEARER TOKEN IS SHA256 ENCODE [ (user_hash):(super_secret_bearer_code):(provided auth token):(registration_date) ]
-
 // The TOKEN_STORAGE is used to store previously used
 // tokens so that abusers can't access the api using
 // a previous token.
@@ -19,6 +15,87 @@ lazy_static::lazy_static! {
     static ref TOKEN_STORAGE: Mutex<HashMap<String, Vec<String>>> = {
         Mutex::new(HashMap::new())
     };    
+}
+
+// Create a new Tokens struct for easily storing
+// and accessing the incoming requests
+// authentication tokens
+pub struct Tokens {
+    pub user_hash: String,
+    pub auth_token: String,
+    pub bearer: String
+}
+// Tokens implementation for reading data
+impl From<&str> for Tokens {
+    fn from(auth_crypt: &str) -> Self {
+        // Decode the authentication cryption by base64
+        let decoded: Vec<u8> = base64::decode(auth_crypt).unwrap();
+        // Convert the decoded bytes into a string
+        let str_data = String::from_utf8(decoded).unwrap();
+    
+        // Split the converted data string into an
+        // array containing the user_hash, auth_token,
+        // and bearer token
+        let data: Vec<&str> = str_data
+            .split(":")
+            .collect();
+    
+        // Return the tokens object
+        return Tokens {
+            user_hash: data[0].to_string(),
+            auth_token: data[1].to_string(),
+            bearer: data[2].to_string()
+        }
+    }
+}
+
+// BEARER TOKEN IS SHA256 ENCODE [ :(user_hash)*(super_secret_bearer_code)*(provided auth token): ]
+// The verify_bearer() function is used to verify whether
+// the provided bearer token is valid. If the bearer is valid
+// then we can proceed with whatever 'secure' function it is we need to do
+pub fn verify_bearer(
+    user_hash: &str, auth_token: &str, provided_bearer: &str
+) -> bool {
+    // Generate a new bearer token format using the provided
+    // data which will be compared to the provided bearer
+    let gen: String = format!(":{}*{}*{}:", user_hash, SUPER_SECRET_BEARER_CODE, auth_token);
+    // SHA256 Encode the generated format above
+    let gen_bearer: String = sha256::digest(gen);
+
+    // Return whether the provided bearer token is
+    // equal to the generated one
+    return provided_bearer.to_string() == gen_bearer
+}
+
+// The verify() function is used to check whether the
+// provided auth token is valid. It does this by
+// checking whether the token has been created within
+// the past 8 seconds. If so, return true, else, return false.
+pub fn verify(user_hash: &str, auth_token: &str) -> bool {
+    // Get the system time since epoch. This value
+    // is used to check how long ago the auth token was
+    // generated. Doing this prevents users from consecutively
+    // using a single auth token if trying to abuse the api
+    let time: std::time::Duration = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH).unwrap();
+    let time = time.as_secs();
+
+    // Execute the storage handler
+    // If the function returns false, then the provided
+    // auth token has already been used within the past 8 seconds.
+    if !storage_handler(user_hash, auth_token, &time) { return false };
+
+    // Check whether the auth token was generated
+    // within the past 10 seconds
+    for i in 0..8 {
+        let gen: String = format!("{}:{}:{}", user_hash, time-i, SUPER_SECRET_CODE);
+        // If the provided auth token is equal to the
+        // generated auth token, return true
+        if auth_token == sha256::digest(gen) {
+            return true;
+        }
+    }
+    return false;
 }
 
 // The storage_handler() function is used to check whether
@@ -55,7 +132,7 @@ fn storage_handler(user_hash: &str, auth_token: &str, time: &u64) -> bool {
     let mut_storage: &mut Vec<String> = mut_storage.unwrap();
 
     // Get the last storage wipe time
-    let last_wipe_time: u64 = mut_storage.first().unwrap().parse().expect("");
+    let last_wipe_time: u64 = mut_storage.first().unwrap().parse().unwrap();
 
     // If the last wipe happened over 8 seconds ago,
     // wipe the users token storage to prevent an
@@ -75,37 +152,6 @@ fn storage_handler(user_hash: &str, auth_token: &str, time: &u64) -> bool {
     if !mut_storage.contains(&auth_token.to_string()) {
         mut_storage.push(auth_token.to_string());
         return true;
-    }
-    return false;
-}
-
-// The verify() function is used to check whether the
-// provided auth token is valid. It does this by
-// checking whether the token has been created within
-// the past 8 seconds. If so, return true, else, return false.
-pub fn verify(user_hash: &str, auth_token: &str) -> bool {
-    // Get the system time since epoch. This value
-    // is used to check how long ago the auth token was
-    // generated. Doing this prevents users from consecutively
-    // using a single auth token if trying to abuse the api
-    let time: std::time::Duration = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH).unwrap();
-    let time = time.as_secs();
-
-    // Execute the storage handler
-    // If the function returns false, then the provided
-    // auth token has already been used within the past 8 seconds.
-    if !storage_handler(user_hash, auth_token, &time) { return false };
-
-    // Check whether the auth token was generated
-    // within the past 10 seconds
-    for i in 0..8 {
-        let generated_auth: String = format!("{}:{}:{}", user_hash, time-i, SUPER_SECRET_CODE);
-        // If the provided auth token is equal to the
-        // generated auth token, return true
-        if auth_token == sha256::digest(generated_auth) {
-            return true;
-        }
     }
     return false;
 }

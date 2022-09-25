@@ -7,9 +7,9 @@ pub struct Database { pub conn: sqlx::SqlitePool }
 #[allow(dead_code)]
 impl Database {
     // Initialize a new database connection
-    pub async fn init() -> Database {
+    pub async fn init() -> Self {
         // Initialize a connection to the sqlite database
-        return Database{ conn: sqlx::sqlite::SqlitePoolOptions::new()
+        return Self{ conn: sqlx::sqlite::SqlitePoolOptions::new()
             .max_connections(5)
             .connect_with(
                 sqlx::sqlite::SqliteConnectOptions::new()

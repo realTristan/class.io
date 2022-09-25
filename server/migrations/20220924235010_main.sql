@@ -60,9 +60,8 @@ CREATE TABLE units (
 CREATE TABLE lessons (
     id INTEGER PRIMARY KEY,
     unit_hash TEXT NOT NULL,        -- class_hash:user_hash:time.time()
-    lesson_data TEXT NOT NULL,      -- homework json map that contains: title, description, video, homework_image, homework_questions, homework_solutions
+    lesson_data TEXT NOT NULL       -- homework json map that contains: title, description, video, homework_image, homework_questions, homework_solutions
 );
-
 -- Homework Submissions for a specific Unit
 -- endpoint: get_unit_submissions
 CREATE TABLE submissions (
@@ -71,7 +70,7 @@ CREATE TABLE submissions (
     class_hash TEXT NOT NULL,               -- class_hash:user_hash:time.time()
 
     submitter_hash TEXT NOT NULL,           -- The student's user hash (use this to get the user's name, email, etc.)
-    submission_date INTEGER NOT NULL        -- The time since epoch when the user submitted the work
+    submission_date INTEGER NOT NULL,       -- The time since epoch when the user submitted the work
 
-    data BLOB NOT NULL                      -- Homework file (AUTO CONVERT TO PDF)
+    data TEXT NOT NULL                      -- Homework file (AUTO CONVERT TO PDF)
 );

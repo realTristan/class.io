@@ -6,11 +6,12 @@ version = 3
 name = "advanced_funcs_server"
 version = "0.1.0"
 dependencies = [
+ "base64",
  "lazy_static",
  "rocket",
+ "serde",
  "sha256",
  "sqlx",
- "tokio",
 ]
 
 [[package]]
@@ -1259,6 +1260,7 @@ dependencies = [
  "rocket_codegen",
  "rocket_http",
  "serde",
+ "serde_json",
  "state",
  "tempfile",
  "time",
