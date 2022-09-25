@@ -45,7 +45,6 @@ CREATE TABLE classes (
 /* endpoint: get_class_data         */
 CREATE TABLE units (
     id INTEGER PRIMARY KEY,
-    user_hash TEXT NOT NULL,        /* The users email sha256 encrypted */
     class_hash TEXT NOT NULL,       /* user_hash:time.time() */
     unit_hash TEXT NOT NULL,        /* class_hash:user_hash:time.time() */
     locked INTEGER NOT NULL         /* whether the students can access this unit */
