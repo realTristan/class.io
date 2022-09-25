@@ -18,7 +18,7 @@ struct Class {
     announcements:          Vec<Announcement>,
     require_student_login:  bool,
     analytics:              bool,
-    units:                  Vec<String>         // Array of unit_hashes
+    units:                  Vec<Unit>
 }
 
 // Store the unit data

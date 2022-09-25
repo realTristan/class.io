@@ -36,12 +36,13 @@ CREATE TABLE whitelists (
 -- endpoint: get_class_data
 CREATE TABLE classes (
     id INTEGER PRIMARY KEY,
-    owner_hash TEXT NOT NULL,       -- The users email sha256 encrypted
-    class_hash TEXT NOT NULL,       -- user_hash:time.time()
+    owner_hash TEXT NOT NULL,           -- The users email sha256 encrypted
+    class_hash TEXT NOT NULL,           -- user_hash:time.time()
 
-    class_name TEXT NOT NULL,       -- Ex: MHF4UI
-    rsl INTEGER NOT NULL,           -- Require Student Login BOOL
-    analytics INTEGER NOT NULL      -- Enable Analytics (Graphs of activity, submissions, etc.) BOOL
+    class_name TEXT NOT NULL,           -- Ex: MHF4UI
+    rsl INTEGER NOT NULL,               -- Require Student Login BOOL
+    analytics INTEGER NOT NULL,         -- Enable Analytics (Graphs of activity, submissions, etc.) BOOL
+    enable_whitelist INTEGER NOT NULL,  -- Whether to use the whitelist for this class
 );
 
 -- MAX 12 UNITS                                     

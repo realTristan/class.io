@@ -19,8 +19,10 @@ async fn rocket() -> _ {
     // Build the API Endpoints
     rocket::build()
         .manage(db)
-        .mount("/user/update", routes![update_user_data])
-        .mount("/user/get", routes![get_user_data])
+        // Updating user data
+        .mount("/user", routes![update_user_data])
+        // Fetching user data
+        .mount("/user", routes![get_user_data])
 }
 
 // The /user/info/<user_hash>/<auth_token> endpoint is used
@@ -28,7 +30,7 @@ async fn rocket() -> _ {
 // user_hash. This function is necessary for the frontend
 // dashboard page. To ensure the security of the endpoint,
 //  a valid auth token is required.
-#[get("/<user_hash>/<auth_token>")]
+#[get("/get/<user_hash>?<auth_token>")]
 pub async fn get_user_data(db: &DBState, user_hash: &str, auth_token: &str) -> String {
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
@@ -52,18 +54,18 @@ pub async fn get_user_data(db: &DBState, user_hash: &str, auth_token: &str) -> S
 // the incoming requests http request body. This is
 // the easiest way for reading what modifications
 // to make within the database
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize)]
 pub struct UpdateUserDataBody { user_name: String }
 // The /user/info/<user_hash>/<auth_token> endpoint is used
 // to get an users dashboard settings through their
 // user_hash. This function is necessary for the frontend
 // dashboard page. To ensure the security of the endpoint,
 // a valid auth token is required.
-#[post("/<auth_crypt>", format = "json", data = "<data>")]  // db: &DBState, 
-pub async fn update_user_data(db: &DBState, auth_crypt: &str, data: Json<UpdateUserDataBody>) -> String {
+#[post("/update?<data>", format = "json", data = "<body>")]
+pub async fn update_user_data(db: &DBState, data: &str, body: Json<UpdateUserDataBody>) -> String {
     // Extract the user_hash, auth_token, and bearer token
-    // from the url provided base64 encoded auth_crypt.
-    let tokens: lib::auth::Tokens = lib::auth::Tokens::from(auth_crypt);
+    // from the url provided base64 encoded data.
+    let tokens: lib::auth::Tokens = lib::auth::Tokens::from(data);
 
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
@@ -79,9 +81,9 @@ pub async fn update_user_data(db: &DBState, auth_crypt: &str, data: Json<UpdateU
     }
 
     // If the incoming request contains a new user_name
-    if data.user_name.len() > 0 {
+    if body.user_name.len() > 0 {
         // Then update the users 'user_name' in the database
-        db.update_user_name(&tokens.user_hash, &data.user_name).await;
+        db.update_user_name(&tokens.user_hash, &body.user_name).await;
     }
 
     // Return successful update
@@ -89,21 +91,13 @@ pub async fn update_user_data(db: &DBState, auth_crypt: &str, data: Json<UpdateU
 }
 
 
-
-// Here there is
-// - Whitelists
-// - Submissions
-// - Classes
-// - Units
-// - Announcements
-
 /*
 
 Example 1:
     /class/get/<class_hash>/<auth_token>
 
     fn get_class_data(class_hash: &str) {
-        return whitelist[String Array], announcements, rsl, analytics, class_name, 
+        return whitelist[String Array], announcements, rsl[bool], analytics[bool], class_name, enable_whitelist[bool]
         "units": [
             "unit_name": {
                 "is_locked": bool
