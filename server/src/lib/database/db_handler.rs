@@ -10,7 +10,6 @@ impl Database {
     pub async fn init() -> Self {
         // Initialize a connection to the sqlite database
         return Self{ conn: sqlx::sqlite::SqlitePoolOptions::new()
-            .max_connections(5)
             .connect_with(
                 sqlx::sqlite::SqliteConnectOptions::new()
                     .filename("database.sqlite")

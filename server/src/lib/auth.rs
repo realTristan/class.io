@@ -78,7 +78,8 @@ pub fn verify(user_hash: &str, auth_token: &str) -> bool {
     // using a single auth token if trying to abuse the api
     let time: std::time::Duration = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH).unwrap();
-    let time = time.as_secs();
+    // Convert the time to milliseconds
+    let time: u64 = time.as_secs();
 
     // Execute the storage handler
     // If the function returns false, then the provided

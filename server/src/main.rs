@@ -24,7 +24,7 @@ async fn rocket() -> _ {
         // POST Request (Update user data)
         .mount("/user", routes![get_user_data])
         // PUT Request (Insert new user data)
-        .mount("/user", routies![insert_user_data])
+        .mount("/user", routes![insert_user_data])
 }
 
 // The /user/info/<user_hash>/<auth_token> endpoint is used
@@ -32,7 +32,7 @@ async fn rocket() -> _ {
 // user_hash. This function is necessary for the frontend
 // dashboard page. To ensure the security of the endpoint,
 //  a valid auth token is required.
-#[get("/get/<user_hash>?<auth_token>")]
+#[get("/<user_hash>?<auth_token>")]
 pub async fn get_user_data(db: &DBState, user_hash: &str, auth_token: &str) -> String {
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
@@ -57,13 +57,13 @@ pub async fn get_user_data(db: &DBState, user_hash: &str, auth_token: &str) -> S
 // the easiest way for reading what modifications
 // to make within the database
 #[derive(Serialize, Deserialize)]
-pub struct UpdateUserDataBody { user_name: String }
+pub struct UpdateUserDataBody { user_name: String, email: String }
 // The /user/info/<user_hash>/<auth_token> endpoint is used
 // to get an users dashboard settings through their
 // user_hash. This function is necessary for the frontend
 // dashboard page. To ensure the security of the endpoint,
 // a valid auth token is required.
-#[post("/update?<data>", format = "json", data = "<body>")]
+#[post("/?<data>", format = "json", data = "<body>")]
 pub async fn update_user_data(db: &DBState, data: &str, body: Json<UpdateUserDataBody>) -> String {
     // Extract the user_hash, auth_token, and bearer token
     // from the url provided base64 encoded data.
@@ -87,11 +87,51 @@ pub async fn update_user_data(db: &DBState, data: &str, body: Json<UpdateUserDat
         // Then update the users 'user_name' in the database
         db.update_user_name(&tokens.user_hash, &body.user_name).await;
     }
-
     // Return successful update
     return format!("{{\"success\": {}}}", true)
 }
 
+// The insert_user_data() function is used to insert
+// a new row into the users column within the database
+// containing the users unique hash, provided name,
+// provided email and the current date as the registration time.
+// This endpoint is called whenever an user logs into the website
+// using firebase google auth.
+#[put("/?<data>", format = "json", data = "<body>")]
+pub async fn insert_user_data(db: &DBState, data: &str, body: Json<UpdateUserDataBody>) -> String {
+    // Extract the user_hash, auth_token, and bearer token
+    // from the url provided base64 encoded data.
+    let tokens: lib::auth::Tokens = lib::auth::Tokens::from(data);
+
+    // If the user does not provide a valid auth
+    // token and is trying to abuse the api, return
+    // an empty json map
+    if !lib::auth::verify(&tokens.user_hash, &tokens.auth_token) { 
+        return "{}".to_string()
+    }
+    // If the user does not provide a valid bearer token,
+    // return an empty json map
+    let firebase_token: &str = "";
+    if !lib::auth::verify_bearer(&tokens.user_hash, &tokens.auth_token, &tokens.bearer, firebase_token) { 
+        return "{}".to_string()
+    }
+
+    // Get the current system time. This is used
+    // for inserting the users registration date
+    // into the database.
+    let time: std::time::Duration = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH).unwrap();
+    
+    // Insert the user into the database
+    // Along with this insertion is the user_hash, user_name
+    // user's email and the time of registration
+    let _ = db.insert_user(
+        &tokens.user_hash, &body.user_name, 
+        &body.email, time.as_secs() as i64
+    );
+    // Return successful update
+    return format!("{{\"success\": {}}}", true)
+}
 
 /*
 
