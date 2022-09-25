@@ -19,10 +19,12 @@ async fn rocket() -> _ {
     // Build the API Endpoints
     rocket::build()
         .manage(db)
-        // Updating user data
+        // GET Request (Get user data)
         .mount("/user", routes![update_user_data])
-        // Fetching user data
+        // POST Request (Update user data)
         .mount("/user", routes![get_user_data])
+        // PUT Request (Insert new user data)
+        .mount("/user", routies![insert_user_data])
 }
 
 // The /user/info/<user_hash>/<auth_token> endpoint is used
