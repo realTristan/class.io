@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 // Library Usages
-use super::handler;
+use super::db_handler;
 
 // Store User data as a struct
 pub struct User {
@@ -12,7 +12,7 @@ pub struct User {
 
 // Database Implemenetation that contains all the
 // functions for manipulating the user db data
-impl handler::Database {
+impl db_handler::Database {
     // The insert_test_user() function is used to
     // insert a fake user for testing the backend
     // database functions

@@ -10,7 +10,8 @@ CREATE TABLE users (
     id INTEGER PRIMARY KEY,
     user_hash TEXT NOT NULL,        /* The users email sha256 encrypted */
     user_name TEXT NOT NULL,        /* A name the user can change themselves */
-    email TEXT NOT NULL             /* Used for emailing students about their homework */
+    email TEXT NOT NULL,            /* Used for emailing students about their homework */
+    registration_date INT NOT NULL  /* The time since epoch format of when the user registered */
 );
 CREATE TABLE announcements (
     id INTEGER PRIMARY KEY,

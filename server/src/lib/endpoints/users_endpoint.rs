@@ -1,9 +1,9 @@
-#[path = "../database/handler.rs"] mod handler;
-#[path = "../database/users.rs"] mod users;
+#[path = "../database/db_handler.rs"] mod db_handler;
+#[path = "../database/db_users.rs"] mod db_users;
 #[path = "../auth.rs"] mod auth;
 
 // Import the database functions
-type DBState = rocket::State<handler::Database>;
+type DBState = rocket::State<db_handler::Database>;
 
 // The /user/info/<user_hash>/<auth_token> endpoint is used
 // to get an users dashboard settings through their
@@ -19,7 +19,7 @@ pub async fn get_user_data(db: &DBState, user_hash: &str, auth_token: &str) -> S
     // Once the request has been verified, query the
     // database for the provided user_hash. Once found,
     // return all the data from said user.
-    let user: users::User = db.query_user_by_hash(user_hash).await;
+    let user: db_users::User = db.query_user_by_hash(user_hash).await;
 
     // Return a formatted string as a json map
     // so the frontend can successfully read the
@@ -35,6 +35,12 @@ pub async fn get_user_data(db: &DBState, user_hash: &str, auth_token: &str) -> S
 // user_hash. This function is necessary for the frontend
 // dashboard page. To ensure the security of the endpoint,
 // a valid auth token is required.
+//
+// WARNING:
+//  - When making requests to this endpoint, require a Bearer Authentication Token
+//
+//      - Example:   Bearer SHA256_encode( user_hash:super_secret_bearer_code:user_registration_date )
+//
 #[get("/<user_hash>/<auth_token>")] // db: &DBState, 
 pub async fn update_user_data(user_hash: &str, auth_token: &str) -> String {
     // If the user does not provide a valid auth

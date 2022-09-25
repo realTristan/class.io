@@ -1,2 +1,2 @@
-pub mod classes;
-pub mod users;
+pub mod classes_endpoint;
+pub mod users_endpoint;
