@@ -73,7 +73,8 @@ pub async fn update_user_data(db: &DBState, auth_crypt: &str, data: Json<UpdateU
     }
     // If the user does not provide a valid bearer token,
     // return an empty json map
-    if !lib::auth::verify_bearer(&tokens.user_hash, &tokens.auth_token, &tokens.bearer) { 
+    let firebase_token: &str = "";
+    if !lib::auth::verify_bearer(&tokens.user_hash, &tokens.auth_token, &tokens.bearer, firebase_token) { 
         return "{}".to_string()
     }
 
@@ -99,9 +100,6 @@ pub async fn update_user_data(db: &DBState, auth_crypt: &str, data: Json<UpdateU
 /*
 
 Example 1:
-
-    /class/get/<class_hash>/auth_crypt(:user_hash*super_secret_bearer_code*auth_token:)
-    or
     /class/get/<class_hash>/<auth_token>
 
     fn get_class_data(class_hash: &str) {
@@ -121,11 +119,59 @@ Example 1:
         ]
     }
 
-*/
-
-/*
 
 Example 2:
+    /class/update/<class_hash>/auth_crypt(user_hash:auth_token:bearer)
+
+    fn update_class_data(analytics, rsl) {
+        
+    }
+
+Example 3:
+    /class/create/auth_crypt(user_hash:auth_token:bearer)
+
+    fn create_class() {
+        sets { analytics, rsl, units, whitelist, announcements }
+        to default values
+    }
+
+Example 4:
+    /class/units/add/auth_crypt(user_hash:auth_token:bearer)
+    and
+    /class/units/remove/auth_crypt(user_hash:auth_token:bearer)
+
+    fn add_class_unit(unit_name) {
+        
+    }
+
+    fn remove_class_unit(unit_hash) {
+        
+    }
+
+
+Example 5:
+    /class/whitelist/add/<class_hash>/auth_crypt(user_hash:auth_token:bearer)
+    and
+    /class/whitelist/remove/<class_hash>/auth_crypt(user_hash:auth_token:bearer)
+
+    fn add_class_whitelist(user_to_add, class_hash) {
+
+    }
+
+    fn remove_class_whitelist(user_to_add, class_hash) {
+
+    }
+
+
+Example 6:
+    /class/units/edit/<class_hash>/auth_crypt(user_hash:auth_token:bearer)
+
+    fn add_class_whitelist(unit_hash, unit_title, unit_description, and so on..) {
+
+    }
+
+
+Example 7:
     /submissions/get/<class_hash>/auth_crypt(user_hash:auth_token:bearer)
 
     

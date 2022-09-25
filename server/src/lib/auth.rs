@@ -54,11 +54,11 @@ impl From<&str> for Tokens {
 // the provided bearer token is valid. If the bearer is valid
 // then we can proceed with whatever 'secure' function it is we need to do
 pub fn verify_bearer(
-    user_hash: &str, auth_token: &str, provided_bearer: &str
+    user_hash: &str, auth_token: &str, provided_bearer: &str, firebase_token: &str
 ) -> bool {
     // Generate a new bearer token format using the provided
     // data which will be compared to the provided bearer
-    let gen: String = format!(":{}*{}*{}:", user_hash, SUPER_SECRET_BEARER_CODE, auth_token);
+    let gen: String = format!(":{}*{}*{}*{}:", user_hash, SUPER_SECRET_BEARER_CODE, auth_token, firebase_token);
     // SHA256 Encode the generated format above
     let gen_bearer: String = sha256::digest(gen);
 

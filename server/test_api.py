@@ -40,12 +40,16 @@ def test_get():
 
 # // Test the /user/update endpoint
 def test_update():
+    
+    # // Firebase user special token
+    firebase_token:str = ""
+    
     # // Create a formatted auth string
     generated_auth:str = f"{USER_HASH}:{int(time.time())}:{SUPER_SECRET_CODE}"
     # // Encode that string using SHA256 encryption
     auth_token = sha256_encode(generated_auth)
     # // Create a new bearer token
-    bearer: str = sha256_encode(f":{USER_HASH}*{SUPER_SECRET_BEARER_CODE}*{auth_token}:")
+    bearer: str = sha256_encode(f":{USER_HASH}*{SUPER_SECRET_BEARER_CODE}*{auth_token}*{firebase_token}:")
     # // Base64 encode all the token data
     crypt: str = base64_encode(f"{USER_HASH}:{auth_token}:{bearer}")
     # // Track api latency
