@@ -10,6 +10,8 @@ use std::sync::Mutex;
 static SUPER_SECRET_CODE: &str = "super_secret_code";
 static SUPER_SECRET_BEARER_CODE: &str = "super_secret_bearer_code";
 
+// BEARER TOKEN IS SHA256 ENCODE [ (user_hash):(super_secret_bearer_code):(provided auth token):(registration_date) ]
+
 // The TOKEN_STORAGE is used to store previously used
 // tokens so that abusers can't access the api using
 // a previous token.

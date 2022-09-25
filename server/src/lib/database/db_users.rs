@@ -5,9 +5,11 @@ use super::db_handler;
 
 // Store User data as a struct
 pub struct User {
-    pub id:         i64,        // Row Increment ID
-    pub hash:       String,     // The user hash (aka: the user id)
-    pub name:       String,     // The user name
+    pub id:                 i64,        // Row Increment ID
+    pub hash:               String,     // The user hash (aka: the user id)
+    pub name:               String,     // The users name
+    pub email:              String,     // The users email
+    pub registration_date:   i64        // The Users registration date (used for bearer token)
 }
 
 // Database Implemenetation that contains all the
@@ -18,8 +20,8 @@ impl db_handler::Database {
     // database functions
     pub async fn insert_test_user(&self) -> sqlx::sqlite::SqliteQueryResult {
         return sqlx::query!( 
-            "INSERT INTO users (user_hash, user_name) VALUES (?, ?)",
-            "822f3d5b9c91b570a4f1848c5d147b4709d2fb96", "realtristan"
+            "INSERT INTO users (user_hash, user_name, email, registration_date) VALUES (?, ?, ?, ?)",
+            "822f3d5b9c91b570a4f1848c5d147b4709d2fb96", "realtristan", "fake@gmail.com", 0
         ).execute(&self.conn).await.unwrap();
     }
 
@@ -30,7 +32,7 @@ impl db_handler::Database {
     pub async fn query_user_by_hash(&self, user_hash: &str) -> User {
         // Query the database
         let r = sqlx::query!(
-            "SELECT id, user_name FROM users WHERE user_hash=?",
+            "SELECT * FROM users WHERE user_hash=?",
             user_hash
         ).fetch_one(&self.conn).await.unwrap();
 
@@ -39,7 +41,9 @@ impl db_handler::Database {
         return User {
             id: r.id,
             hash: user_hash.to_string(),
-            name: r.user_name
+            name: r.user_name,
+            email: r.email,
+            registration_date: r.registration_date
         }
     }
 }

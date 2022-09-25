@@ -39,7 +39,7 @@ pub async fn get_user_data(db: &DBState, user_hash: &str, auth_token: &str) -> S
 // WARNING:
 //  - When making requests to this endpoint, require a Bearer Authentication Token
 //
-//      - Example:   Bearer SHA256_encode( user_hash:super_secret_bearer_code:user_registration_date )
+//      - BEARER TOKEN IS SHA256 ENCODE [ (user_hash):(super_secret_bearer_code):(provided auth token):(registration_date) ]
 //
 #[get("/<user_hash>/<auth_token>")] // db: &DBState, 
 pub async fn update_user_data(user_hash: &str, auth_token: &str) -> String {
