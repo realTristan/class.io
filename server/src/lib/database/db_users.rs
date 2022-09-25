@@ -23,6 +23,19 @@ impl Database {
         ).execute(&self.conn).await.unwrap();
     }
 
+    // The user_exists() function is used to check whether
+    // the provided user_hash is present within the database.
+    // If it is, return true.. else return false.
+    pub async fn user_exists(user_hash: &str) -> bool {
+        // Query the database
+        let r = sqlx::query!(
+            "SELECT * FROM users WHERE user_hash=?",
+            user_hash
+        ).fetch_one(&self.conn).await;
+        // Return whether valid query data has been obtained
+        return !r.is_none();
+    }
+
     // The query_user_by_hash() function is used to query
     // the database for an user with the provided hash
     // Once found, the function will return the users
@@ -32,10 +45,22 @@ impl Database {
         let r = sqlx::query!(
             "SELECT * FROM users WHERE user_hash=?",
             user_hash
-        ).fetch_one(&self.conn).await.unwrap();
+        ).fetch_one(&self.conn).await;
+
+        // If the user is invalid
+        if r.is_none() {
+            return User {
+                id: 0,
+                hash_hash: user_hash.to_string(),
+                name: "None",
+                email: "None",
+                registration_date: 0
+            }
+        }
 
         // Return the 'User' object containing all of
         // the requested user's data
+        let r = r.unwrap();
         return User {
             id: r.id,
             hash: user_hash.to_string(),
