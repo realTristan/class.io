@@ -18,7 +18,7 @@ auth_token = sha256_encode(generated_auth)
 start_time = time.time()
 
 # // Send the http request to the api
-r = requests.get(f"http://127.0.0.1:8000/user/info/{USER_HASH}/{auth_token}")
+r = requests.get(f"http://127.0.0.1:8000/user/get/{USER_HASH}/{auth_token}")
 print(f" >> Response: {time.time()-start_time} -> {r.text}")
 # {
     # "auth_token": "1ed4c5700b434be84953a6052dfd0357aecf99480a0a8d2415528ce19bb9383c", 

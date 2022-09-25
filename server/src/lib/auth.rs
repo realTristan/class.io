@@ -1,3 +1,6 @@
+#![allow(dead_code)]
+
+// Library Usages
 use std::collections::HashMap;
 use std::sync::Mutex;
 
