@@ -37,6 +37,11 @@ struct Lesson {
     video_url:      String, // and so on..
 }
 
+
+// To get how many submissions a student has done, do 
+//      SELECT submitter_hash FROM submissions WHERE class_hash=? AND submitter_hash=?
+
+
 /*
 
 use bearer token when updating the database
