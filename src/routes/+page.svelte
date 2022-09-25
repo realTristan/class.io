@@ -69,12 +69,12 @@
 		margin: 0 auto;
 	}
     /* On Hover Effect */
-    ul { position: relative; } 
-    ul li {
+    ul { 
+        position: relative; 
+    } ul li {
         list-style: none;
         text-align: center;
-    }
-    ul li a {
+    } ul li a {
         color: #0002;
         text-decoration: none;
         font-size: 2.5em;

@@ -6,7 +6,6 @@ use std::sync::Mutex;
 // users trying to abuse the api from being able
 // to generate their own auth tokens
 static SUPER_SECRET_CODE: &str = "super_secret_code";
-static SUPER_SECRET_BEARER_CODE: &str = "super_secret_bearer_code";
 
 // The TOKEN_STORAGE is used to store previously used
 // tokens so that abusers can't access the api using
@@ -49,7 +48,7 @@ impl From<&str> for Tokens {
     }
 }
 
-// BEARER TOKEN IS SHA256 ENCODE [ :(user_hash)*(super_secret_bearer_code)*(provided auth token): ]
+// BEARER TOKEN IS SHA256 ENCODE [ (user_hash):(provided auth token):(firebase_token) ]
 // The verify_bearer() function is used to verify whether
 // the provided bearer token is valid. If the bearer is valid
 // then we can proceed with whatever 'secure' function it is we need to do
@@ -58,7 +57,7 @@ pub fn verify_bearer(
 ) -> bool {
     // Generate a new bearer token format using the provided
     // data which will be compared to the provided bearer
-    let gen: String = format!(":{}*{}*{}*{}:", user_hash, SUPER_SECRET_BEARER_CODE, auth_token, firebase_token);
+    let gen: String = format!("{}:{}:{}", user_hash, auth_token, firebase_token);
     // SHA256 Encode the generated format above
     let gen_bearer: String = sha256::digest(gen);
 
