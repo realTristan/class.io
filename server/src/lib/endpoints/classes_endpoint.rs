@@ -9,7 +9,7 @@
 
 Example 1:
     fn get_class_data(class_hash: &str) {
-        return whitelists, units, announcements
+        return whitelists, units[map(  unit_hash: locked{bool}  )], announcements, rsl, analytics
     }
 
 */

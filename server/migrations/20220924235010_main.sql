@@ -17,12 +17,12 @@ CREATE TABLE announcements (
     id INTEGER PRIMARY KEY,
     user_hash TEXT NOT NULL,        /* The users email sha256 encrypted */
     class_hash TEXT NOT NULL,       /* user_hash:time.time() */
-    content TEXT NOT NULL,          /* The announcement content json map ex: {title, description, attached_images} */
+    content TEXT NOT NULL,          /* The announcement content json map ex: {user_name, title, description, attached_images} */
     date INTEGER NOT NULL           /* The time since epoch format of when the post was made */
 );
 
-/* MAX 100 USERS */
-/* endpoint: get_class_data */
+/* MAX 100 USERS                    */
+/* endpoint: get_class_data         */
 CREATE TABLE whitelist (
     id INTEGER PRIMARY KEY,
     user_hash TEXT NOT NULL,        /* The users email sha256 encrypted */
@@ -30,8 +30,8 @@ CREATE TABLE whitelist (
     whitelisted_user TEXT NOT NULL  /* The user to be whitelisted's email sha256 encrypted */
 );
 
-/* MAX 10 CLASSES */
-/* endpoint: get_user_data */
+/* MAX 10 CLASSES                   */
+/* endpoint: get_class_data         */
 CREATE TABLE classes (
     id INTEGER PRIMARY KEY,
     user_hash TEXT NOT NULL,        /* The users email sha256 encrypted */
@@ -41,8 +41,8 @@ CREATE TABLE classes (
 );
 
 
-/* MAX 12 UNITS */
-/* endpoint: get_class_data */
+/* MAX 12 UNITS                     */
+/* endpoint: get_class_data         */
 CREATE TABLE units (
     id INTEGER PRIMARY KEY,
     user_hash TEXT NOT NULL,        /* The users email sha256 encrypted */
@@ -51,7 +51,8 @@ CREATE TABLE units (
     locked INTEGER NOT NULL         /* whether the students can access this unit */
 );
 
-/* MAX (20 * unit_count) LESSONS */
+/* MAX (20 * unit_count) LESSONS    */
+/* endpoint: get_unit_lessons       */
 CREATE TABLE lessons (
     id INTEGER PRIMARY KEY,
     user_hash TEXT NOT NULL,        /* The users email sha256 encrypted */
@@ -60,7 +61,8 @@ CREATE TABLE lessons (
     lesson_data TEXT NOT NULL,      /* homework json map that contains: title, description, video, homework_image, homework_questions, homework_solutions*/
 );
 
-/* Homework submissions for a specific unit */
+/* Homework Submissions for a Unit  */
+/* endpoint: get_unit_submissions   */
 CREATE TABLE submissions (
     id INTEGER PRIMARY KEY,
     user_hash TEXT NOT NULL,        /* The users email sha256 encrypted */
