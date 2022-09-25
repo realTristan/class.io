@@ -3,7 +3,7 @@
 // Import the External files
 mod lib;
 use lib::database::db_handler::Database;
-use rocket::serde::{Serialize, Deserialize, json::Json};
+use rocket::serde::{Deserialize, json::Json};
 
 // Database State Simplifier
 type DBState = rocket::State<Database>;
@@ -52,19 +52,19 @@ pub async fn get_user_data(db: &DBState, user_hash: &str, auth_token: &str) -> S
     )
 }
 
-// The UpdateUserDataBody struct is used to read
+// The UserDataBody struct is used to read
 // the incoming requests http request body. This is
 // the easiest way for reading what modifications
 // to make within the database
-#[derive(Serialize, Deserialize)]
-pub struct UpdateUserDataBody { user_name: String, email: String }
+#[derive(Deserialize)]
+pub struct UserDataBody { user_name: String, email: String }
 // The /user/info/<user_hash>/<auth_token> endpoint is used
 // to get an users dashboard settings through their
 // user_hash. This function is necessary for the frontend
 // dashboard page. To ensure the security of the endpoint,
 // a valid auth token is required.
 #[post("/?<data>", format = "json", data = "<body>")]
-pub async fn update_user_data(db: &DBState, data: &str, body: Json<UpdateUserDataBody>) -> String {
+pub async fn update_user_data(db: &DBState, data: &str, body: Json<UserDataBody>) -> String {
     // Extract the user_hash, auth_token, and bearer token
     // from the url provided base64 encoded data.
     let tokens: lib::auth::Tokens = lib::auth::Tokens::from(data);
@@ -98,7 +98,7 @@ pub async fn update_user_data(db: &DBState, data: &str, body: Json<UpdateUserDat
 // This endpoint is called whenever an user logs into the website
 // using firebase google auth.
 #[put("/?<data>", format = "json", data = "<body>")]
-pub async fn insert_user_data(db: &DBState, data: &str, body: Json<UpdateUserDataBody>) -> String {
+pub async fn insert_user_data(db: &DBState, data: &str, body: Json<UserDataBody>) -> String {
     // Extract the user_hash, auth_token, and bearer token
     // from the url provided base64 encoded data.
     let tokens: lib::auth::Tokens = lib::auth::Tokens::from(data);
