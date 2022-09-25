@@ -13,10 +13,14 @@ https://user-images.githubusercontent.com/75189508/192068727-fcf78602-ddbc-492d-
 - Svelte is 30% faster than other frameworks.
 - Svelte is best when used for designing small apps
 
+<h3>Security</h3>
+
+- The backend requires an authentication token to be used
+- The authentication token can only be used once and can only be used within 8 seconds of it's creation
+
 # Todo
 <h3>Major</h3>
 
-- Finish adding all the data for unit 1
 - Add a section to select the unit
 - Add a section to submit homework answers
 - Add a section for the teacher to mark homework answers
