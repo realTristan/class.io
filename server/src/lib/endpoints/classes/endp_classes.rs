@@ -87,10 +87,36 @@ struct ClassDataBody {
     owner_hash: String,
     class_hash: String,
     class_name: String,
-    analytics: bool,
-    enable_whitelist: bool,
-    req_student_login: bool
+    analytics: i64,
+    enable_whitelist: i64,
+    req_student_login: i64
 }
+
+fn generate_class_update_query(data: &ClassDataBody) -> String {
+    let res: String = "".to_string();
+    let var_res = vec![];
+
+    // "UPDATE users SET user_name=? WHERE user_hash=?"
+
+    if data.analytics != 2 { // 2 == Invalid
+        res.push_str(&format!("analytics=?"));
+        var_res.push(data.analytics);
+    }
+    if data.enable_whitelist != 2 { // 2 == Invalid
+        res.push_str(&format!("enable_whitelist=?"));
+        var_res.push(data.enable_whitelist);
+    }
+    if data.req_student_login != 2 { // 2 == Invalid
+        res.push_str(&format!("rsl=?"));
+        var_res.push(data.req_student_login);
+    }
+    if data.class_name.len() > 0 {
+        res.push_str(&format!("class_name=?"));
+        var_res.push(data.class_name);
+    }
+    return res
+}
+
 // The UnitDataBody struct is used to read the
 // incoming requests http request body. This is
 // the easiest way for reading what modifications
