@@ -38,33 +38,3 @@ async fn main() -> std::io::Result<()> {
     .run()
     .await
 }
-
-/*
-
-Example 5:
-    /class/whitelist/add/<class_hash>/auth_crypt(user_hash:access_token:bearer)
-    and
-    /class/whitelist/remove/<class_hash>/auth_crypt(user_hash:access_token:bearer)
-
-    fn add_class_whitelist(user_to_add, class_hash) {
-
-    }
-
-    fn remove_class_whitelist(user_to_add, class_hash) {
-
-    }
-
-Example 7:
-    /submissions/get/<class_hash>/auth_crypt(user_hash:access_token:bearer)
-
-    
-    fn get_unit_submissions(
-        Optional<unit_hash: &str>,
-        Optional<user_hash: &str>
-    ) {
-        return [
-            { submission_date: submission }
-        ]
-    }
-
-*/

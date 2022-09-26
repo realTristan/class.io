@@ -103,7 +103,7 @@ fn storage_handler(
 
     // Get the last storage wipe time
     let last_wipe_time: u64 = mut_storage[0].parse().unwrap();
-
+    
     // If the last wipe happened over 8 seconds ago,
     // wipe the users token storage to prevent an
     // overflow. If the user has too many tokens and

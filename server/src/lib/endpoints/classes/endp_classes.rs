@@ -103,6 +103,21 @@ struct UnitDataBody {
     locked: bool
 }
 
+#[derive(serde::Deserialize)]
+struct WhitelistDataBody {
+    class_hash: String,
+    user_to_add_hash: String
+}
+
+#[derive(serde::Deserialize)]
+struct SubmissionDataBody {
+    user_hash: String,
+    class_hash: String,
+    submitter_hash: String,
+    submission_date: i64,
+    data: String
+}
+
 // The get_class_data() endpoint is used to get the class's
 // whitelist[String Array], announcements, rsl[bool], 
 // analytics[bool], class_name, enable_whitelist[bool]
@@ -200,7 +215,7 @@ async fn insert_class_data(
 // provided class_hash the function will generate
 // a unique unit identifier using the following format:
 // SHA256(class_hash:current_time)
-#[actix_web::put("/class/units/{class_hash}")]
+#[actix_web::put("/class/{class_hash}/units")]
 async fn add_class_unit(
     req: HttpRequest, db: web::Data<Database>, class_hash: web::Path<String>, body: web::Json<UnitDataBody>
 ) -> impl Responder {
@@ -227,7 +242,7 @@ async fn add_class_unit(
 
 // The delete_class_unit() function is used to
 // delete the provided unit from the database.
-#[actix_web::delete("/class/units/{class_hash}")]
+#[actix_web::delete("/class/{class_hash}/units")]
 async fn delete_class_unit(
     req: HttpRequest, db: web::Data<Database>, class_hash: web::Path<String>, body: web::Json<UnitDataBody>
 ) -> impl Responder {
@@ -254,9 +269,111 @@ async fn delete_class_unit(
 
 // The update_class_unit() endpoint is used to
 // modify any data within the unit's database row.
-#[actix_web::post("/class/units/{class_hash}")]
+#[actix_web::post("/class/{class_hash}/units")]
 async fn update_class_unit(
     req: HttpRequest, db: web::Data<Database>, class_hash: web::Path<String>, body: web::Json<UnitDataBody>
+) -> impl Responder {
+    // Get the access and authentication tokens from
+    // the request headers. These tokens are used to make
+    // sure that the incoming request isn't from an abuser.
+    let access_token: &str = global::get_header(&req, "Access Token");
+    let bearer_token: &str = global::get_header(&req, "Authorization");
+
+    // If the user does not provide a valid auth
+    // token and is trying to abuse the api, return
+    // an empty json map
+    if !lib::auth::verify(&class_hash, access_token) { 
+        return "{}".to_string()
+    }
+    // If the user does not provide a valid bearer token,
+    // return an empty json map
+    let firebase_token: &str = "";
+    if !lib::auth::verify_bearer(&class_hash, access_token, bearer_token, firebase_token) { 
+        return "{}".to_string()
+    }
+    return format!("")
+}
+
+
+#[actix_web::put("/class/{class_hash}/whitelist")]
+async fn add_to_class_whitelist(
+    req: HttpRequest, db: web::Data<Database>, class_hash: web::Path<String>, body: web::Json<WhitelistDataBody>
+) -> impl Responder {
+    // Get the access and authentication tokens from
+    // the request headers. These tokens are used to make
+    // sure that the incoming request isn't from an abuser.
+    let access_token: &str = global::get_header(&req, "Access Token");
+    let bearer_token: &str = global::get_header(&req, "Authorization");
+
+    // If the user does not provide a valid auth
+    // token and is trying to abuse the api, return
+    // an empty json map
+    if !lib::auth::verify(&class_hash, access_token) { 
+        return "{}".to_string()
+    }
+    // If the user does not provide a valid bearer token,
+    // return an empty json map
+    let firebase_token: &str = "";
+    if !lib::auth::verify_bearer(&class_hash, access_token, bearer_token, firebase_token) { 
+        return "{}".to_string()
+    }
+    return format!("")
+}
+
+#[actix_web::delete("/class/{class_hash}/whitelist")]
+async fn delete_from_class_whitelist(
+    req: HttpRequest, db: web::Data<Database>, class_hash: web::Path<String>, body: web::Json<WhitelistDataBody>
+) -> impl Responder {
+    // Get the access and authentication tokens from
+    // the request headers. These tokens are used to make
+    // sure that the incoming request isn't from an abuser.
+    let access_token: &str = global::get_header(&req, "Access Token");
+    let bearer_token: &str = global::get_header(&req, "Authorization");
+
+    // If the user does not provide a valid auth
+    // token and is trying to abuse the api, return
+    // an empty json map
+    if !lib::auth::verify(&class_hash, access_token) { 
+        return "{}".to_string()
+    }
+    // If the user does not provide a valid bearer token,
+    // return an empty json map
+    let firebase_token: &str = "";
+    if !lib::auth::verify_bearer(&class_hash, access_token, bearer_token, firebase_token) { 
+        return "{}".to_string()
+    }
+    return format!("")
+}
+
+#[actix_web::get("/class/{class_hash}/submissions")]
+async fn get_class_submissions(
+    req: HttpRequest, db: web::Data<Database>, class_hash: web::Path<String>, body: web::Json<SubmissionDataBody>
+) -> impl Responder {
+    // Get the access and authentication tokens from
+    // the request headers. These tokens are used to make
+    // sure that the incoming request isn't from an abuser.
+    let access_token: &str = global::get_header(&req, "Access Token");
+    let bearer_token: &str = global::get_header(&req, "Authorization");
+
+    // If the user does not provide a valid auth
+    // token and is trying to abuse the api, return
+    // an empty json map
+    if !lib::auth::verify(&class_hash, access_token) { 
+        return "{}".to_string()
+    }
+    // If the user does not provide a valid bearer token,
+    // return an empty json map
+    let firebase_token: &str = "";
+    if !lib::auth::verify_bearer(&class_hash, access_token, bearer_token, firebase_token) { 
+        return "{}".to_string()
+    }
+    return format!("")
+}
+
+
+#[actix_web::put("/class/{class_hash}/submissions")]
+async fn insert_class_submission(
+    req: HttpRequest, db: web::Data<Database>, class_hash: web::Path<String>, body: web::Json<SubmissionDataBody>
 ) -> impl Responder {
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
