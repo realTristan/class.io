@@ -3,150 +3,47 @@ use lib::database::Database;
 use lib::global;
 use crate::lib;
 
-// The Announcement data struct is used to
-// store the announcement author's unique identifier,
-// the authors name, the announcement title and description,
-// along with any attachements the author has posted with it.
-struct Announcement {
-    // The author's unique identifier (required for bearer token)
-    author_hash: String,
-    // The announcement's author name
-    // Use the get_user_data endpoint to get this
-    author_name: String,
-    // The announcement title
-    title: String,
-    // The announcements content
-    description: String,
-    // Any images/videos attached with the announcement
-    attachements: Vec<String>   // Base64 encode images, etc.
-}
-// The Class data struct is used to store
-// the classes owner_hash, unique class identifier,
-// class name, class whitelist array, class announcements,
-// rsl bool, analytics bool and the class units.
-struct Class {
-    // The Teacher's unique user identifier
-    owner_hash: String,
-    // The Classes unique identifier
-    class_hash: String,
-    // The Class Name
-    class_name: String,
-    // An array of user hashes that are used to
-    // determine whether a student is allowed to
-    // access this class
-    whitelist: Vec<String>,
-    // An array of announcements that use the above struct
-    announcements: Vec<Announcement>,
-    // Whether the students need to be logged in to
-    // access this class
-    require_student_login: bool,
-    // Whether to show activity graphs and analytics
-    // for this class. 
-    analytics: bool,
-    // An array of units that use the below struct
-    units: Vec<Unit>
-}
-// The Unit data struct is used to store
-// the class unit's unique identifier, 
-// unit name, it's locked status and the
-// lessons that come along with the unit.
-struct Unit {
-    // The unique unit identifier
-    unit_hash: String,
-    // The Unit's Name
-    unit_name: String,
-    // Whether students can access this unit yet
-    locked: bool,
-    // The Unit lessons that uses the below struct
-    lessons: Vec<Lesson>
-}
-// The Lesson data struct is used to store
-// the class unit's lesson title, description,
-// video_url, work and work_solutions.
-struct Lesson {
-    // The unique unit identifier
-    unit_hash: String,
-    // The Lesson Title
-    title: String,
-    // The Lesson Description
-    description: String,
-    // The Lesson's Youtube Video URL
-    video_url: String,
-    // The Lesson Homework that can be 
-    // submitted and marked
-    work: Vec<String>,
-    work_solutions: Vec<String>
-}
+//
+// The unit hash is just the class_hash:time.now()
+// The class hash is in the url
+//
 
 // The ClassDataBody struct is used to read the
 // incoming requests http request body. This is
 // the easiest way for reading what modifications
 // to make within the database
 #[derive(serde::Deserialize)]
-struct ClassDataBody {
-    owner_hash: String,
-    class_hash: String,
-    class_name: String,
-    analytics: i64,
-    enable_whitelist: i64,
-    req_student_login: i64
+pub struct ClassDataBody {
+    // Update the class name
+    pub class_name: String,
+    // Update whether to use the class whitelist
+    pub enable_whitelist: i64,
+    // Update whether to require student logins
+    pub rsl: i64
 }
-
-fn generate_class_update_query(data: &ClassDataBody) -> String {
-    let res: String = "".to_string();
-    let var_res = vec![];
-
-    // "UPDATE users SET user_name=? WHERE user_hash=?"
-
-    if data.analytics != 2 { // 2 == Invalid
-        res.push_str(&format!("analytics=?"));
-        var_res.push(data.analytics);
-    }
-    if data.enable_whitelist != 2 { // 2 == Invalid
-        res.push_str(&format!("enable_whitelist=?"));
-        var_res.push(data.enable_whitelist);
-    }
-    if data.req_student_login != 2 { // 2 == Invalid
-        res.push_str(&format!("rsl=?"));
-        var_res.push(data.req_student_login);
-    }
-    if data.class_name.len() > 0 {
-        res.push_str(&format!("class_name=?"));
-        var_res.push(data.class_name);
-    }
-    return res
-}
-
 // The UnitDataBody struct is used to read the
 // incoming requests http request body. This is
 // the easiest way for reading what modifications
 // to make within the database
 #[derive(serde::Deserialize)]
-struct UnitDataBody {
-    class_hash: String,
-    unit_hash: String,
-    unit_name: String,
-    locked: bool
-}
-
+pub struct UnitDataBody { unit_name: String, locked: bool }
+// The WhitelistDataBody struct is used to read the
+// incoming requests http request body. This is
+// the easiest way for reading what modifications
+// to make within the database
 #[derive(serde::Deserialize)]
-struct WhitelistDataBody {
-    class_hash: String,
-    user_to_add_hash: String
-}
+pub struct WhitelistDataBody { class_hash: String, user: String }
 
+// The SubmissionDataBody struct is used to read the
+// incoming requests http request body. This is
+// the easiest way for reading what modifications
+// to make within the database
 #[derive(serde::Deserialize)]
-struct SubmissionDataBody {
-    user_hash: String,
-    class_hash: String,
-    submitter_hash: String,
-    submission_date: i64,
-    data: String
-}
+pub struct SubmissionDataBody { submitter_hash: String, data: String }
 
 // The get_class_data() endpoint is used to get the class's
 // whitelist[String Array], announcements, rsl[bool], 
-// analytics[bool], class_name, enable_whitelist[bool]
+// class_name, enable_whitelist[bool]
 /* Example:
     "units": [
         "unit_name": {
@@ -192,6 +89,7 @@ async fn update_class_data(
     // sure that the incoming request isn't from an abuser.
     let access_token: &str = global::get_header(&req, "Access Token");
     let bearer_token: &str = global::get_header(&req, "Authorization");
+    let firebase_token: &str = global::get_header(&req, "Google Auth Token");
 
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
@@ -201,11 +99,16 @@ async fn update_class_data(
     }
     // If the user does not provide a valid bearer token,
     // return an empty json map
-    let firebase_token: &str = "";
     if !lib::auth::verify_bearer(&class_hash, access_token, bearer_token, firebase_token) { 
         return "{}".to_string()
     }
-    return format!("")
+    // Generate a class update query which is the fastest way 
+    // for updating multiple values inside the database before 
+    // executing the database update using the below function
+    let _  = db.update_class_data(&class_hash, body);
+
+    // Return the success json body
+    return "{{\"success\": true}}".to_string()
 }
 
 // The insert_class_data() endpoint is used to

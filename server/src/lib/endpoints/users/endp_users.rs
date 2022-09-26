@@ -17,7 +17,7 @@ pub struct User {
 // the easiest way for reading what modifications
 // to make within the database
 #[derive(serde::Deserialize)]
-struct UserDataBody { user_name: String, email: String }
+pub struct UserDataBody { user_name: String, email: String }
 
 // The GET /user/<user_hash> endpoint is used
 // to get an users dashboard settings through their
@@ -85,7 +85,7 @@ pub async fn update_user_data(
         db.update_user_name(&user_hash, &body.user_name).await;
     }
     // Return successful update
-    return format!("{{\"success\": {}}}", true)
+    return "{{\"success\": true}}".to_string()
 }
 
 // The insert_user_data() function is used to insert
@@ -116,19 +116,17 @@ async fn insert_user_data(
     if !lib::auth::verify_bearer(&user_hash, access_token, bearer_token, firebase_token) { 
         return "{}".to_string()
     }
-
     // Get the current system time. This is used
     // for inserting the users registration date
     // into the database.
-    let time: std::time::Duration = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH).unwrap();
+    let time: u64 = global::get_time();
     
     // Insert the user into the database
     // Along with this insertion is the user_hash, user_name
     // user's email and the time of registration
     let _ = db.insert_user(
         &user_hash, &body.user_name, 
-        &body.email, time.as_secs() as i64
+        &body.email, time as i64
     );
     // Return successful update
     return format!("{{\"success\": {}}}", true)

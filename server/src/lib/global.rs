@@ -20,3 +20,12 @@ pub fn get_header<'a>(req: &'a HttpRequest, header: &str) -> &'a str {
     // unwrapped string
     return head_val.to_str().unwrap()
 }
+
+// The get_time() function is used to quickly
+// and cleanly get the time in seconds since
+// the unix epoch.
+pub fn get_time() -> u64 {
+    let time: std::time::Duration = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH).unwrap();
+    return time.as_secs();
+}
