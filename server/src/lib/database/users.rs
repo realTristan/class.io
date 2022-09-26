@@ -1,5 +1,5 @@
 // External Crates Usages
-use super::db_handler::Database;
+use super::handler::Database;
 
 // Store User data as a struct
 pub struct User {

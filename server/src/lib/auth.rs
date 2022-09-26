@@ -21,14 +21,13 @@ lazy_static::lazy_static! {
 // the provided bearer token is valid. If the bearer is valid
 // then we can proceed with whatever 'secure' function it is we need to do
 pub fn verify_bearer(
-    user_hash: &str, auth_token: &str, provided_bearer: &str, firebase_token: &str
+    user_hash: &str, access_token: &str, provided_bearer: &str, firebase_token: &str
 ) -> bool {
     // Generate a new bearer token format using the provided
     // data which will be compared to the provided bearer
-    let gen: String = format!("{}:{}:{}", user_hash, auth_token, firebase_token);
+    let gen: String = format!("{}:{}:{}", user_hash, access_token, firebase_token);
     // SHA256 Encode the generated format above
-    let gen_bearer: String = sha256::digest(gen);
-
+    let gen_bearer: String = format!("Bearer {}", sha256::digest(gen));
     // Return whether the provided bearer token is
     // equal to the generated one
     return provided_bearer.to_string() == gen_bearer
@@ -38,7 +37,7 @@ pub fn verify_bearer(
 // provided auth token is valid. It does this by
 // checking whether the token has been created within
 // the past 8 seconds. If so, return true, else, return false.
-pub fn verify(user_hash: &str, auth_token: &str) -> bool {
+pub fn verify(user_hash: &str, access_token: &str) -> bool {
     // Get the system time since epoch. This value
     // is used to check how long ago the auth token was
     // generated. Doing this prevents users from consecutively
@@ -51,7 +50,7 @@ pub fn verify(user_hash: &str, auth_token: &str) -> bool {
     // Execute the storage handler
     // If the function returns false, then the provided
     // auth token has already been used within the past 8 seconds.
-    if !storage_handler(user_hash, auth_token, &time) { return false };
+    if !storage_handler(user_hash, access_token, &time) { return false };
 
     // Check whether the auth token was generated
     // within the past 10 seconds
@@ -59,7 +58,7 @@ pub fn verify(user_hash: &str, auth_token: &str) -> bool {
         let gen: String = format!("{}:{}:{}", user_hash, time-i, SUPER_SECRET_CODE);
         // If the provided auth token is equal to the
         // generated auth token, return true
-        if auth_token == sha256::digest(gen) {
+        if access_token == sha256::digest(gen) {
             return true;
         }
     }
@@ -71,11 +70,11 @@ pub fn verify(user_hash: &str, auth_token: &str) -> bool {
 // within the past 8 seconds. This is function is
 // necessary to prevent abusers from using the same
 // token more than once.
-fn storage_handler(user_hash: &str, auth_token: &str, time: &u64) -> bool {
+fn storage_handler(user_hash: &str, access_token: &str, time: &u64) -> bool {
     let mut token_storage = TOKEN_STORAGE.lock().unwrap();
 
     // Convert the token storage into a mutable variable.
-    // This is required so that we can append the auth_token
+    // This is required so that we can append the access_token
     // to the users token storage, or so that we can clear
     // the token storage if full.
     let mut_storage: Option<&mut Vec<String>> = token_storage.get_mut(user_hash);
@@ -90,7 +89,7 @@ fn storage_handler(user_hash: &str, auth_token: &str, time: &u64) -> bool {
         // along with the current time and auth token
         token_storage.insert(
             user_hash.to_string(), 
-            [time.to_string(), auth_token.to_string()].to_vec()
+            [time.to_string(), access_token.to_string()].to_vec()
         );
         // Return true as the token did not
         // previously exist in the token storage
@@ -113,12 +112,12 @@ fn storage_handler(user_hash: &str, auth_token: &str, time: &u64) -> bool {
     }
     
     // After the users current token storage has or hasn't been
-    // cleared, check whether the auth_token is already existant
+    // cleared, check whether the access_token is already existant
     // in the token storage. If it is, return false, thus the
     // user is using an unauthorized token. Else, append the
     // token to the user's token storage and return true.
-    if !mut_storage.contains(&auth_token.to_string()) {
-        mut_storage.push(auth_token.to_string());
+    if !mut_storage.contains(&access_token.to_string()) {
+        mut_storage.push(access_token.to_string());
         return true;
     }
     return false;

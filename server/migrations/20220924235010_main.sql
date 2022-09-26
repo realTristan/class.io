@@ -42,7 +42,7 @@ CREATE TABLE classes (
     class_name TEXT NOT NULL,           -- Ex: MHF4UI
     rsl INTEGER NOT NULL,               -- Require Student Login BOOL
     analytics INTEGER NOT NULL,         -- Enable Analytics (Graphs of activity, submissions, etc.) BOOL
-    enable_whitelist INTEGER NOT NULL,  -- Whether to use the whitelist for this class
+    enable_whitelist INTEGER NOT NULL   -- Whether to use the whitelist for this class
 );
 
 -- MAX 12 UNITS                                     

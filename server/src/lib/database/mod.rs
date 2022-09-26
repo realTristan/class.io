@@ -1,2 +1,2 @@
-pub mod db_users;
-pub mod db_handler;
+pub mod users;
+pub mod handler;
