@@ -3,6 +3,7 @@ mod lib;
 use lib::database::Database;
 use lib::endpoints::users::endp_users;
 use lib::endpoints::classes::endp_classes;
+use lib::endpoints::classes::endp_units;
 use actix_web::{App, HttpServer};
 
 // Main Actix-Web function
@@ -29,9 +30,9 @@ async fn main() -> std::io::Result<()> {
             .service(endp_classes::insert_class_data)
 
             // Class Units
-            .service(endp_classes::add_class_unit)
-            .service(endp_classes::delete_class_unit)
-            .service(endp_classes::update_class_unit)
+            .service(endp_units::add_class_unit)
+            .service(endp_units::delete_class_unit)
+            .service(endp_units::update_class_unit)
 
     })
     .bind(("127.0.0.1", 8080))?
