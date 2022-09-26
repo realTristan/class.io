@@ -1,6 +1,6 @@
 // Library Usages
 use std::collections::HashMap;
-use std::sync::Mutex;
+use std::sync::{Mutex, MutexGuard};
 
 // The SUPER_SECRET_CODE is what's used to prevent
 // users trying to abuse the api from being able
@@ -38,27 +38,38 @@ pub fn verify_bearer(
 // checking whether the token has been created within
 // the past 8 seconds. If so, return true, else, return false.
 pub fn verify(user_hash: &str, access_token: &str) -> bool {
+    let mut token_storage = TOKEN_STORAGE.lock().unwrap();
+    // Convert the token storage into a mutable variable.
+    // This is required so that we can append the access_token
+    // to the users token storage, or so that we can clear
+    // the token storage if full.
+    let mut_storage: &Option<&mut Vec<String>> = &token_storage.get_mut(user_hash);
+
     // Get the system time since epoch. This value
     // is used to check how long ago the auth token was
     // generated. Doing this prevents users from consecutively
     // using a single auth token if trying to abuse the api
     let time: std::time::Duration = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH).unwrap();
-    // Convert the time to milliseconds
+    // Convert the time to seconds
     let time: u64 = time.as_secs();
 
     // Execute the storage handler
     // If the function returns false, then the provided
     // auth token has already been used within the past 8 seconds.
-    if !storage_handler(user_hash, access_token, &time) { return false };
+    if !storage_handler(&token_storage, &mut_storage, user_hash, access_token, &time) { return false };
 
     // Check whether the auth token was generated
-    // within the past 10 seconds
+    // within the past 8 seconds
     for i in 0..8 {
         let gen: String = format!("{}:{}:{}", user_hash, time-i, SUPER_SECRET_CODE);
         // If the provided auth token is equal to the
         // generated auth token, return true
         if access_token == sha256::digest(gen) {
+            // Append the access token to the TOKEN_STORAGE
+            if !mut_storage.is_none() {
+                mut_storage.unwrap().push(access_token.to_string());
+            }
             return true;
         }
     }
@@ -70,20 +81,12 @@ pub fn verify(user_hash: &str, access_token: &str) -> bool {
 // within the past 8 seconds. This is function is
 // necessary to prevent abusers from using the same
 // token more than once.
-fn storage_handler(user_hash: &str, access_token: &str, time: &u64) -> bool {
-    let mut token_storage = TOKEN_STORAGE.lock().unwrap();
-
-    // Convert the token storage into a mutable variable.
-    // This is required so that we can append the access_token
-    // to the users token storage, or so that we can clear
-    // the token storage if full.
-    let mut_storage: Option<&mut Vec<String>> = token_storage.get_mut(user_hash);
-
+fn storage_handler(
+    token_storage: &MutexGuard<HashMap<String, Vec<String>>>, mut_storage: &Option<&mut Vec<String>>, 
+    user_hash: &str, access_token: &str, time: &u64
+) -> bool {
     // If the user doesn't already exist within the
-    // token storage.. Insert a new key:value that
-    // contains the users hash and the array containing the
-    // current time (which will be used to determine the last wipe)
-    // and the provided auth token.
+    // token storage return true
     if mut_storage.is_none() {
         // Insert the user into the token storage
         // along with the current time and auth token
@@ -110,15 +113,10 @@ fn storage_handler(user_hash: &str, access_token: &str, time: &u64) -> bool {
         mut_storage.clear();
         mut_storage[0] = time.to_string();
     }
-    
+
     // After the users current token storage has or hasn't been
     // cleared, check whether the access_token is already existant
     // in the token storage. If it is, return false, thus the
-    // user is using an unauthorized token. Else, append the
-    // token to the user's token storage and return true.
-    if !mut_storage.contains(&access_token.to_string()) {
-        mut_storage.push(access_token.to_string());
-        return true;
-    }
-    return false;
+    // user is using an unauthorized token. Else, return true.
+    return !mut_storage.contains(&access_token.to_string())
 }
