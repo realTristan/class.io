@@ -16,38 +16,6 @@ lazy_static::lazy_static! {
     };    
 }
 
-// Create a new Tokens struct for easily storing
-// and accessing the incoming requests
-// authentication tokens
-pub struct Tokens {
-    pub user_hash: String,
-    pub auth_token: String,
-    pub bearer: String
-}
-// Tokens implementation for reading data
-impl From<&str> for Tokens {
-    fn from(auth_crypt: &str) -> Self {
-        // Decode the authentication cryption by base64
-        let decoded: Vec<u8> = base64::decode(auth_crypt).unwrap();
-        // Convert the decoded bytes into a string
-        let str_data = String::from_utf8(decoded).unwrap();
-    
-        // Split the converted data string into an
-        // array containing the user_hash, auth_token,
-        // and bearer token
-        let data: Vec<&str> = str_data
-            .split(":")
-            .collect();
-    
-        // Return the tokens object
-        return Tokens {
-            user_hash: data[0].to_string(),
-            auth_token: data[1].to_string(),
-            bearer: data[2].to_string()
-        }
-    }
-}
-
 // BEARER TOKEN IS SHA256 ENCODE [ (user_hash):(provided auth token):(firebase_token) ]
 // The verify_bearer() function is used to verify whether
 // the provided bearer token is valid. If the bearer is valid

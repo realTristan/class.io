@@ -1,10 +1,10 @@
 // Database Struct for globalizing it's
 // connection variable
+#[derive(Clone)]
 pub struct Database { pub conn: sqlx::SqlitePool }
 
 // Database Implemenetation that contains all the
 // functions for manipulating the sqlite db data
-#[allow(dead_code)]
 impl Database {
     // Initialize a new database connection
     pub async fn init() -> Self {

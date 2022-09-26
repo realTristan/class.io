@@ -4,7 +4,7 @@ publish(
     './build', 
     {
         branch: 'gh-pages',
-        repo: 'https://github.com/realTristan/MHF4UI.git',
+        repo: 'https://github.com/realTristan/class.io.git',
         user: {
             name: 'realTristan',
             email: 'heytristaann@gmail.com'
@@ -12,6 +12,6 @@ publish(
         dotfiles: true
     },
     () => {
-        console.log('Github Page: https://realtristan.github.io/MHF4UI/');
+        console.log('Github Page: https://realtristan.github.io/class.io/');
     }
 );
