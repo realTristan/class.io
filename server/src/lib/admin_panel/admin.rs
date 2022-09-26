@@ -1,1 +1,0 @@
-// show graphs of user activity, amount of users, etc.

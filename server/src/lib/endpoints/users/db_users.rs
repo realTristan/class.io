@@ -1,18 +1,9 @@
-// External Crates Usages
-use super::handler::Database;
-
-// Store User data as a struct
-pub struct User {
-    pub id:                 i64,        // Row Increment ID
-    pub hash:               String,     // The user hash (aka: the user id)
-    pub name:               String,     // The users name
-    pub email:              String,     // The users email
-    pub registration_date:   i64        // The Users registration date (used for bearer token)
-}
+use super::endp_users::User;
+use crate::lib;
 
 // Database Implemenetation that contains all the
 // functions for manipulating the user db data
-impl Database {
+impl lib::database::Database {
     // The insert_test_user() function is used to
     // insert a fake user for testing the backend
     // database functions

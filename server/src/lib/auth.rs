@@ -21,7 +21,7 @@ lazy_static::lazy_static! {
 // the provided bearer token is valid. If the bearer is valid
 // then we can proceed with whatever 'secure' function it is we need to do
 pub fn verify_bearer(
-    user_hash: &str, access_token: &str, provided_bearer: &str, firebase_token: &str
+    user_hash: &str, access_token: &str, bearer_token: &str, firebase_token: &str
 ) -> bool {
     // Generate a new bearer token format using the provided
     // data which will be compared to the provided bearer
@@ -30,7 +30,7 @@ pub fn verify_bearer(
     let gen_bearer: String = format!("Bearer {}", sha256::digest(gen));
     // Return whether the provided bearer token is
     // equal to the generated one
-    return provided_bearer.to_string() == gen_bearer
+    return bearer_token.to_string() == gen_bearer
 }
 
 // The verify() function is used to check whether the

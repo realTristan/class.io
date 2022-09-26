@@ -60,8 +60,12 @@ CREATE TABLE units (
 -- endpoint: get_unit_lessons
 CREATE TABLE lessons (
     id INTEGER PRIMARY KEY,
-    unit_hash TEXT NOT NULL,        -- class_hash:user_hash:time.time()
-    lesson_data TEXT NOT NULL       -- homework json map that contains: title, description, video, homework_image, homework_questions, homework_solutions
+    unit_hash TEXT NOT NULL,                -- class_hash:user_hash:time.time()
+    lesson_title TEXT NOT NULL,             -- Lesson Title
+    lesson_description TEXT NOT NULL,       -- Lesson Description
+    lesson_video TEXT NOT NULL,             -- Lesson Youtube Video
+    lesson_work TEXT NOT NULL,              -- Lesson Work
+    lesson_work_solutions TEXT NOT NULL,    -- Lesson Work Solutions
 );
 -- Homework Submissions for a specific Unit
 -- endpoint: get_unit_submissions
