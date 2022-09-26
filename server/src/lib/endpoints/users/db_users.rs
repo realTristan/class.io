@@ -9,7 +9,8 @@ impl lib::database::Database {
     // database functions
     pub async fn insert_test_user(&self) -> u64 {
         return self.insert_user(
-            "822f3d5b9c91b570a4f1848c5d147b4709d2fb96", "realtristan", "realtristan@gmail.com", 0
+            "822f3d5b9c91b570a4f1848c5d147b4709d2fb96", "realtristan", 
+            "realtristan@gmail.com", 0
         ).await;
     }
 
