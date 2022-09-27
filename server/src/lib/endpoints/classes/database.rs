@@ -60,9 +60,15 @@ struct Lesson {
     // The Lesson Homework Solutions
     work_solutions: String
 }
+//
+struct Submission {
+    submitter_hash: String,
+    data: String
+}
 // The Whitelist data struct is used for querying
 // the whitelisted users for a specific class.
 struct Whitelist { whitelisted_user: String }
+
 
 // Database Implementation
 impl lib::handlers::Database {
@@ -109,6 +115,68 @@ impl lib::handlers::Database {
             "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020", "822f3d5b9c91b570a4f1848c5d147b4709d2fb96", 0, ""
         ).execute(&self.conn).await.unwrap();
     }
+
+
+    /*
+    
+    CREATE TABLE submissions (
+        id INTEGER PRIMARY KEY,
+        class_hash TEXT NOT NULL,               -- class_hash:user_hash:time.time()
+
+        submitter_hash TEXT NOT NULL,           -- The student's user hash (use this to get the user's name, email, etc.)
+        submission_date INTEGER NOT NULL,       -- The time since epoch when the user submitted the work
+        data TEXT NOT NULL                      -- Homework file (AUTO CONVERT TO PDF)
+    );
+    
+    */
+    pub async fn insert_class_submission() {
+
+    }
+
+    pub async fn delete_class_submission() {
+
+    }
+
+    pub async fn get_class_submission() {
+
+    }
+
+    fn get_submission_json(&self, submissions: Vec<Submission>) -> String {
+        // Define the json result string
+        let mut r: String = String::new();
+        // Iterate over the provided lessons array and
+        // append each of the lesson's data to a formatted
+        // string array of maps
+        submissions.iter().for_each(|f| {
+            r.push_str(
+                &format!("{{
+                    \"submitter_hash\": \"{}\", 
+                    \"data\":\"{}\"
+                }},",
+                f.submitter_hash, f.data
+            ))
+        });
+        // Remove the last comma of the string array
+        // before returning the new json map result
+        return r[..r.len()-1].to_string();
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     
     pub async fn insert_class_unit(&self, class_hash: &str, data: Json<UnitDataBody>) -> u64 {
