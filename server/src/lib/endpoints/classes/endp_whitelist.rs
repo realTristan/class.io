@@ -8,7 +8,7 @@ use crate::lib;
 // the easiest way for reading what modifications
 // to make within the database
 #[derive(serde::Deserialize)]
-pub struct WhitelistDataBody { user: String }
+pub struct WhitelistDataBody { pub user: String }
 
 // The add_to_class_whitelist() endpoint is used
 // to add an user to the provided class_hash's
