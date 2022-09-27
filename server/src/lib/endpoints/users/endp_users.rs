@@ -3,15 +3,6 @@ use lib::handlers::Database;
 use lib::global;
 use crate::lib;
 
-// Store User data as a struct
-pub struct User {
-    pub id:                 i64,        // Row Increment ID
-    pub hash:               String,     // The user hash (aka: the user id)
-    pub name:               String,     // The users name
-    pub email:              String,     // The users email
-    pub registration_date:   i64        // The Users registration date (used for bearer token)
-}
-
 // The UserDataBody struct is used to read the
 // incoming requests http request body. This is
 // the easiest way for reading what modifications
@@ -32,16 +23,21 @@ pub async fn get_user_data(
     // This tokens is used to make sure that the incoming 
     // request isn't from an abuser.
     let access_token: &str = global::get_header(&req, "Access Token");
-
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
     if !lib::auth::verify(&user_hash, access_token) { return "{}".to_string()}
+
     // Once the request has been verified, query the
     // database for the provided user_hash. Once found,
     // return all the data from said user.
-    let user: User = db.query_user_by_hash(&user_hash).await;
-
+    let user = db.query_user_by_hash(&user_hash).await;
+    // Check whether or not the user is invalid
+    if user.is_none() { return "{}".to_string() }
+    // Else, if the user is valid, unwrap the
+    // object so it can be read
+    let user = user.unwrap();
+    
     // Return a formatted string as a json map
     // so the frontend can successfully read the
     // response data.

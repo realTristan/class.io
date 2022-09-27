@@ -132,10 +132,17 @@ impl lib::handlers::Database {
     // The function requires a generated class_update_query
     // which can be generated using the function above.
     pub async fn update_class_data(&self, class_hash: &str, data: Json<ClassDataBody>) -> u64 {
+        // Generate a new query string. This query string accounts
+        // for empty values so that nothing gets corrupted.
         let q: String = self.get_class_update_query(data);
-        return sqlx::query(
+        // Query the database
+        let r = sqlx::query(
             &format!("UPDATE classes SET {q} WHERE class_hash={class_hash}"))
-                .execute(&self.conn).await.unwrap().rows_affected();
+                .execute(&self.conn).await;
+        // If an error has occurred, return 0 rows affected
+        if r.is_err() { return 0; }
+        // Else, return the amount of affected rows
+        return r.unwrap().rows_affected();
     }
 
     // The get_class_basic_data() function is used to get
