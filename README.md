@@ -43,9 +43,9 @@ https://user-images.githubusercontent.com/75189508/192068727-fcf78602-ddbc-492d-
     "announcements": [
         {
             "author_name": "test_author_name", 
-            "author_name": "test_title", 
-            "author_name": "test_desc", 
-            "author_name": "no_attachment"
+            "title": "test_title", 
+            "description": "test_desc", 
+            "attachment": "no_attachment"
         }
     ]
 }
