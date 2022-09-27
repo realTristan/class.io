@@ -19,6 +19,7 @@ async fn get_class_submissions(
     // sure that the incoming request isn't from an abuser.
     let access_token: &str = global::get_header(&req, "Access Token");
     let bearer_token: &str = global::get_header(&req, "Authorization");
+    let firebase_token: &str = global::get_header(&req, "Google Auth Token");
 
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
@@ -28,7 +29,6 @@ async fn get_class_submissions(
     }
     // If the user does not provide a valid bearer token,
     // return an empty json map
-    let firebase_token: &str = "";
     if !lib::auth::verify_bearer(&class_hash, access_token, bearer_token, firebase_token) { 
         return "{}".to_string()
     }
@@ -45,6 +45,7 @@ async fn insert_class_submission(
     // sure that the incoming request isn't from an abuser.
     let access_token: &str = global::get_header(&req, "Access Token");
     let bearer_token: &str = global::get_header(&req, "Authorization");
+    let firebase_token: &str = global::get_header(&req, "Google Auth Token");
 
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
@@ -54,7 +55,6 @@ async fn insert_class_submission(
     }
     // If the user does not provide a valid bearer token,
     // return an empty json map
-    let firebase_token: &str = "";
     if !lib::auth::verify_bearer(&class_hash, access_token, bearer_token, firebase_token) { 
         return "{}".to_string()
     }

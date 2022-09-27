@@ -37,7 +37,7 @@ pub async fn get_user_data(
     // Else, if the user is valid, unwrap the
     // object so it can be read
     let user = user.unwrap();
-    
+
     // Return a formatted string as a json map
     // so the frontend can successfully read the
     // response data.
@@ -61,6 +61,7 @@ pub async fn update_user_data(
     // sure that the incoming request isn't from an abuser.
     let access_token: &str = global::get_header(&req, "Access Token");
     let bearer_token: &str = global::get_header(&req, "Authorization");
+    let firebase_token: &str = global::get_header(&req, "Google Auth Token");
 
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
@@ -70,18 +71,17 @@ pub async fn update_user_data(
     }
     // If the user does not provide a valid bearer token,
     // return an empty json map
-    let firebase_token: &str = "";
     if !lib::auth::verify_bearer(&user_hash, access_token, bearer_token, firebase_token) { 
         return "{}".to_string()
     }
+    // If the incoming request doesn't contain
+    // a new user_name, return an empty json map
+    if body.user_name.len() < 1 { return "{}".to_string() }
 
-    // If the incoming request contains a new user_name
-    if body.user_name.len() > 0 {
-        // Then update the users 'user_name' in the database
-        db.update_user_name(&user_hash, &body.user_name).await;
-    }
-    // Return successful update
-    return "{{\"success\": true}}".to_string()
+    // Else, update the users 'user_name' in the database
+    let r: u64 = db.update_user_name(&user_hash, &body.user_name).await;
+    // Return whether more than 0 rows were affected
+    return format!("{{\"success\": {}}}", r > 0)
 }
 
 // The insert_user_data() function is used to insert
@@ -99,6 +99,7 @@ async fn insert_user_data(
     // sure that the incoming request isn't from an abuser.
     let access_token: &str = global::get_header(&req, "Access Token");
     let bearer_token: &str = global::get_header(&req, "Authorization");
+    let firebase_token: &str = global::get_header(&req, "Google Auth Token");
 
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
@@ -108,7 +109,6 @@ async fn insert_user_data(
     }
     // If the user does not provide a valid bearer token,
     // return an empty json map
-    let firebase_token: &str = "";
     if !lib::auth::verify_bearer(&user_hash, access_token, bearer_token, firebase_token) { 
         return "{}".to_string()
     }
@@ -120,10 +120,10 @@ async fn insert_user_data(
     // Insert the user into the database
     // Along with this insertion is the user_hash, user_name
     // user's email and the time of registration
-    let _ = db.insert_user(
+    let r: u64 = db.insert_user(
         &user_hash, &body.user_name, 
         &body.email, time as i64
-    );
-    // Return successful update
-    return format!("{{\"success\": {}}}", true)
+    ).await;
+    // Return whether more than 0 rows were affected
+    return format!("{{\"success\": {}}}", r > 0)
 }

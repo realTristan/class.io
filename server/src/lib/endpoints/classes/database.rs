@@ -64,6 +64,33 @@ struct Whitelist { whitelisted_user: String }
 
 // Database Implementation
 impl lib::handlers::Database {
+    // The insert_class_data() function is used to insert
+    // a new class into the database. A maximum of
+    // 5 classes is allowed per user. To generate the unique
+    // class identifier, format the user_hash with the current
+    // time in nanoseconds.
+    pub async fn insert_class_data(&self, data: Json<ClassDataBody>) -> u64 {
+        // Get the current time since epoch. This duration is later converted
+        // into nanoseconds to ensure that the class hash is 100% unique.
+        let time: std::time::Duration = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH).unwrap();
+
+        // Generate a new class hash using the user's hash,
+        // the current time and the randomly generated string
+        let class_hash: String = format!("{}:{}", data.user_hash, time.as_nanos());
+        let r = sqlx::query!(
+            "INSERT INTO classes (owner_hash, class_hash, class_name, rsl, enable_whitelist) VALUES (?, ?, ?, ?, ?)",
+            data.user_hash, class_hash, data.class_name, 0, 0
+        ).execute(&self.conn).await;
+
+        // If an error has occurred, return 0 rows affected
+        if r.is_err() { return 0; }
+        // Else, return the amount of affected rows
+        return r.unwrap().rows_affected();
+    }
+
+
+
     pub async fn insert_test_class(&self) {
         println!("Test User Hash: 22f3d5b9c91b570a4f1848c5d147b4709d2fb96");
         println!("Test Class Hash: e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020");

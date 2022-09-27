@@ -3,6 +3,11 @@ use lib::handlers::Database;
 use lib::global;
 use crate::lib;
 
+//
+// The unit hash is just the class_hash:time.now()
+// The class hash is in the url
+//
+
 // The UnitDataBody struct is used to read the
 // incoming requests http request body. This is
 // the easiest way for reading what modifications
@@ -24,6 +29,7 @@ async fn add_class_unit(
     // sure that the incoming request isn't from an abuser.
     let access_token: &str = global::get_header(&req, "Access Token");
     let bearer_token: &str = global::get_header(&req, "Authorization");
+    let firebase_token: &str = global::get_header(&req, "Google Auth Token");
 
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
@@ -33,7 +39,6 @@ async fn add_class_unit(
     }
     // If the user does not provide a valid bearer token,
     // return an empty json map
-    let firebase_token: &str = "";
     if !lib::auth::verify_bearer(&class_hash, access_token, bearer_token, firebase_token) { 
         return "{}".to_string()
     }
@@ -51,6 +56,7 @@ async fn delete_class_unit(
     // sure that the incoming request isn't from an abuser.
     let access_token: &str = global::get_header(&req, "Access Token");
     let bearer_token: &str = global::get_header(&req, "Authorization");
+    let firebase_token: &str = global::get_header(&req, "Google Auth Token");
 
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
@@ -60,7 +66,6 @@ async fn delete_class_unit(
     }
     // If the user does not provide a valid bearer token,
     // return an empty json map
-    let firebase_token: &str = "";
     if !lib::auth::verify_bearer(&class_hash, access_token, bearer_token, firebase_token) { 
         return "{}".to_string()
     }
@@ -78,6 +83,7 @@ async fn update_class_unit(
     // sure that the incoming request isn't from an abuser.
     let access_token: &str = global::get_header(&req, "Access Token");
     let bearer_token: &str = global::get_header(&req, "Authorization");
+    let firebase_token: &str = global::get_header(&req, "Google Auth Token");
 
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
@@ -87,7 +93,6 @@ async fn update_class_unit(
     }
     // If the user does not provide a valid bearer token,
     // return an empty json map
-    let firebase_token: &str = "";
     if !lib::auth::verify_bearer(&class_hash, access_token, bearer_token, firebase_token) { 
         return "{}".to_string()
     }
