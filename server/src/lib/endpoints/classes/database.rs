@@ -1,4 +1,4 @@
-use super::{endp_class::ClassDataBody, endp_unit::UnitDataBody, endp_whitelist::WhitelistDataBody};
+use super::{endp_class::ClassDataBody, endp_unit::UnitDataBody, endp_whitelist::WhitelistDataBody, endp_submission::SubmissionDataBody};
 use actix_web::web::Json;
 use crate::lib;
 
@@ -63,6 +63,8 @@ struct Lesson {
 //
 struct Submission {
     submitter_hash: String,
+    submission_hash: String,
+    submission_date: i64,
     data: String
 }
 // The Whitelist data struct is used for querying
@@ -129,31 +131,85 @@ impl lib::handlers::Database {
     );
     
     */
-    pub async fn insert_class_submission() {
 
+
+    fn generate_new_hash(&self, identifier: &str) -> String {
+        // Get the current time since epoch. This duration is later converted
+        // into nanoseconds to ensure that the class hash is 100% unique.
+        let time: std::time::Duration = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH).unwrap();
+        // Generate a new hash using the provided
+        // class hash, and the current time as nanoseconds.
+        return format!("{}:{}", identifier, time.as_nanos());
     }
 
-    pub async fn delete_class_submission() {
 
+    pub async fn insert_class_submission(&self, data: Json<SubmissionDataBody>) -> u64 {
+        // Generate a new class hash using the provided class_hash
+        let submission_hash: String = self.generate_new_hash(data.submitter_hash);
+
+        // Insert the data into the database
+        let r = sqlx::query!(
+            "INSERT INTO submissions (class_hash, submission_hash, submitter_hash, submission_date, data)", 
+            class_hash, submission_hash, data.submitter_hash, time.as_secs(), data.data
+        ).execute(&self.conn).await;
+
+        // If an error has occurred, return 0 rows affected
+        if r.is_err() { return 0; }
+        // Else, return the actual amount of rows that
+        // have been affected by the insertion
+        return r.unwrap().rows_affected();
     }
 
-    pub async fn get_class_submission() {
+    pub async fn delete_class_submission(&self, data: Json<SubmissionDataBody>) -> u64 {
+        let r = sqlx::query!(
+            "DELETE FROM submissions WHERE submission_hash=?", data.submission_hash
+        ).execute(&self.conn).await;
 
+        if r.is_err() { return 0; }
+        return r.unwrap().rows_affected();
+    }
+
+    pub async fn get_class_submissions(&self, class_hash: &str) -> String {
+        let r = sqlx::query_as!(
+            Submission, "SELECT submitter_hash, submission_hash, submission_date, data FROM submissions WHERE class_hash=?", 
+            class_hash
+        ).fetch_all(&self.conn).await;
+        // Return empty if an error has occurred
+        if r.is_err() { return "{}".to_string() }
+        // Else if no error has occurred, return
+        // the unwrapped array of all the units
+        return format!("[{}]", self.get_submission_json(r.unwrap()));
+    }
+
+    pub async fn get_user_submissions(&self, class_hash: &str, user_hash: &str) -> String {
+        let r = sqlx::query_as!(
+            Submission, "SELECT submitter_hash, submission_hash, submission_date, data 
+                            FROM submissions WHERE class_hash=? AND submitter_hash=?", 
+            class_hash, user_hash
+        ).fetch_all(&self.conn).await;
+        // Return empty if an error has occurred
+        if r.is_err() { return "{}".to_string() }
+        // Else if no error has occurred, return
+        // the unwrapped array of all the units
+        return format!("[{}]", self.get_submission_json(r.unwrap()));
     }
 
     fn get_submission_json(&self, submissions: Vec<Submission>) -> String {
         // Define the json result string
         let mut r: String = String::new();
-        // Iterate over the provided lessons array and
+        // Iterate over the provided submissions array and
         // append each of the lesson's data to a formatted
         // string array of maps
         submissions.iter().for_each(|f| {
             r.push_str(
                 &format!("{{
                     \"submitter_hash\": \"{}\", 
+                    \"submission_hash\": \"{}\", 
+                    \"submission_date\": \"{}\", 
                     \"data\":\"{}\"
                 }},",
-                f.submitter_hash, f.data
+                f.submitter_hash, f.submission_hash, f.submission_date, f.data
             ))
         });
         // Remove the last comma of the string array
@@ -167,26 +223,10 @@ impl lib::handlers::Database {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
     
     pub async fn insert_class_unit(&self, class_hash: &str, data: Json<UnitDataBody>) -> u64 {
-        // Get the current time since epoch. This duration is later converted
-        // into nanoseconds to ensure that the class hash is 100% unique.
-        let time: std::time::Duration = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH).unwrap();
-        // Generate a new unit hash using the provided
-        // class hash, and the current time as nanoseconds.
-        let unit_hash: String = format!("{}:{}", class_hash, time.as_nanos());
+        // Generate a new unit hash using the provided class_hash
+        let unit_hash: String = self.generate_new_hash(class_hash);
 
         // Insert the data into the database
         let r = sqlx::query!(
@@ -266,14 +306,9 @@ impl lib::handlers::Database {
     // class identifier, format the user_hash with the current
     // time in nanoseconds.
     pub async fn insert_class_data(&self, data: Json<ClassDataBody>) -> u64 {
-        // Get the current time since epoch. This duration is later converted
-        // into nanoseconds to ensure that the class hash is 100% unique.
-        let time: std::time::Duration = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH).unwrap();
-
-        // Generate a new class hash using the user's hash,
-        // the current time and the randomly generated string
-        let class_hash: String = format!("{}:{}", data.user_hash, time.as_nanos());
+        // Generate a new class hash using the provided class_hash
+        let class_hash: String = self.generate_new_hash(data.user_hash);
+        // Query the database
         let r = sqlx::query!(
             "INSERT INTO classes (owner_hash, class_hash, class_name, rsl, enable_whitelist) VALUES (?, ?, ?, ?, ?)",
             data.user_hash, class_hash, data.class_name, 0, 0
@@ -290,7 +325,7 @@ impl lib::handlers::Database {
     // the class data within the database. This function
     // is required to disperse the query string from any
     // invalid/empty values.
-    fn get_class_update_query(&self, data: Json<ClassDataBody>) -> String {
+    fn generate_class_update_query(&self, data: Json<ClassDataBody>) -> String {
         let mut res: String = String::new();
         // If the provided data's enable_whitelist integer bool
         // isn't invalid (equal to 2) then append the
@@ -325,7 +360,7 @@ impl lib::handlers::Database {
     pub async fn update_class_data(&self, class_hash: &str, data: Json<ClassDataBody>) -> u64 {
         // Generate a new query string. This query string accounts
         // for empty values so that nothing gets corrupted.
-        let q: String = self.get_class_update_query(data);
+        let q: String = self.generate_class_update_query(data);
         // Query the database
         let r = sqlx::query(
             &format!("UPDATE classes SET {q} WHERE class_hash='{class_hash}'"))

@@ -1,5 +1,7 @@
 // Import Libraries
 mod lib;
+use lib::endpoints::classes::endp_submission;
+use lib::endpoints::classes::endp_whitelist;
 use lib::handlers::Database;
 use lib::endpoints::users::endp_users;
 use lib::endpoints::classes::endp_class;
@@ -34,6 +36,16 @@ async fn main() -> std::io::Result<()> {
             .service(endp_unit::add_class_unit)
             .service(endp_unit::delete_class_unit)
             .service(endp_unit::update_class_unit)
+
+            // Class Whitelist
+            .service(endp_whitelist::delete_from_class_whitelist)
+            .service(endp_whitelist::add_to_class_whitelist)
+
+            // Class Submissions
+            .service(endp_submission::delete_class_submission)
+            .service(endp_submission::insert_class_submission)
+            .service(endp_submission::get_user_submissions)
+            .service(endp_submission::get_class_submissions)
 
     })
     .bind(("127.0.0.1", 8080))?
