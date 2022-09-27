@@ -7,15 +7,13 @@ use crate::lib;
 // class name, class whitelist array, class announcements,
 // rsl bool, and the class units.
 pub struct Class {
-    // The Classes unique identifier
-    pub class_hash: String,
     // The Class Name
-    pub class_name: String,
+    class_name: String,
     // Whether the students need to be logged in to
     // access this class
-    pub rsl: i64,
+    rsl: i64,
     // Whether to the use the class whitelist
-    pub enable_whitelist: i64,
+    enable_whitelist: i64,
 }
 // The Announcement data struct is used to
 // store the announcement author's unique identifier,
@@ -38,11 +36,11 @@ struct Announcement {
 // lessons that come along with the unit.
 pub struct Unit {
     // The unique unit identifier
-    pub unit_hash: String,
+    unit_hash: String,
     // The Unit's Name
-    pub unit_name: String,
+    unit_name: String,
     // Whether students can access this unit yet
-    pub locked: i64
+    locked: i64
 }
 // The Lesson data struct is used to store
 // the class unit's lesson title, description,
@@ -402,7 +400,7 @@ impl lib::handlers::Database {
         // Get the class primary data. This includes the class:
         // class_name, whitelist[bool], rls[bool], and class_hash
         let r = sqlx::query_as!(
-            Class, "SELECT class_hash, class_name, rsl, enable_whitelist FROM classes WHERE class_hash=?", class_hash
+            Class, "SELECT class_name, rsl, enable_whitelist FROM classes WHERE class_hash=?", class_hash
         ).fetch_one(&self.conn).await;
         // Return empty if an error has occurred
         if r.is_err() { return None; }
