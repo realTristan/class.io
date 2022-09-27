@@ -21,6 +21,7 @@ https://user-images.githubusercontent.com/75189508/192068727-fcf78602-ddbc-492d-
 {
     "class_hash": "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020", 
     "class_name": "test_class_name", 
+    "enable_whitelist": false,
     "rsl":false, 
     "units": [
         {
