@@ -13,7 +13,11 @@ use crate::lib;
 // the easiest way for reading what modifications
 // to make within the database
 #[derive(serde::Deserialize)]
-pub struct UnitDataBody { unit_name: String, locked: bool }
+pub struct UnitDataBody { 
+    pub unit_hash: String,
+    pub unit_name: String,
+    pub locked: i64
+}
 
 // The add_class_unit() endpoint is used to create
 // a new unit for the provided class. Using the 
@@ -42,12 +46,15 @@ async fn add_class_unit(
     if !lib::auth::verify_bearer(&class_hash, access_token, bearer_token, firebase_token) { 
         return "{}".to_string()
     }
-    return format!("")
+    // Insert the unit data into the database
+    let r: u64 = db.insert_class_unit(&class_hash, body).await;
+    // Return whether more than 0 rows were affected
+    return format!("{{\"success\": {}}}", r > 0)
 }
 
 // The delete_class_unit() function is used to
 // delete the provided unit from the database.
-#[actix_web::delete("/class/{class_hash}/units")]
+#[actix_web::delete("/class/{class_hash}/units/{unit_hash}")]
 async fn delete_class_unit(
     req: HttpRequest, db: web::Data<Database>, class_hash: web::Path<String>, body: web::Json<UnitDataBody>
 ) -> impl Responder {
@@ -69,7 +76,10 @@ async fn delete_class_unit(
     if !lib::auth::verify_bearer(&class_hash, access_token, bearer_token, firebase_token) { 
         return "{}".to_string()
     }
-    return format!("")
+    // Insert the unit data into the database
+    let r: u64 = db.delete_class_unit(body).await;
+    // Return whether more than 0 rows were affected
+    return format!("{{\"success\": {}}}", r > 0)
 }
 
 // The update_class_unit() endpoint is used to
@@ -96,5 +106,8 @@ async fn update_class_unit(
     if !lib::auth::verify_bearer(&class_hash, access_token, bearer_token, firebase_token) { 
         return "{}".to_string()
     }
-    return format!("")
+    // Insert the unit data into the database
+    let r: u64 = db.update_class_unit(body).await;
+    // Return whether more than 0 rows were affected
+    return format!("{{\"success\": {}}}", r > 0)
 }

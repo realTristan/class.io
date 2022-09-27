@@ -1,4 +1,4 @@
-use super::endp_class::ClassDataBody;
+use super::{endp_class::ClassDataBody, endp_unit::UnitDataBody};
 use actix_web::web::Json;
 use crate::lib;
 
@@ -110,6 +110,64 @@ impl lib::handlers::Database {
         ).execute(&self.conn).await.unwrap();
     }
 
+    
+    pub async fn insert_class_unit(&self, class_hash: &str, data: Json<UnitDataBody>) -> u64 {
+        // Get the current time since epoch. This duration is later converted
+        // into nanoseconds to ensure that the class hash is 100% unique.
+        let time: std::time::Duration = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH).unwrap();
+        // Generate a new unit hash using the provided
+        // class hash, and the current time as nanoseconds.
+        let unit_hash: String = format!("{}:{}", class_hash, time.as_nanos());
+
+        // Insert the data into the database
+        let r = sqlx::query!(
+            "INSERT INTO units (class_hash, unit_hash, unit_name, locked)", 
+            class_hash, unit_hash, data.unit_name, 0
+        ).execute(&self.conn).await;
+
+        // If an error has occurred, return 0 rows affected
+        if r.is_err() { return 0; }
+        // Else, return the actual amount of rows that
+        // have been affected by the insertion
+        return r.unwrap().rows_affected();
+    }
+
+    // 
+    pub async fn delete_class_unit(&self, data: Json<UnitDataBody>) -> u64 {
+        let r = sqlx::query!(
+            "DELETE FROM units WHERE unit_hash=?", data.unit_hash
+        ).execute(&self.conn).await;
+
+        if r.is_err() { return 0; }
+        return r.unwrap().rows_affected();
+    }
+
+    // UnitDataBody { unit_name: String, locked: bool }
+    pub async fn update_class_unit(&self, data: Json<UnitDataBody>) -> u64 {
+        let mut res: String = String::new();
+        // If the provided data's enable_whitelist integer bool
+        // isn't invalid (equal to 2) then append the
+        // updated value to the result string
+        if data.unit_name.len() > 0 {
+            res.push_str(&format!("unit_name='{}',", data.unit_name));
+        }
+        // If the provided data's rsl integer bool
+        // isn't invalid (equal to 2) then append the
+        // updated value to the result string
+        if data.locked != 2 { // 2 == Invalid
+            res.push_str(&format!("locked={},", data.locked));
+        }
+        let res: String = res[..res.len()-1].to_string();
+
+        let r = sqlx::query(
+            &format!("UPDATE units SET {} unit_hash='{}'", res, data.unit_hash)
+        ).execute(&self.conn).await;
+
+        if r.is_err() { return 0; }
+        return r.unwrap().rows_affected();
+    }
+
     // The insert_class_data() function is used to insert
     // a new class into the database. A maximum of
     // 5 classes is allowed per user. To generate the unique
@@ -145,22 +203,27 @@ impl lib::handlers::Database {
         // If the provided data's enable_whitelist integer bool
         // isn't invalid (equal to 2) then append the
         // updated value to the result string
+
+
+        // FIX THIS FIND A WAY TO CHECK IF
+        // VALUE IS INVALID NOT 2
         if data.enable_whitelist != 2 { // 2 == Invalid
-            res.push_str(&format!("enable_whitelist={}", data.enable_whitelist));
+            res.push_str(&format!("enable_whitelist={},", data.enable_whitelist));
         }
         // If the provided data's rsl integer bool
         // isn't invalid (equal to 2) then append the
         // updated value to the result string
         if data.rsl != 2 { // 2 == Invalid
-            res.push_str(&format!("rsl={}", data.rsl));
+            res.push_str(&format!("rsl={},", data.rsl));
         }
         // If the provided data's class_name length
         // is valid (greater than 0) then append the
         // updated value to the result string
         if data.class_name.len() > 0 {
-            res.push_str(&format!("class_name={}", data.class_name));
+            res.push_str(&format!("class_name='{}',", data.class_name));
         }
-        return res
+        // Remove the trailing comma at the end of the query
+        return res[..res.len()-1].to_string()
     }
 
     // The update_class_data() function is used to change
@@ -173,7 +236,7 @@ impl lib::handlers::Database {
         let q: String = self.get_class_update_query(data);
         // Query the database
         let r = sqlx::query(
-            &format!("UPDATE classes SET {q} WHERE class_hash={class_hash}"))
+            &format!("UPDATE classes SET {q} WHERE class_hash='{class_hash}'"))
                 .execute(&self.conn).await;
         // If an error has occurred, return 0 rows affected
         if r.is_err() { return 0; }

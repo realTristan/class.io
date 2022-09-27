@@ -60,3 +60,10 @@ async fn insert_class_submission(
     }
     return format!("")
 }
+
+/*
+
+have a GET submissions so the student can see the
+work they've already submitted
+
+*/
