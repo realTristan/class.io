@@ -325,7 +325,7 @@ impl lib::handlers::Database {
         // string array of maps
         announcements.iter().for_each(|f| {
             r.push_str(
-                &format!("{{\"author_name\": \"{}\", \"author_name\": \"{}\", \"author_name\": \"{}\", \"author_name\": \"{}\"}},", 
+                &format!("{{\"author_name\": \"{}\", \"title\": \"{}\", \"description\": \"{}\", \"attachment\": \"{}\"}},", 
                 f.author_name, f.title, f.description, f.attachment
             ))
         });
