@@ -34,12 +34,10 @@ async fn get_class_data(
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    
-    /* Removed for testing purposes
     if !lib::auth::verify(&class_hash, access_token) { 
         return "{}".to_string()
     }
-    */
+    // Return the class data
     return db.get_class_data(&class_hash).await;
 }
 
