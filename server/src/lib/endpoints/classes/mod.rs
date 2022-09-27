@@ -1,3 +1,5 @@
-pub mod db_classes;
-pub mod endp_classes;
-pub mod endp_units;
+pub mod database;
+pub mod endp_class;
+pub mod endp_unit;
+pub mod endp_submission;
+pub mod endp_whitelist;

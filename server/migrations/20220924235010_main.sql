@@ -16,13 +16,12 @@ CREATE TABLE users (
 );
 CREATE TABLE announcements (
     id INTEGER PRIMARY KEY,
-    author_hash TEXT NOT NULL,      -- The users email sha256 encrypted
     class_hash TEXT NOT NULL,       -- user_hash:time.time()
 
     author_name TEXT NOT NULL,      -- The Teacher's name
     title TEXT NOT NULL,            -- Announcement title
     description TEXT NOT NULL,      -- Announcement content
-    attachement TEXT NOT NULL,      -- Base64 encoded images/video
+    attachment TEXT NOT NULL,      -- Base64 encoded images/video
     date INTEGER NOT NULL           -- The time since epoch format of when the post was made
 );
 

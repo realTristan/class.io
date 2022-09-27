@@ -41,7 +41,12 @@ pub fn verify_bearer(
 // the past 8 seconds. If so, return true, else, return false.
 pub fn verify(user_hash: &str, access_token: &str) -> bool {
     // Lock the TOKEN STORAGE so we can access it's data
-    let mut token_storage = TOKEN_STORAGE.lock().unwrap();
+    let _token_storage = TOKEN_STORAGE.lock();
+    // If an error has occurred, return false
+    if _token_storage.is_err() { return false; }
+
+    // Unwrap the token storage data
+    let mut token_storage = _token_storage.unwrap();
     // Get the system time since epoch. This value
     // is used to check how long ago the auth token was
     // generated. Doing this prevents users from consecutively

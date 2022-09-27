@@ -1,5 +1,5 @@
 use actix_web::{web, Responder, HttpRequest};
-use lib::database::Database;
+use lib::handlers::Database;
 use lib::global;
 use crate::lib;
 

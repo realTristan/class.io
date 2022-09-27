@@ -1,4 +1,4 @@
 pub mod auth;
-pub mod database;
+pub mod handlers;
 pub mod endpoints;
 pub mod global;

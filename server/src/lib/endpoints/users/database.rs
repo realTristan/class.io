@@ -3,7 +3,7 @@ use crate::lib;
 
 // Database Implemenetation that contains all the
 // functions for manipulating the user db data
-impl lib::database::Database {
+impl lib::handlers::Database {
     // The insert_test_user() function is used to
     // insert a fake user for testing the backend
     // database functions

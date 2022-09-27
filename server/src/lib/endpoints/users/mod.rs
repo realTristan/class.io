@@ -1,2 +1,2 @@
-pub mod db_users;
+pub mod database;
 pub mod endp_users;
