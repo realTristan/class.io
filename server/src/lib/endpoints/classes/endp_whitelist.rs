@@ -38,7 +38,10 @@ async fn add_to_class_whitelist(
     if !lib::auth::verify_bearer(&class_hash, access_token, bearer_token, firebase_token) { 
         return "{}".to_string()
     }
-    return format!("")
+    // Insert the whitelist data into the database
+    let r: u64 = db.insert_class_whitelist(&class_hash, body).await;
+    // Return whether more than 0 rows were affected
+    return format!("{{\"success\": {}}}", r > 0)
 }
 
 #[actix_web::delete("/class/{class_hash}/whitelist")]
@@ -63,5 +66,8 @@ async fn delete_from_class_whitelist(
     if !lib::auth::verify_bearer(&class_hash, access_token, bearer_token, firebase_token) { 
         return "{}".to_string()
     }
-    return format!("")
+    // Delete the whitelist data into the database
+    let r: u64 = db.delete_from_class_whitelist(&class_hash, body).await;
+    // Return whether more than 0 rows were affected
+    return format!("{{\"success\": {}}}", r > 0)
 }

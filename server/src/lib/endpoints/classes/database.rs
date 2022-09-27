@@ -1,4 +1,4 @@
-use super::{endp_class::ClassDataBody, endp_unit::UnitDataBody};
+use super::{endp_class::ClassDataBody, endp_unit::UnitDataBody, endp_whitelist::WhitelistDataBody};
 use actix_web::web::Json;
 use crate::lib;
 
@@ -137,6 +137,30 @@ impl lib::handlers::Database {
     pub async fn delete_class_unit(&self, data: Json<UnitDataBody>) -> u64 {
         let r = sqlx::query!(
             "DELETE FROM units WHERE unit_hash=?", data.unit_hash
+        ).execute(&self.conn).await;
+
+        if r.is_err() { return 0; }
+        return r.unwrap().rows_affected();
+    }
+
+    //
+    pub async fn delete_from_class_whitelist(
+        &self, class_hash: &str, data: Json<WhitelistDataBody>
+    ) -> u64 {
+        let r = sqlx::query!(
+            "DELETE FROM whitelist WHERE class_hash=? AND whitelisted_user=?", class_hash, data.user
+        ).execute(&self.conn).await;
+
+        if r.is_err() { return 0; }
+        return r.unwrap().rows_affected();
+    }
+
+    pub async fn insert_class_whitelist(
+        &self, class_hash: &str, data: Json<WhitelistDataBody>
+    ) -> u64 {
+        let r = sqlx::query!(
+            "INSERT INTO whitelist (class_hash, whitelisted_user) VALUES (?, ?)", 
+            class_hash, data.user
         ).execute(&self.conn).await;
 
         if r.is_err() { return 0; }
@@ -349,7 +373,13 @@ impl lib::handlers::Database {
         // string array of maps
         lessons.iter().for_each(|f| {
             r.push_str(
-                &format!("{{\"title\": \"{}\", \"description\":\"{}\", \"video\": \"{}\", \"work\":\"{}\", \"work_solutions\":\"{}\"}},",
+                &format!("{{
+                    \"title\": \"{}\", 
+                    \"description\":\"{}\", 
+                    \"video\": \"{}\", 
+                    \"work\":\"{}\", 
+                    \"work_solutions\":\"{}\"
+                }},",
                 f.title, f.description, f.video, f.work, f.work_solutions
             ))
         });
@@ -371,7 +401,11 @@ impl lib::handlers::Database {
             let l: Vec<Lesson> = self.get_unit_lessons(&u.unit_hash).await;
             // Append the unit json to the result string
             r.push_str(
-                &format!("{{\"unit_name\": \"{}\", \"locked\": {}, \"lessons\": [{}]}},", 
+                &format!("{{
+                    \"unit_name\": \"{}\", 
+                    \"locked\": {}, 
+                    \"lessons\": [{}]
+                }},", 
                 u.unit_name, u.locked==1, self.get_unit_lesson_json(l)
             ));
         };
@@ -391,7 +425,12 @@ impl lib::handlers::Database {
         // string array of maps
         announcements.iter().for_each(|f| {
             r.push_str(
-                &format!("{{\"author_name\": \"{}\", \"title\": \"{}\", \"description\": \"{}\", \"attachment\": \"{}\"}},", 
+                &format!("{{
+                    \"author_name\": \"{}\", 
+                    \"title\": \"{}\", 
+                    \"description\": \"{}\", 
+                    \"attachment\": \"{}\"
+                }},", 
                 f.author_name, f.title, f.description, f.attachment
             ))
         });
@@ -419,7 +458,15 @@ impl lib::handlers::Database {
 
         // Return a formatted string of all the class data
         return format!(
-            "{{\"class_hash\": \"{}\", \"class_name\": \"{}\", \"enable_whitelist\":{}, \"rsl\":{}, \"units\": [{}], \"whitelist\": [{}], \"announcements\": [{}]}}", 
+            "{{
+                \"class_hash\": \"{}\", 
+                \"class_name\": \"{}\", 
+                \"enable_whitelist\":{}, 
+                \"rsl\":{}, 
+                \"units\": [{}], 
+                \"whitelist\": [{}], 
+                \"announcements\": [{}]
+            }}", 
             class_hash, class.class_name, class.enable_whitelist==1, class.rsl==1, 
             self.get_units_json(units).await, self.get_whitelist_json(whitelist), self.get_announcements_json(announcements),
         );
