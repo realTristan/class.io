@@ -113,6 +113,12 @@ impl lib::handlers::Database {
             "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020", "test_whitelisted_user1"
         ).execute(&self.conn).await.unwrap();
 
+        // Insert into LESSONS column
+        sqlx::query!(
+            "INSERT INTO lessons (unit_hash, title, description, video, work, work_solutions) VALUES (?, ?, ?, ?, ?, ?)",
+            "random_unit_hash", "test_lesson_title", "test_lesson_desc", "test_lesson_video", "test_lesson_work", "test_lesson_work_solutions"
+        ).execute(&self.conn).await.unwrap();
+
         // Insert into UNITS column
         sqlx::query!(
             "INSERT INTO units (class_hash, unit_hash, unit_name, locked) VALUES (?, ?, ?, ?)",
@@ -237,6 +243,19 @@ impl lib::handlers::Database {
         return r.unwrap();
     }
 
+    // The get_unit_lessons() function is used to get all
+    // the lesson data that comes with the provided unit hash.
+    async fn get_unit_lessons(&self, unit_hash: &str) -> Vec<Lesson> {
+        let r = sqlx::query_as!(
+            Lesson, "SELECT title, description, video, work, work_solutions FROM lessons WHERE unit_hash=?", unit_hash
+        ).fetch_all(&self.conn).await;
+        // Return empty if an error has occurred
+        if r.is_err() { return vec![]; }
+        // Else if no error has occurred, return
+        // the unwrapped array of all the units
+        return r.unwrap();
+    }
+
     // The get_whitelist_json() function is used to
     // geterate a new json map as a string from the
     // provided whitelist array.
@@ -252,21 +271,44 @@ impl lib::handlers::Database {
         // before returning the new json map result
         return r[..r.len()-1].to_string();
     }
+    
+    // The get_unit_lesson_json() function converts the
+    // array of lessons into a readable json map that
+    // will eventually be returned with the outgoing response body
+    fn get_unit_lesson_json(&self, lessons: Vec<Lesson>) -> String {
+        // Define the json result string
+        let mut r: String = String::new();
+        // Iterate over the provided lessons array and
+        // append each of the lesson's data to a formatted
+        // string array of maps
+        lessons.iter().for_each(|f| {
+            r.push_str(
+                &format!("{{\"title\": \"{}\", \"description\":\"{}\", \"video\": \"{}\", \"work\":\"{}\", \"work_solutions\":\"{}\"}},",
+                f.title, f.description, f.video, f.work, f.work_solutions
+            ))
+        });
+        // Remove the last comma of the string array
+        // before returning the new json map result
+        return r[..r.len()-1].to_string();
+    }
 
     // The get_units_json() function is used to generate 
     // a new json map as a string from the provided units array.
-    fn get_units_json(&self, units: Vec<Unit>) -> String {
+    async fn get_units_json(&self, units: Vec<Unit>) -> String {
         // Define the json result string
         let mut r: String = String::new();
         // Iterate over the provided units array and
         // append each of the units data to a formatted
         // string array of maps
-        units.iter().for_each(|f| {
+        for u in units {
+            // Get the lessons that correspond with the unit
+            let l: Vec<Lesson> = self.get_unit_lessons(&u.unit_hash).await;
+            // Append the unit json to the result string
             r.push_str(
                 &format!("{{\"unit_name\": \"{}\", \"locked\": {}, \"lessons\": [{}]}},", 
-                f.unit_name, f.locked==1, "\"no lessons\""
-            ))
-        });
+                u.unit_name, u.locked==1, self.get_unit_lesson_json(l)
+            ));
+        };
         // Remove the last comma of the string array
         // before returning the new json map result
         return r[..r.len()-1].to_string();
@@ -292,19 +334,6 @@ impl lib::handlers::Database {
         return r[..r.len()-1].to_string();
     }
 
-    // The get_unit_lessons() function is used to get all
-    // the lesson data that comes with the provided unit hash.
-    async fn get_unit_lessons(&self, unit_hash: &str) -> Vec<Lesson> {
-        let r = sqlx::query_as!(
-            Lesson, "SELECT title, description, video, work, work_solutions FROM lessons WHERE unit_hash=?", unit_hash
-        ).fetch_all(&self.conn).await;
-        // Return empty if an error has occurred
-        if r.is_err() { return vec![]; }
-        // Else if no error has occurred, return
-        // the unwrapped array of all the units
-        return r.unwrap();
-    }
-
     // The get_class_data() function is used to get all data
     // revolving around the provided class_hash. This includes
     // the class's primary data (shown below) and the class's
@@ -326,7 +355,7 @@ impl lib::handlers::Database {
         return format!(
             "{{\"class_hash\": \"{}\", \"class_name\": \"{}\", \"rsl\":{}, \"units\": [{}], \"whitelist\": [{}], \"announcements\": [{}]}}", 
             class_hash, class.class_name, class.rsl==1, 
-            self.get_units_json(units), self.get_whitelist_json(whitelist), self.get_announcements_json(announcements),
+            self.get_units_json(units).await, self.get_whitelist_json(whitelist), self.get_announcements_json(announcements),
         );
     }
 }
