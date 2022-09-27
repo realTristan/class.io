@@ -60,17 +60,22 @@ struct Lesson {
     // The Lesson Homework Solutions
     work_solutions: String
 }
-//
+// The Submission data struct is used to store
+// the work: submitter_hash, submissions_hash,
+// submission_date and work data
 struct Submission {
+    // The user who submitted the work's unique identifier
     submitter_hash: String,
+    // The unique identifier of the submission
     submission_hash: String,
+    // The date the work was submitted
     submission_date: i64,
+    // The submission data. (ex: the file, the answers, etc.)
     data: String
 }
 // The Whitelist data struct is used for querying
 // the whitelisted users for a specific class.
 struct Whitelist { whitelisted_user: String }
-
 
 // Database Implementation
 impl lib::handlers::Database {
@@ -118,21 +123,9 @@ impl lib::handlers::Database {
         ).execute(&self.conn).await.unwrap();
     }
 
-
-    /*
-    
-    CREATE TABLE submissions (
-        id INTEGER PRIMARY KEY,
-        class_hash TEXT NOT NULL,               -- class_hash:user_hash:time.time()
-
-        submitter_hash TEXT NOT NULL,           -- The student's user hash (use this to get the user's name, email, etc.)
-        submission_date INTEGER NOT NULL,       -- The time since epoch when the user submitted the work
-        data TEXT NOT NULL                      -- Homework file (AUTO CONVERT TO PDF)
-    );
-    
-    */
-
-
+    // The generate_new_hash() function is used to generate
+    // a unique hash using the provided identifier (class_hash, user_hash, etc.)
+    // and the current time in nanoseconds.
     fn generate_new_hash(&self, identifier: &str) -> String {
         // Get the current time since epoch. This duration is later converted
         // into nanoseconds to ensure that the class hash is 100% unique.
@@ -142,16 +135,26 @@ impl lib::handlers::Database {
         // class hash, and the current time as nanoseconds.
         return format!("{}:{}", identifier, time.as_nanos());
     }
-
-
-    pub async fn insert_class_submission(&self, data: Json<SubmissionDataBody>) -> u64 {
-        // Generate a new class hash using the provided class_hash
-        let submission_hash: String = self.generate_new_hash(data.submitter_hash);
+    
+    // The insert_class_submission() function is used to
+    // insert a new work submission into the database
+    // using the provided class hash. The function generates
+    // a unique submission hash before inserting the data, which
+    // is used within the delete_class_submission() function
+    pub async fn insert_class_submission(&self, class_hash: &str, data: Json<SubmissionDataBody>) -> u64 {
+        // Get the current time since epoch. This duration is later converted
+        // into nanoseconds to ensure that the class hash is 100% unique.
+        let time: std::time::Duration = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH).unwrap();
+        // Generate a new hash using the provided
+        // class hash, and the current time as nanoseconds.
+        let submission_hash: String = format!("{}:{}", data.submitter_hash, time.as_nanos());
+        let date: i64 = time.as_secs() as i64;
 
         // Insert the data into the database
         let r = sqlx::query!(
-            "INSERT INTO submissions (class_hash, submission_hash, submitter_hash, submission_date, data)", 
-            class_hash, submission_hash, data.submitter_hash, time.as_secs(), data.data
+            "INSERT INTO submissions (class_hash, submission_hash, submitter_hash, submission_date, data) VALUES (?, ?, ?, ?, ?)", 
+            class_hash, submission_hash, data.submitter_hash, date, data.data
         ).execute(&self.conn).await;
 
         // If an error has occurred, return 0 rows affected
@@ -161,20 +164,36 @@ impl lib::handlers::Database {
         return r.unwrap().rows_affected();
     }
 
+    // The delete_class_submission() function is used to
+    // delete a submission from the database. This function
+    // is called when a student wants to unsubmit a portion
+    // of their work.
     pub async fn delete_class_submission(&self, data: Json<SubmissionDataBody>) -> u64 {
+        // Query the database, deleting all data revolving around
+        // the provided submission hash
         let r = sqlx::query!(
             "DELETE FROM submissions WHERE submission_hash=?", data.submission_hash
         ).execute(&self.conn).await;
 
+        // If an error has occurred, return 0 rows affected
         if r.is_err() { return 0; }
+        // Else, return the actual amount of rows that
+        // have been affected by the insertion
         return r.unwrap().rows_affected();
     }
 
+    // The get_class_submissions() function is used to 
+    // return all the submissions for the provided class.
+    // This function is used in the dashboard of the website
+    // where the teachers can mark the students submitted work.
     pub async fn get_class_submissions(&self, class_hash: &str) -> String {
+        // Query the database, selecting the submitter_hash, submission_date
+        // and the submission data from the submissions column
         let r = sqlx::query_as!(
             Submission, "SELECT submitter_hash, submission_hash, submission_date, data FROM submissions WHERE class_hash=?", 
             class_hash
         ).fetch_all(&self.conn).await;
+
         // Return empty if an error has occurred
         if r.is_err() { return "{}".to_string() }
         // Else if no error has occurred, return
@@ -182,12 +201,20 @@ impl lib::handlers::Database {
         return format!("[{}]", self.get_submission_json(r.unwrap()));
     }
 
+    // The get_user_submissions() function is used to get all the
+    // submissions from the provided user_hash within the provided
+    // class. This function is used for the students to see
+    // what work they have previously submitted. This function is the
+    // basis towards students being able to insert and delete submissions.
     pub async fn get_user_submissions(&self, class_hash: &str, user_hash: &str) -> String {
+        // Query the database selecting the submitter_hash, submission_hash, submission_date
+        // and the submission data from the submissions column.
         let r = sqlx::query_as!(
             Submission, "SELECT submitter_hash, submission_hash, submission_date, data 
                             FROM submissions WHERE class_hash=? AND submitter_hash=?", 
             class_hash, user_hash
         ).fetch_all(&self.conn).await;
+
         // Return empty if an error has occurred
         if r.is_err() { return "{}".to_string() }
         // Else if no error has occurred, return
@@ -195,42 +222,16 @@ impl lib::handlers::Database {
         return format!("[{}]", self.get_submission_json(r.unwrap()));
     }
 
-    fn get_submission_json(&self, submissions: Vec<Submission>) -> String {
-        // Define the json result string
-        let mut r: String = String::new();
-        // Iterate over the provided submissions array and
-        // append each of the lesson's data to a formatted
-        // string array of maps
-        submissions.iter().for_each(|f| {
-            r.push_str(
-                &format!("{{
-                    \"submitter_hash\": \"{}\", 
-                    \"submission_hash\": \"{}\", 
-                    \"submission_date\": \"{}\", 
-                    \"data\":\"{}\"
-                }},",
-                f.submitter_hash, f.submission_hash, f.submission_date, f.data
-            ))
-        });
-        // Remove the last comma of the string array
-        // before returning the new json map result
-        return r[..r.len()-1].to_string();
-    }
-
-
-
-
-
-
-
-    
+    // The insert_class_unit() function is used to insert a new
+    // unit into the database for the provided class. Students who
+    // visit the class through the website, will see this unit appear.
     pub async fn insert_class_unit(&self, class_hash: &str, data: Json<UnitDataBody>) -> u64 {
         // Generate a new unit hash using the provided class_hash
         let unit_hash: String = self.generate_new_hash(class_hash);
 
         // Insert the data into the database
         let r = sqlx::query!(
-            "INSERT INTO units (class_hash, unit_hash, unit_name, locked)", 
+            "INSERT INTO units (class_hash, unit_hash, unit_name, locked) VALUES (?, ?, ?, ?)", 
             class_hash, unit_hash, data.unit_name, 0
         ).execute(&self.conn).await;
 
@@ -241,41 +242,61 @@ impl lib::handlers::Database {
         return r.unwrap().rows_affected();
     }
 
-    // 
+    // The delete_class_unit() function is used to delete a unit
+    // from the units column wherever the provided unit_hash
+    // is present. A maximum of 12 units is allowed per class.
     pub async fn delete_class_unit(&self, data: Json<UnitDataBody>) -> u64 {
         let r = sqlx::query!(
             "DELETE FROM units WHERE unit_hash=?", data.unit_hash
         ).execute(&self.conn).await;
 
+        // If an error has occurred, return 0 rows affected
         if r.is_err() { return 0; }
+        // Else, return the actual amount of rows that
+        // have been affected by the insertion
         return r.unwrap().rows_affected();
     }
 
-    //
+    // The delete_from_class_whitelist() function deletes 
+    // an user from the provided class's whitelist. This
+    // user can no longer access the provided class.
     pub async fn delete_from_class_whitelist(
         &self, class_hash: &str, data: Json<WhitelistDataBody>
     ) -> u64 {
         let r = sqlx::query!(
-            "DELETE FROM whitelist WHERE class_hash=? AND whitelisted_user=?", class_hash, data.user
+            "DELETE FROM whitelists WHERE class_hash=? AND whitelisted_user=?", class_hash, data.user
         ).execute(&self.conn).await;
 
+        // If an error has occurred, return 0 rows affected
         if r.is_err() { return 0; }
+        // Else, return the actual amount of rows that
+        // have been affected by the insertion
         return r.unwrap().rows_affected();
     }
 
+    // The insert_class_whitelist() function is used to add an
+    // user into the provided class's whitelist. Users in this
+    // whitelist can access the class info. The whitelist only
+    // works if the teacher has enabled the class whitelist setting
     pub async fn insert_class_whitelist(
         &self, class_hash: &str, data: Json<WhitelistDataBody>
     ) -> u64 {
         let r = sqlx::query!(
-            "INSERT INTO whitelist (class_hash, whitelisted_user) VALUES (?, ?)", 
+            "INSERT INTO whitelists (class_hash, whitelisted_user) VALUES (?, ?)", 
             class_hash, data.user
         ).execute(&self.conn).await;
 
+        // If an error has occurred, return 0 rows affected
         if r.is_err() { return 0; }
+        // Else, return the actual amount of rows that
+        // have been affected by the insertion
         return r.unwrap().rows_affected();
     }
 
-    // UnitDataBody { unit_name: String, locked: bool }
+    // The update_class_unit() function is used to update a class's
+    // unit data replacing the current data, with that of the provided
+    // Json<UnitDataBody> values. In order to prevent null values
+    // being updated, the function first determines which values are null.
     pub async fn update_class_unit(&self, data: Json<UnitDataBody>) -> u64 {
         let mut res: String = String::new();
         // If the provided data's enable_whitelist integer bool
@@ -290,8 +311,12 @@ impl lib::handlers::Database {
         if data.locked != 2 { // 2 == Invalid
             res.push_str(&format!("locked={},", data.locked));
         }
+        // Remove the trailing comma
         let res: String = res[..res.len()-1].to_string();
 
+        // Query the database, updating all the values
+        // in the above res: String that have the same
+        // unit_hash as the one provided
         let r = sqlx::query(
             &format!("UPDATE units SET {} unit_hash='{}'", res, data.unit_hash)
         ).execute(&self.conn).await;
@@ -307,7 +332,7 @@ impl lib::handlers::Database {
     // time in nanoseconds.
     pub async fn insert_class_data(&self, data: Json<ClassDataBody>) -> u64 {
         // Generate a new class hash using the provided class_hash
-        let class_hash: String = self.generate_new_hash(data.user_hash);
+        let class_hash: String = self.generate_new_hash(&data.user_hash);
         // Query the database
         let r = sqlx::query!(
             "INSERT INTO classes (owner_hash, class_hash, class_name, rsl, enable_whitelist) VALUES (?, ?, ?, ?, ?)",
@@ -330,7 +355,6 @@ impl lib::handlers::Database {
         // If the provided data's enable_whitelist integer bool
         // isn't invalid (equal to 2) then append the
         // updated value to the result string
-
 
         // FIX THIS FIND A WAY TO CHECK IF
         // VALUE IS INVALID NOT 2
@@ -459,6 +483,31 @@ impl lib::handlers::Database {
         // and append each of them to a formatted string array
         whitelist.iter().for_each(|f| {
             r.push_str(&format!("\"{}\",", f.whitelisted_user));
+        });
+        // Remove the last comma of the string array
+        // before returning the new json map result
+        return r[..r.len()-1].to_string();
+    }
+
+    // The get_submission_json() function is used to return
+    // a string json map with all the submission data
+    // that was retrieved from the database.
+    fn get_submission_json(&self, submissions: Vec<Submission>) -> String {
+        // Define the json result string
+        let mut r: String = String::new();
+        // Iterate over the provided submissions array and
+        // append each of the lesson's data to a formatted
+        // string array of maps
+        submissions.iter().for_each(|f| {
+            r.push_str(
+                &format!("{{
+                    \"submitter_hash\": \"{}\", 
+                    \"submission_hash\": \"{}\", 
+                    \"submission_date\": \"{}\", 
+                    \"data\":\"{}\"
+                }},",
+                f.submitter_hash, f.submission_hash, f.submission_date, f.data
+            ))
         });
         // Remove the last comma of the string array
         // before returning the new json map result

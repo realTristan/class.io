@@ -8,14 +8,18 @@ use crate::lib;
 // the easiest way for reading what modifications
 // to make within the database
 #[derive(serde::Deserialize)]
-pub struct SubmissionDataBody { pub submitter_hash: String, pub data: String }
+pub struct SubmissionDataBody { 
+    pub submitter_hash: String,
+    pub submission_hash: String,
+    pub data: String
+}
 
 //
 //
 //
 #[actix_web::get("/class/{class_hash}/submissions")]
 async fn get_class_submissions(
-    req: HttpRequest, db: web::Data<Database>, class_hash: web::Path<String>, body: web::Json<SubmissionDataBody>
+    req: HttpRequest, db: web::Data<Database>, class_hash: web::Path<String>
 ) -> impl Responder {
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
@@ -90,7 +94,7 @@ async fn insert_class_submission(
         return "{}".to_string()
     }
     // Insert the submission data into the database
-    let r: u64 = db.insert_class_submission(body).await;
+    let r: u64 = db.insert_class_submission(&class_hash, body).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0)
 }
