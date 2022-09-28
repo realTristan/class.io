@@ -1,12 +1,14 @@
-// Import Libraries
-mod lib;
-use lib::endpoints::announcements::endp_announces;
-use lib::endpoints::submissions::endp_submissions;
-use lib::endpoints::whitelist::endp_whitelist;
-use lib::{handlers::Database, endpoints::units::endp_unit};
-use lib::endpoints::users::endp_users;
-use lib::endpoints::classes::endp_class;
 use actix_web::{App, HttpServer, web::Data};
+mod lib;
+use lib::{
+    endpoints::announcements::endp_announces, 
+    endpoints::submissions::endp_submissions,
+    endpoints::whitelist::endp_whitelist,
+    endpoints::classes::endp_class,
+    endpoints::users::endp_users,
+    endpoints::units::endp_unit,
+    handlers::Database
+};
 
 // Main Actix-Web function
 #[actix_web::main]
