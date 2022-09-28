@@ -33,8 +33,8 @@ impl lib::handlers::Database {
 
         // Insert into ANNOUNCEMENTS column
         sqlx::query!(
-            "INSERT INTO announcements (class_hash, author_name, title, description, attachment, date) VALUES (?, ?, ?, ?, ?, ?)",
-            "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020", "test_author_name", "test_title", "test_desc", "no_attachment", 0
+            "INSERT INTO announcements (class_hash, announcement_hash, author_name, title, description, attachment, date) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020", "announcement_hash", "test_author_name", "test_title", "test_desc", "no_attachment", 0
         ).execute(&self.conn).await.unwrap();
         
         // Insert into WHITELISTS column
@@ -57,8 +57,8 @@ impl lib::handlers::Database {
 
         // Insert into SUBMISSIONS column
         sqlx::query!(
-            "INSERT INTO submissions (class_hash, submitter_hash, submission_date, data) VALUES (?, ?, ?, ?)",
-            "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020", "822f3d5b9c91b570a4f1848c5d147b4709d2fb96", 0, ""
+            "INSERT INTO submissions (class_hash, submission_hash, submitter_hash, submission_date, data) VALUES (?, ?, ?, ?, ?)",
+            "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020", "submission_hash", "822f3d5b9c91b570a4f1848c5d147b4709d2fb96", 0, ""
         ).execute(&self.conn).await.unwrap();
     }
 
