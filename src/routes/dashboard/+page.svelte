@@ -3,89 +3,195 @@
 </svelte:head>
 
 <script>
-	import { onMount } from 'svelte';
-	import Dropdown from './components/dropdown.svelte'
-	import JsonData from './settings_data.json'
-	
-	// The openCloseSettingSlider() function is used to
-	// open / close the homework question sliders and 
-	// change the contents within said sliders to hidden.
-	function openCloseSettingSlider(dropDownTitles, dropDownDescriptions, e, i) {
-		// If slider is closed, open it
-		if (e.style.height == '20px' || e.style.height == '') {
-			e.style.height = `${
-				30*(dropDownDescriptions[i].innerHTML.length/50)
-			}px`;
-			e.style.display = "block";
-			dropDownDescriptions[i].style.display = 'block';
-
-			// Close all the other equation dropDownDescriptions
-			for (let n = 0; n < dropDownTitles.length; n++) {
-				if (n != i) {
-					dropDownTitles[n].style.height = '20px';
-					dropDownDescriptions[n].style.display = 'none';
-				}
-			}
-		} 
-		// Else, Hide the slider
-		else {
-			e.style.height = '20px';
-			dropDownDescriptions[i].style.display = 'none';
-		}
+	const SIDEBAR_NAMES = [
+		"Classes",
+		"Students",
+		"Settings",
+		"Analytics"
+	]
+	const FAKE_NAMES = [
+		"Tristan",
+		"Ella",
+		"Keeleigh",
+		"James",
+		"Connor",
+		"Michael",
+		"Andrew"
+	]
+	const FAKE_CLASSES = [
+		"MHF4UI",
+		"PHYSICS",
+		"CHEMISTRY"
+	]
+	function rand_image() {
+		let rand_num = Math.floor(Math.random() * (500 - 400) + 400)
+		return `https://picsum.photos/${rand_num}/${rand_num}`
 	}
-	// Call the contents in this function when
-	// the website is mounted (aka loaded)
-	onMount(() => {
-		let dropDownTitles = [];
-		let dropDownDescriptions = [];
-
-		// For each of the slide elements
-		document.querySelectorAll("#fade_in_text").forEach((e) => {
-			e.style.display = 'none';
-			dropDownDescriptions.push(e);
-		});
-
-		// For each of the slide elements
-		document.querySelectorAll("#slider").forEach((e, i) => {
-			dropDownTitles.push(e);
-
-			// Establish the event listener
-			e.addEventListener("click", () => openCloseSettingSlider(
-				dropDownTitles, dropDownDescriptions, e, i
-			));
-		});
-	});
+	function get_fake_name() {
+		return FAKE_NAMES[Math.floor(Math.random()*FAKE_NAMES.length)]
+	}
 </script>
 
 <main>
-	<h1>MHF4UI Dashboard</h1>
+	<h1>Dashboard</h1>
 
-	{#each Object.entries(JsonData) as [key, value]}
-		<Dropdown title={key} description={value}/>
+	<ul>
+        {#each SIDEBAR_NAMES as name}
+            <!-- svelte-ignore a11y-invalid-attribute -->
+            <li style="display: flex; justify-content; center;">
+                <a href="/dashboard"
+                    data-text="VIEW_{name}">{name}
+                </a>
+            </li>
+        {/each}
+    </ul>
+	
+	<h1>My Classes</h1>
+	<div style="margin-left: 30px;">
+		{#each FAKE_CLASSES as class_name}
+			<div style="display: inline-block; margin: 20px;">
+				<h3 style="color: #333; font-weight: 900; border-radius: 8px;">{class_name}</h3>
+				<div style="width: 300px; height: 200px; background-color: white; border-radius: 10px;"></div>
+				<div> 
+					<h3 class="class_bottom">2022/08/07</h3>
+					<h3 class="class_bottom">Analytics</h3>
+				</div>
+			</div>
+		{/each}
+	</div>
+	
+	<h1>Students</h1>
+	{#each FAKE_CLASSES as class_name}
+		<div style="margin-left: 40px;">
+			<h2 style="color: #333; opacity: 1; letter-spacing: 1px; text-transform: uppercase;">{class_name}</h2>
+			<div style="margin-left: 30px;">
+				{#each Array(20) as _}
+					<div style="display: inline-block; margin: 20px;">
+						<div style="text-align: center; position: relative;">
+							<img
+								style="width: 100px; height: 100px; background-color: white; border-radius: 100px;" 
+								src={rand_image()}
+								alt=""
+							/>
+							<div class="overlay">
+								<div class="remove_text">Remove</div>
+							</div>
+							<h3 style="color: #333; opacity: 1; letter-spacing: 1px; text-transform: uppercase;">{get_fake_name()}</h3>
+						</div>
+					</div>
+				{/each}
+			</div>
+		</div>
 	{/each}
-	<div class="seperator"></div>
 </main>
 
 <style>
-	@import url('https://fonts.googleapis.com/css?family=Poppins:700,900&display=swap'); 
-
-	/* Lesson Seperator Line */
-	.seperator {
-		margin-top: 120px; 
-		margin-bottom: 120px;
+	@import url('https://fonts.googleapis.com/css?family=Poppins:700,800,900&display=swap');
+    
+	.class_bottom {
+		display: inline-block;
+		background-color: #00ff73;
+		font-weight: 800;
+		color: #333;
+		padding-top: 5px;
+		padding-bottom: 5px;
+		padding-left: 15px;
+		padding-right: 20px;
+		border-radius: 8px;
+		margin-right: 10px;
 	}
-	/* Main Styles */
+	
 	main {
-		text-align: center;
-		padding: 1em;
+        overflow: hidden;
+        font-family: 'Poppins', sans-serif;
+		flex: 1;
+		padding: 1rem;
 		margin: 0 auto;
-		font-family: 'Poppins', sans-serif;
 	}
 	h1 {
+		font-size: 40px;
 		font-family: 'Poppins', sans-serif;
         color: #333;
         font-weight: 900;
         text-transform: uppercase;
+    }
+	.overlay {
+		cursor: pointer;
+		position: absolute;
+		top: 0;
+		width: 100px;
+		height: 100px; 
+		background-color: white; 
+		border-radius: 100px;
+		opacity: 0;
+		transition: .3s ease;
+		background-color: #000000;
+	}
+	.overlay:hover { opacity: 0.8; }
+	.remove_text {
+		color: white;
+		font-size: 15px;
+		font-weight: 700;
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+	}
+
+    /* On Hover Effect */
+    ul { 
+        position: relative; 
+    } ul li {
+        list-style: none;
+        text-align: center;
+    } ul li a {
+        color: #0002;
+        text-decoration: none;
+        font-size: 2.5em;
+        padding: 5px 20px;
+        display: inline-flex;
+        font-weight: 900;
+        transition: 0.5s;
+        letter-spacing: 2px;
+    } ul:hover li a { 
+        color: #0002;
+    } ul li:hover a {
+        color: #000;
+        background: rgba(255,255,255,1);
+        border-radius: 10px;
+        letter-spacing: 6px;
+    } ul li a:before {
+        content: '';
+        position: absolute;
+        top: 30%;
+        margin-right: 50px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 2em;
+        color: rgba(0, 0, 0, .1);
+        z-index: -1;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 500px;
+        transition: letter-spacing 0.5s, left 0.5s;
+    } ul li:hover a:before {
+        content: attr(data-text);
+        right: 0px;
+        opacity: 1;
+        letter-spacing: 10px;
+    }
+    /* On Page Load Temporary Unit Hover */
+    #staticSelectionHover:not(:hover) a:before {
+        content: attr(data-text);
+        right: 0px;
+        opacity: 1;
+        letter-spacing: 10px;
+    } #staticSelectionHover:not(:hover) a {
+        letter-spacing: 6px;
+        color: #000;
+        background: rgba(255,255,255,1);
+        border-radius: 10px;
     }
 	/* Scroll Bar */
 	:root::-webkit-scrollbar {
