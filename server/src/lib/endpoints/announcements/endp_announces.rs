@@ -9,18 +9,22 @@ use crate::lib;
 // to make within the database
 #[derive(serde::Deserialize)]
 pub struct AnnouncementDataBody { 
+    // The announcements unique identifier
     pub announcement_hash: String,
-    pub submission_hash: String,
-    pub data: String,
+    // The announcement attachment (image, file, etc.)
     pub attachment: String,
+    // The announcement content/description
     pub description: String,
+    // The title of the announcement
     pub title: String,
+    // The name of the user who posted the announcement
     pub author_name: String
 }
 
-//
-//
-//
+// The insert_class_announcement() endpoint is used
+// to insert a new announcement into the database.
+// A unique announcement identifier is created
+// for if the user wants to later delete the post.
 #[actix_web::put("/class/{class_hash}/announcements")]
 async fn insert_class_announcement(
     req: HttpRequest, db: web::Data<Database>, class_hash: web::Path<String>, body: web::Json<AnnouncementDataBody>
@@ -48,9 +52,11 @@ async fn insert_class_announcement(
     return format!("{{\"success\": {}}}", 1 > 0)
 }
 
-//
-//
-//
+
+// The delete_class_announcement() endpoint is used
+// to delete an announcement from the database. This
+// function requires a bearer token which means the
+// user making the announcement must be signed in.
 #[actix_web::delete("/class/{class_hash}/announcements")]
 async fn delete_class_announcement(
     req: HttpRequest, db: web::Data<Database>, class_hash: web::Path<String>, body: web::Json<AnnouncementDataBody>
@@ -73,7 +79,7 @@ async fn delete_class_announcement(
     if !lib::auth::verify_bearer(&class_hash, access_token, bearer_token, firebase_token) { 
         return "{}".to_string()
     }
-    let r: u64 = db.delete_class_announcement(&class_hash, body).await;
+    let r: u64 = db.delete_class_announcement(body).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", 1 > 0)
 }
