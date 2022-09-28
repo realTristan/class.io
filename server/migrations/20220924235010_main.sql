@@ -16,13 +16,14 @@ CREATE TABLE users (
 );
 CREATE TABLE announcements (
     id INTEGER PRIMARY KEY,
-    class_hash TEXT NOT NULL,       -- user_hash:time.time()
+    class_hash TEXT NOT NULL,           -- user_hash:time.time()
+    announcement_hash TEXT NOT NULL,    -- the announcements unique identifier
 
-    author_name TEXT NOT NULL,      -- The Teacher's name
-    title TEXT NOT NULL,            -- Announcement title
-    description TEXT NOT NULL,      -- Announcement content
-    attachment TEXT NOT NULL,      -- Base64 encoded images/video
-    date INTEGER NOT NULL           -- The time since epoch format of when the post was made
+    author_name TEXT NOT NULL,          -- The Teacher's name
+    title TEXT NOT NULL,                -- Announcement title
+    description TEXT NOT NULL,          -- Announcement content
+    attachment TEXT NOT NULL,           -- Base64 encoded images/video
+    date INTEGER NOT NULL               -- The time since epoch format of when the post was made
 );
 
 -- MAX 100 USERS
