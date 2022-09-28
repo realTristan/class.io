@@ -49,7 +49,7 @@ async fn insert_class_announcement(
     }
     let r: u64 = db.insert_class_announcement(&class_hash, body).await;
     // Return whether more than 0 rows were affected
-    return format!("{{\"success\": {}}}", 1 > 0)
+    return format!("{{\"success\": {}}}", r > 0)
 }
 
 
@@ -81,5 +81,5 @@ async fn delete_class_announcement(
     }
     let r: u64 = db.delete_class_announcement(body).await;
     // Return whether more than 0 rows were affected
-    return format!("{{\"success\": {}}}", 1 > 0)
+    return format!("{{\"success\": {}}}", r > 0)
 }
