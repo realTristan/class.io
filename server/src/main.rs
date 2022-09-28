@@ -1,5 +1,6 @@
 // Import Libraries
 mod lib;
+use lib::endpoints::announcements::endp_announces;
 use lib::endpoints::submissions::endp_submissions;
 use lib::endpoints::whitelist::endp_whitelist;
 use lib::{handlers::Database, endpoints::units::endp_unit};
@@ -45,6 +46,10 @@ async fn main() -> std::io::Result<()> {
             .service(endp_submissions::insert_class_submission)
             .service(endp_submissions::get_user_submissions)
             .service(endp_submissions::get_class_submissions)
+
+            // Class Announcements
+            .service(endp_announces::insert_class_announcement)
+            .service(endp_announces::delete_class_announcement)
 
     })
     .bind(("127.0.0.1", 8080))?

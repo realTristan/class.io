@@ -4,7 +4,7 @@ use actix_web::HttpRequest;
 // any invalid header errors. Without this function,
 // if an abuser tried to send a request with an
 // invalid error, an internal server error would occur.
-pub fn get_header<'a>(req: &'a HttpRequest, header: &str) -> &'a str {
+pub fn get_header<'a>(req: &'a HttpRequest, key: &str) -> &'a str {
     // Get the header option to check whether the
     // head is valid/present
     let opt_head = req.headers().get(header);
