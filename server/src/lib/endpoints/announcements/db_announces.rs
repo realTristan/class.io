@@ -1,4 +1,6 @@
-use crate::lib;
+use actix_web::web::Json;
+use crate::lib::{self, global};
+use super::endp_announces::AnnouncementDataBody;
 
 // The Announcement data struct is used to
 // store the announcement author's unique identifier,
@@ -18,6 +20,36 @@ pub struct Announcement {
 
 // Database Implementation
 impl lib::handlers::Database {
+
+
+    pub async fn insert_class_announcement(
+        &self, class_hash: &str, data: Json<AnnouncementDataBody>
+    ) -> u64 {
+        let announcement_hash: String = global::generate_new_hash(class_hash);
+        let time: i64 = global::get_time() as i64;
+        
+        let r = sqlx::query!(
+            "INSERT INTO announcements (class_hash, announcement_hash, author_name, title, description, attachment, date)", 
+            class_hash, announcement_hash, data.author_name, data.title, data.description, data.attachment, time
+        ).execute(&self.conn).await;
+        // If an error has occurred, return 0 rows affected
+        if r.is_err() { return 0; }
+        // Else, return the amount of affected rows
+        return r.unwrap().rows_affected();
+    }
+
+    pub async fn delete_class_announcement(
+        &self, announcement_hash: &str, data: Json<AnnouncementDataBody>
+    ) -> u64 {
+        let r = sqlx::query!(
+            "DELETE FROM announcements WHERE announcement_hash=?", announcement_hash
+        ).execute(&self.conn).await;
+        // If an error has occurred, return 0 rows affected
+        if r.is_err() { return 0; }
+        // Else, return the amount of affected rows
+        return r.unwrap().rows_affected();
+    }
+
     // The get_class_announcements() function is used
     // to get all the announcements a teacher has
     // made within provided class_hash.

@@ -43,9 +43,7 @@ async fn insert_class_announcement(
     if !lib::auth::verify_bearer(&class_hash, access_token, bearer_token, firebase_token) { 
         return "{}".to_string()
     }
-    //
-    // create a new announcement_hash
-    //
+    let r: u64 = db.insert_class_announcement(&class_hash, body).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", 1 > 0)
 }
@@ -75,9 +73,7 @@ async fn delete_class_announcement(
     if !lib::auth::verify_bearer(&class_hash, access_token, bearer_token, firebase_token) { 
         return "{}".to_string()
     }
-    //
-    // use the announcement_hash
-    //
+    let r: u64 = db.delete_class_announcement(&class_hash, body).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", 1 > 0)
 }
