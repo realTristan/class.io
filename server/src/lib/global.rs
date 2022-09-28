@@ -29,3 +29,16 @@ pub fn get_time() -> u64 {
         .duration_since(std::time::UNIX_EPOCH).unwrap();
     return time.as_secs();
 }
+
+// The generate_new_hash() function is used to generate
+// a unique hash using the provided identifier (class_hash, user_hash, etc.)
+// and the current time in nanoseconds.
+pub fn generate_new_hash(identifier: &str) -> String {
+    // Get the current time since epoch. This duration is later converted
+    // into nanoseconds to ensure that the class hash is 100% unique.
+    let time: std::time::Duration = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH).unwrap();
+    // Generate a new hash using the provided
+    // class hash, and the current time as nanoseconds.
+    return format!("{}:{}", identifier, time.as_nanos());
+}
