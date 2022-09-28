@@ -3,3 +3,4 @@ pub mod users;
 pub mod whitelist;
 pub mod submissions;
 pub mod units;
+pub mod announcements;

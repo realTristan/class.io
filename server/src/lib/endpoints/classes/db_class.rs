@@ -1,6 +1,6 @@
 use super::endp_class::ClassDataBody;
 use actix_web::web::Json;
-use crate::lib::{self, global, endpoints::{units::db_unit::Unit, whitelist::db_whitelist::Whitelist}};
+use crate::lib::{self, global};
 
 // The Class data struct is used to store
 // the classes owner_hash, unique class identifier,
@@ -14,21 +14,6 @@ pub struct Class {
     rsl: i64,
     // Whether to the use the class whitelist
     enable_whitelist: i64,
-}
-// The Announcement data struct is used to
-// store the announcement author's unique identifier,
-// the authors name, the announcement title and description,
-// along with any attachments the author has posted with it.
-struct Announcement {
-    // The announcement's author name
-    // Use the get_user_data endpoint to get this
-    author_name: String,
-    // The announcement title
-    title: String,
-    // The announcements content
-    description: String,
-    // Any images/videos attached with the announcement
-    attachment: String   // Base64 encode images, etc.
 }
 
 // Database Implementation
@@ -163,56 +148,15 @@ impl lib::handlers::Database {
         return Some(r.unwrap());
     }
 
-    // The get_class_announcements() function is used
-    // to get all the announcements a teacher has
-    // made within provided class_hash.
-    async fn get_class_announcements(&self, class_hash: &str) -> Vec<Announcement> {
-        // Fetch all the announcements that the
-        // class owner has created.
-        let r = sqlx::query_as!(
-            Announcement, "SELECT author_name, title, description, attachment FROM announcements WHERE class_hash=?", class_hash
-        ).fetch_all(&self.conn).await;
-        // Return empty if an error has occurred
-        if r.is_err() { return vec![]; }
-        // Return the unwrapped array of all
-        // the class announcements
-        return r.unwrap();
-    }
-
-    // The get_announcements_json() function is used to
-    // generate a new json map as a string from the
-    // provided announcements array.
-    fn get_announcements_json(&self, announcements: Vec<Announcement>) -> String {
-        // Define the json result string
-        let mut r: String = String::new();
-        // Iterate over the provided announcements array and
-        // append each of the announcement's data to a formatted
-        // string array of maps
-        announcements.iter().for_each(|f| {
-            r.push_str(
-                &format!("{{
-                    \"author_name\": \"{}\", 
-                    \"title\": \"{}\", 
-                    \"description\": \"{}\", 
-                    \"attachment\": \"{}\"
-                }},", 
-                f.author_name, f.title, f.description, f.attachment
-            ))
-        });
-        // Remove the last comma of the string array
-        // before returning the new json map result
-        return r[..r.len()-1].to_string();
-    }
-
     // The get_class_data() function is used to get all data
     // revolving around the provided class_hash. This includes
     // the class's primary data (shown below) and the class's
     // units and lessons.
     pub async fn get_class_data(&self, class_hash: &str) -> String {
-        let class:          Option<Class> = self.get_class_basic_data(class_hash).await;
-        let units:          Vec<Unit> = self.get_class_units(class_hash).await;
-        let whitelist:      Vec<Whitelist> = self.get_class_whitelist(class_hash).await;
-        let announcements:  Vec<Announcement> = self.get_class_announcements(class_hash).await;
+        let class = self.get_class_basic_data(class_hash).await;
+        let units = self.get_class_units(class_hash).await;
+        let whitelist = self.get_class_whitelist(class_hash).await;
+        let announcements = self.get_class_announcements(class_hash).await;
         // If the class is non existent, then return
         // an empty json map. This is required before
         // proceeding with anything else to avoid errors
