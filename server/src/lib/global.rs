@@ -7,7 +7,7 @@ use actix_web::HttpRequest;
 pub fn get_header<'a>(req: &'a HttpRequest, key: &str) -> &'a str {
     // Get the header option to check whether the
     // head is valid/present
-    let opt_head = req.headers().get(header);
+    let opt_head = req.headers().get(key);
     // If the header is invalid/not-present, return
     // an empty string
     if opt_head.is_none() { return "" }
