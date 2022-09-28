@@ -25,21 +25,19 @@ impl lib::handlers::Database {
     // A unique announcement identifier is created before hand
     // so that if the announcement author wants to delete
     // their announcement, they can. Along with this, a post
-    // time is also inserted into the database.
+    // date is also inserted into the database.
     pub async fn insert_class_announcement(
         &self, class_hash: &str, data: Json<AnnouncementDataBody>
     ) -> u64 {
         // Create a new unique identifier for the announcement post
         let announcement_hash: String = global::generate_new_hash(class_hash);
-        // Get the current time which will be used for
-        // determining the post date.
-        let time: i64 = global::get_time() as i64;
+        let date: i64 = global::get_time() as i64;
         
         // Query the database, inserting the new announcement
         // along with all of it's data.
         let r = sqlx::query!(
             "INSERT INTO announcements (class_hash, announcement_hash, author_name, title, description, attachment, date)", 
-            class_hash, announcement_hash, data.author_name, data.title, data.description, data.attachment, time
+            class_hash, announcement_hash, data.author_name, data.title, data.description, data.attachment, date
         ).execute(&self.conn).await;
         // If an error has occurred, return 0 rows affected
         if r.is_err() { return 0; }
