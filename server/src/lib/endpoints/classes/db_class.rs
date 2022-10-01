@@ -67,7 +67,7 @@ impl lib::handlers::Database {
     // 5 classes is allowed per user. To generate the unique
     // class identifier, format the user_hash with the current
     // time in nanoseconds.
-    pub async fn insert_class_data(&self, data: Json<ClassDataBody>) -> u64 {
+    pub async fn insert_class_data(&self, data: &Json<ClassDataBody>) -> u64 {
         // Generate a new class hash using the provided class_hash
         let class_hash: String = global::generate_new_hash(&data.user_hash);
         // Query the database
@@ -87,7 +87,7 @@ impl lib::handlers::Database {
     // the class data within the database. This function
     // is required to disperse the query string from any
     // invalid/empty values.
-    fn generate_class_update_query(&self, data: Json<ClassDataBody>) -> String {
+    fn generate_class_update_query(&self, data: &Json<ClassDataBody>) -> String {
         let mut res: String = String::new();
         // If the provided data's enable_whitelist integer bool
         // isn't invalid (equal to 2) then append the
@@ -118,7 +118,7 @@ impl lib::handlers::Database {
     // any data for the provided class within the database.
     // The function requires a generated class_update_query
     // which can be generated using the function above.
-    pub async fn update_class_data(&self, class_hash: &str, data: Json<ClassDataBody>) -> u64 {
+    pub async fn update_class_data(&self, class_hash: &str, data: &Json<ClassDataBody>) -> u64 {
         // Generate a new query string. This query string accounts
         // for empty values so that nothing gets corrupted.
         let q: String = self.generate_class_update_query(data);

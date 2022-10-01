@@ -48,7 +48,7 @@ impl lib::handlers::Database {
     // using the provided class hash. The function generates
     // a unique submission hash before inserting the data, which
     // is used within the delete_class_submission() function
-    pub async fn insert_class_submission(&self, class_hash: &str, data: Json<SubmissionDataBody>) -> u64 {
+    pub async fn insert_class_submission(&self, class_hash: &str, data: &Json<SubmissionDataBody>) -> u64 {
         // Get the current time since epoch. This duration is later converted
         // into nanoseconds to ensure that the class hash is 100% unique.
         let time: std::time::Duration = std::time::SystemTime::now()
@@ -75,7 +75,7 @@ impl lib::handlers::Database {
     // delete a submission from the database. This function
     // is called when a student wants to unsubmit a portion
     // of their work.
-    pub async fn delete_class_submission(&self, data: Json<SubmissionDataBody>) -> u64 {
+    pub async fn delete_class_submission(&self, data: &Json<SubmissionDataBody>) -> u64 {
         // Query the database, deleting all data revolving around
         // the provided submission hash
         let r = sqlx::query!(

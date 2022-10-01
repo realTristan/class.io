@@ -70,7 +70,7 @@ async fn update_class_data(
     // Generate a class update query which is the fastest way 
     // for updating multiple values inside the database before 
     // executing the database update using the below function
-    let r: u64 = db.update_class_data(&class_hash, body).await;
+    let r: u64 = db.update_class_data(&class_hash, &body).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0)
 }
@@ -107,7 +107,7 @@ async fn insert_class_data(
         return "{}".to_string() 
     }
     // Insert the class data into the database
-    let r: u64 = db.insert_class_data(body).await;
+    let r: u64 = db.insert_class_data(&body).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0)
 }

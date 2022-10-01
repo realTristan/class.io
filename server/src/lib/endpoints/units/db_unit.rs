@@ -53,7 +53,7 @@ impl lib::handlers::Database {
     // The insert_class_unit() function is used to insert a new
     // unit into the database for the provided class. Students who
     // visit the class through the website, will see this unit appear.
-    pub async fn insert_class_unit(&self, class_hash: &str, data: Json<UnitDataBody>) -> u64 {
+    pub async fn insert_class_unit(&self, class_hash: &str, data: &Json<UnitDataBody>) -> u64 {
         // Generate a new unit hash using the provided class_hash
         let unit_hash: String = global::generate_new_hash(class_hash);
 
@@ -73,7 +73,7 @@ impl lib::handlers::Database {
     // The delete_class_unit() function is used to delete a unit
     // from the units column wherever the provided unit_hash
     // is present. A maximum of 12 units is allowed per class.
-    pub async fn delete_class_unit(&self, data: Json<UnitDataBody>) -> u64 {
+    pub async fn delete_class_unit(&self, data: &Json<UnitDataBody>) -> u64 {
         let r = sqlx::query!(
             "DELETE FROM units WHERE unit_hash=?", data.unit_hash
         ).execute(&self.conn).await;
@@ -89,7 +89,7 @@ impl lib::handlers::Database {
     // unit data replacing the current data, with that of the provided
     // Json<UnitDataBody> values. In order to prevent null values
     // being updated, the function first determines which values are null.
-    pub async fn update_class_unit(&self, data: Json<UnitDataBody>) -> u64 {
+    pub async fn update_class_unit(&self, data: &Json<UnitDataBody>) -> u64 {
         let mut res: String = String::new();
         // If the provided data's enable_whitelist integer bool
         // isn't invalid (equal to 2) then append the

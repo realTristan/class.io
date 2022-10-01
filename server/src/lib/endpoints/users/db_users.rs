@@ -4,11 +4,16 @@ use crate::lib;
 // all of the users data from the database
 // into readable values
 pub struct User {
-    pub id:                 i64,        // Row Increment ID
-    pub hash:               String,     // The user hash (aka: the user id)
-    pub name:               String,     // The users name
-    pub email:              String,     // The users email
-    pub registration_date:   i64        // The Users registration date (used for bearer token)
+    // Row Increment ID
+    pub id: i64,
+    // The user hash (aka: the user id)
+    pub user_hash: String,
+    // The users name
+    pub user_name: String,
+    // The users email
+    pub email: String,
+    // The Users registration date (used for bearer token)
+    pub registration_date: i64
 }
 
 // Database Implemenetation that contains all the
@@ -49,7 +54,7 @@ impl lib::handlers::Database {
     // The user_exists() function is used to check whether
     // the provided user_hash is present within the database.
     // If it is, return true.. else return false.
-    pub async fn user_exists(&self, user_hash: &str) -> bool {
+    async fn user_exists(&self, user_hash: &str) -> bool {
         // Query the database
         let r = sqlx::query!(
             "SELECT * FROM users WHERE user_hash=?", user_hash
@@ -64,33 +69,28 @@ impl lib::handlers::Database {
     // name, hash, and id
     pub async fn query_user_by_hash(&self, user_hash: &str) -> Option<User> {
         // Query the database
-        let r = sqlx::query!(
-            "SELECT * FROM users WHERE user_hash=?",
-            user_hash
+        let r = sqlx::query_as!(
+            User, "SELECT * FROM users WHERE user_hash=?", user_hash
         ).fetch_one(&self.conn).await;
 
-        // If the user is invalid
-        if r.is_err() {
-            // Return an empty User object
-            return None
-        }
+        // If the user is invalid, return none
+        if r.is_err() { return None }
         // Return the 'User' object containing all of
         // the requested user's data
-        let r = r.unwrap();
-        return Some(User {
-            id: r.id,
-            hash: user_hash.to_string(),
-            name: r.user_name,
-            email: r.email,
-            registration_date: r.registration_date
-        })
+        return Some(r.unwrap())
     }
 
     // The update_user_name() function is used to 
     // modify the incoming users profile name.
     pub async fn update_user_name(&self, user_hash: &str, new_name: &str) -> u64 {
-        return sqlx::query!("UPDATE users SET user_name=? WHERE user_hash=?",
+        let r = sqlx::query!("UPDATE users SET user_name=? WHERE user_hash=?",
             new_name, user_hash
-        ).execute(&self.conn).await.unwrap().rows_affected();
+        ).execute(&self.conn).await;
+
+        // If an error has occurred, return 0 rows affected
+        if r.is_err() { return 0; }
+        // Else, return the actual amount of rows that
+        // have been affected by the insertion
+        return r.unwrap().rows_affected();
     }
 }

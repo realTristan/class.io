@@ -47,7 +47,7 @@ async fn add_class_unit(
         return "{}".to_string()
     }
     // Insert the unit data into the database
-    let r: u64 = db.insert_class_unit(&class_hash, body).await;
+    let r: u64 = db.insert_class_unit(&class_hash, &body).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0)
 }
@@ -77,7 +77,7 @@ async fn delete_class_unit(
         return "{}".to_string()
     }
     // Insert the unit data into the database
-    let r: u64 = db.delete_class_unit(body).await;
+    let r: u64 = db.delete_class_unit(&body).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0)
 }
@@ -107,7 +107,7 @@ async fn update_class_unit(
         return "{}".to_string()
     }
     // Insert the unit data into the database
-    let r: u64 = db.update_class_unit(body).await;
+    let r: u64 = db.update_class_unit(&body).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0)
 }

@@ -43,7 +43,7 @@ pub async fn get_user_data(
     // response data.
     return format!(
         "{{\"access_token\": \"{}\", \"user_hash\": \"{}\", \"user_name\": \"{}\", \"classes\": {}}}", 
-            access_token, user_hash, user.name, "array of the users class_hashes (select from classes where user_hash = user_hash)"
+            access_token, user_hash, user.user_name, "array of the users class_hashes (select from classes where user_hash = user_hash)"
     )
 }
 

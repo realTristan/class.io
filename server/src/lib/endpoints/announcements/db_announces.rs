@@ -27,7 +27,7 @@ impl lib::handlers::Database {
     // their announcement, they can. Along with this, a post
     // date is also inserted into the database.
     pub async fn insert_class_announcement(
-        &self, class_hash: &str, data: Json<AnnouncementDataBody>
+        &self, class_hash: &str, data: &Json<AnnouncementDataBody>
     ) -> u64 {
         // Create a new unique identifier for the announcement post
         let announcement_hash: String = global::generate_new_hash(class_hash);
@@ -48,7 +48,7 @@ impl lib::handlers::Database {
     // The delete_class_announcement() function is used
     // to delete a specific announcement post using
     // the provided announcement_hash.
-    pub async fn delete_class_announcement(&self, data: Json<AnnouncementDataBody>) -> u64 {
+    pub async fn delete_class_announcement(&self, data: &Json<AnnouncementDataBody>) -> u64 {
         // Query the database, deleting the announcement with
         // the incoming requests data.announcement_hash
         let r = sqlx::query!(
