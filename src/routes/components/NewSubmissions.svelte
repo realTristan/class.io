@@ -6,9 +6,27 @@
     
     // Student Data
     const DATA = [
-        {name: "Tristan", class: "Math", date: "Saturday, October 1st, 2022", marked: true},
-        {name: "Keeleigh", class: "Physics", date: "Saturday, October 3rd, 2022", marked: false},
-        {name: "Ella", class: "Chemistry", date: "Saturday, October 2nd, 2022", marked: true}
+        {
+            name: "Tristan", 
+            submission_hash: "4da0c3de19e7dc9845a87758c2cf6b94a275ff5b", 
+            class: "Math", 
+            date: "Saturday, October 1st, 2022", 
+            marked: true
+        },
+        {
+            name: "Keeleigh", 
+            submission_hash: "4da0c3de19e7dc9845a87758c2cf6b94a275ff5b", 
+            class: "Physics", 
+            date: "Saturday, October 3rd, 2022", 
+            marked: false
+        },
+        {
+            name: "Ella", 
+            submission_hash: "4da0c3de19e7dc9845a87758c2cf6b94a275ff5b", 
+            class: "Chemistry", 
+            date: "Saturday, October 2nd, 2022", 
+            marked: true
+        }
     ];
 </script>
 

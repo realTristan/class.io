@@ -6,9 +6,24 @@
     
     // Student Data
     const DATA = [
-        {name: "Tristan", class: "Math", completion: "100%"},
-        {name: "Keeleigh", class: "Physics", completion: "60%"},
-        {name: "Ella", class: "Chemistry", completion: "30%"}
+        {
+            name: "Tristan", 
+            id: "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3", 
+            class: "Math", 
+            completion: "100%"
+        },
+        {
+            name: "Keeleigh", 
+            id: "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3", 
+            class: "Physics", 
+            completion: "60%"
+        },
+        {
+            name: "Ella", 
+            id: "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3", 
+            class: "Chemistry", 
+            completion: "30%"
+        }
     ];
 </script>
 
