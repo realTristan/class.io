@@ -9,7 +9,7 @@
             ]
         },
         {
-            name: "admin",
+            name: "classes",
             data: [
                 {name: "classes", route: "/classes", image: "/images/icons/classes.png"},
                 {name: "submissions", route: "/submissions", image: "/images/icons/submissions.png"},
