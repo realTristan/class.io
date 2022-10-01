@@ -2,9 +2,6 @@
 	<title>class.io</title>
 </svelte:head>
 
-<script>
-</script>
-
 <body class="bg-slate-50">
     <main>
         <div class="flex justify-center items-center">
