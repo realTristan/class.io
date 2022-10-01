@@ -1,8 +1,8 @@
 <script>
     // Imports
-    import TableBody from "./NewSubmissions/TableBody.svelte"
-    import TableHead from "./NewSubmissions/TableHead.svelte"
-    import TableTitle from "./NewSubmissions/TableTitle.svelte"
+    import TableBody from "./TableBody.svelte"
+    import TableHead from "./TableHead.svelte"
+    import TableTitle from "./TableTitle.svelte"
     
     // Student Data
     const DATA = [
@@ -31,13 +31,13 @@
 </script>
 
 <!-- Table Card -->
-<div class="m-10 px-4">
+<div class="mb-6 mt-10 ml-10 px-4" style="width: 700px;">
     <div class="flex-col break-words bg-white shadow-lg rounded w-full">
         <TableTitle/>
         
         <!-- Table Contents -->
         <div class="block overflow-x-auto w-full">
-            <table class="items-center w-full bg-transparent border-collapse">
+            <table class="items-center w-full bg-transparent border-collapse mb-6">
                 <TableHead/>
                 <TableBody DATA={DATA}/>
             </table>

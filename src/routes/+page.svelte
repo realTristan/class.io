@@ -3,9 +3,10 @@
 </svelte:head>
 
 <script>
+    import ClassesCard from "./components/ClassesCard/ClassesCard.svelte";
     import NavMenu from "./components/NavMenu.svelte";
-    import NewSubmissions from "./components/NewSubmissions.svelte";
-    import StudentStats from "./components/StudentStats.svelte"
+    import NewSubmissions from "./components/NewSubmissions/NewSubmissions.svelte";
+    import StudentStats from "./components/StudentStats/StudentStats.svelte"
 </script>
 
 <body class="bg-slate-50">
@@ -14,8 +15,11 @@
             <NavMenu/>
             <div>
                 <h2 class="font-black text-2xl mt-7 mx-10 text-slate-900">DASHBOARD</h2>
-                <StudentStats/>
-                <NewSubmissions/>
+                <div class="flex">
+                    <StudentStats/>
+                    <NewSubmissions/>
+                </div>
+                <ClassesCard/>
             </div>
         </div>
     </main>
