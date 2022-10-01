@@ -1,6 +1,16 @@
 <script>
-    const NAV_MENU_ITEMS_1 = ["home", "dashboard", "settings"]
-    const NAV_MENU_ITEMS_2 = ["classes", "submissions", "students"]
+    const NAV_MENU_ITEMS = {
+        admin: [
+            {name: "home", route: "/", image: "/images/icons/home.png"},
+            {name: "dashboard", route: "/dashboard", image: "/images/icons/dashboard.png"},
+            {name: "settings", route: "/settings", image: "/images/icons/settings.png"},
+        ],
+        class: [
+            {name: "classes", route: "/classes", image: "/images/icons/classes.png"},
+            {name: "submissions", route: "/submissions", image: "/images/icons/submissions.png"},
+            {name: "students", route: "/students", image: "/images/icons/students.png"},
+        ]
+    };
 </script>
 
 <!-- Navigation Menu -->
@@ -11,26 +21,17 @@
     </div>
     
     <div class="w-50 mx-6 h-px bg-slate-200"></div>
-    <h2 class="font-bold text-xs mt-5 mb-3 ml-6 text-slate-500">ADMIN</h2>
-    <ul class="md:flex-col md:min-w-full flex flex-col list-none">
-        {#each NAV_MENU_ITEMS_1 as item}
-            <li class="items-center hover:bg-slate-50 mx-4 rounded">
-                <a href="/{item}" class="text-xs py-3 uppercase font-bold text-slate-600 flex mx-4">
-                    <img class="mr-3" src="/images/{item}.png" alt=""/>
-                    {item}
-                </a>
-            </li>
-        {/each}
-    </ul>
-    <h2 class="font-bold text-xs mt-5 mb-3 ml-6 text-slate-500">CLASSES</h2>
-    <ul class="md:flex-col md:min-w-full flex flex-col list-none">
-        {#each NAV_MENU_ITEMS_2 as item}
-            <li class="items-center hover:bg-slate-50 mx-4 rounded">
-                <a href="/{item}" class="text-xs py-3 uppercase font-bold text-slate-600 flex mx-4">
-                    <img class="mr-3" src="/images/{item}.png" alt=""/>
-                    {item}
-                </a>
-            </li>
-        {/each}
-    </ul>
+    {#each NAV_MENU_ITEMS as category}
+        <h2 class="font-bold text-xs mt-5 mb-3 ml-6 text-slate-500 uppercase">{category}</h2>
+        <ul class="md:flex-col md:min-w-full flex flex-col list-none">
+            {#each NAV_MENU_ITEMS[category] as item}
+                <li class="items-center hover:bg-slate-50 mx-4 rounded">
+                    <a href={item.route} class="text-xs py-3 uppercase font-bold text-slate-600 flex mx-4">
+                        <img class="mr-3" src={item.image} alt=""/>
+                        {item.name}
+                    </a>
+                </li>
+            {/each}
+        </ul>
+    {/each}
 </div>
