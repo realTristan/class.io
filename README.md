@@ -1,6 +1,6 @@
 # class.io ![Stars](https://img.shields.io/github/stars/realTristan/class.io?color=brightgreen) ![Watchers](https://img.shields.io/github/watchers/realTristan/class.io?label=Watchers)
 
-https://user-images.githubusercontent.com/75189508/192068727-fcf78602-ddbc-492d-b8e2-b329e4b5cbec.mp4
+![Capture](https://user-images.githubusercontent.com/75189508/193428491-28348d48-5a33-4975-8dfa-9c339f8f9db4.PNG)
 
 # About
 <h3>Why Rust?</h3>
