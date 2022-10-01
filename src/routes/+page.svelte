@@ -2,8 +2,14 @@
 	<title>class.io</title>
 </svelte:head>
 
-<main>
-    <h1 class="text-3xl text-violet-600 font-bold text-center">
-        class.io
-    </h1>
-</main>
+<script>
+    import NewSubmissions from "./components/NewSubmissions.svelte";
+    import StudentStats from "./components/StudentStats.svelte"
+</script>
+
+<body class="bg-slate-50">
+    <main>
+        <StudentStats/>
+        <NewSubmissions/>   
+    </main>
+</body>
