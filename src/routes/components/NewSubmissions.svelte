@@ -21,7 +21,7 @@
             marked: false
         },
         {
-            name: "Ella", 
+            name: "Bob", 
             submission_hash: "4da0c3de19e7dc9845a87758c2cf6b94a275ff5b", 
             class: "Chemistry", 
             date: "Saturday, October 2nd, 2022", 
@@ -31,7 +31,7 @@
 </script>
 
 <!-- Table Card -->
-<div class="m-10 px-4 xl:w-3/5">
+<div class="m-10 px-4">
     <div class="flex-col break-words bg-white shadow-lg rounded w-full">
         <TableTitle/>
         

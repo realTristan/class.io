@@ -1,5 +1,5 @@
 <script>
-    const TITLES = [ "STUDENT", "CLASS", "COMPLETION" ];
+    const TITLES = [ "NAME", "CLASS", "COMPLETION" ];
 </script>
 
 <!-- Table Headers -->
