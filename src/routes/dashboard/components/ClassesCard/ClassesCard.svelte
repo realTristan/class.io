@@ -35,7 +35,7 @@
             submissions: "14",
             whitelist: false,
             rsl: true
-        },
+        }
     ];
 
     // The updateData() function is used to
@@ -55,8 +55,8 @@
             submissions: "0",
             whitelist: false,
             rsl: false
-        }]
-        window.location.href='/class/8d767bf5b72373d12f0efd4406677e9ed076f592'
+        }];
+        window.location.href='/class/8d767bf5b72373d12f0efd4406677e9ed076f592';
     }
 </script>
 
