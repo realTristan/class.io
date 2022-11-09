@@ -17,11 +17,12 @@ async fn main() -> std::io::Result<()> {
     let db: Database = Database::init().await;
     // Insert a test user for debugging purposes
     let _ = db.insert_test_user().await;
-    db.insert_test_class().await;
+    // db.insert_test_class().await;
 
     // Establish a connection to http://127.0.0.1:8080/
     HttpServer::new(move || {
         App::new()
+            .wrap(actix_cors::Cors::permissive())
             .app_data(Data::new(db.clone()))
             
             // User data

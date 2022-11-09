@@ -28,13 +28,13 @@ impl lib::handlers::Database {
         // Insert into CLASSES column
         sqlx::query!(
             "INSERT INTO classes (owner_hash, class_hash, class_name, rsl, enable_whitelist) VALUES (?, ?, ?, ?, ?)",
-            "822f3d5b9c91b570a4f1848c5d147b4709d2fb96", "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020", "test_class_name", 0, 0
+            "822f3d5b9c91b570a4f1848c5d147b4709d2fb96", "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020", "Advanced Functions", 0, 0
         ).execute(&self.conn).await.unwrap();
 
         // Insert into ANNOUNCEMENTS column
         sqlx::query!(
             "INSERT INTO announcements (class_hash, announcement_hash, author_name, title, description, attachment, date) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020", "announcement_hash", "test_author_name", "test_title", "test_desc", "no_attachment", 0
+            "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020", "announcement_hash", "Tristan Simpson", "Test Announcement", "Hey guys!", "no_attachment", 0
         ).execute(&self.conn).await.unwrap();
         
         // Insert into WHITELISTS column
@@ -52,7 +52,19 @@ impl lib::handlers::Database {
         // Insert into UNITS column
         sqlx::query!(
             "INSERT INTO units (class_hash, unit_hash, unit_name, locked) VALUES (?, ?, ?, ?)",
-            "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020", "random_unit_hash", "test_unit_name", 0
+            "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020", "random_unit_hash", "Polynomials", 0
+        ).execute(&self.conn).await.unwrap();
+
+        // Insert into UNITS column
+        sqlx::query!(
+            "INSERT INTO units (class_hash, unit_hash, unit_name, locked) VALUES (?, ?, ?, ?)",
+            "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020", "random_unit_hash", "Functions", 0
+        ).execute(&self.conn).await.unwrap();
+
+        // Insert into UNITS column
+        sqlx::query!(
+            "INSERT INTO units (class_hash, unit_hash, unit_name, locked) VALUES (?, ?, ?, ?)",
+            "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020", "random_unit_hash", "Calculus", 0
         ).execute(&self.conn).await.unwrap();
 
         // Insert into SUBMISSIONS column

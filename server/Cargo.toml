@@ -11,4 +11,5 @@ actix-web = { version =  "4" }
 
 # // Secondary Dependencies
 lazy_static = "1.4.0"
+actix-cors = "0.6.3"
 sha256 = "1.0.3"
