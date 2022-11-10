@@ -7,13 +7,11 @@
 
 - I wanted to learn Rust
 - Rust is fast, lightweight and great for low-memory usage.
-- I wanted to learn more Rust as I absolutely love the language!
 
 <h3>Why Svelte and Tailwind CSS?</h3>
 
 - I wanted to learn Tailwind and get better at Svelte
 - Svelte is 30% faster than other frameworks.
-- Svelte is best when used for designing small apps
 
 # API Showcase
 
