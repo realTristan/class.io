@@ -17,13 +17,7 @@
         });
     })
 
-    /* Variables
-        const isClassWhitelisted = Class.enable_whitelist;
-
-        // Whether the student needs to login
-        const RequireStudentLogin = Class.rsl;
-        const isUserWhitelisted = Class.whitelist.includes("user hash")
-    */
+    let Lessons = [];
 </script>
 
 <body 
@@ -43,21 +37,41 @@
         <h2>You are not whitelisted in this class!</h2>
     {/if}
 
+    <div class="flex">
+        <div>
+             <!-- Navigation Menu -->
+            <div class="flex mt-9 mb-7 ml-20">
+                <h2 class="font-bold text-6xl text-slate-900 tracking-wider">{Class.class_name}</h2>
+            </div>
 
-    <!-- Navigation Menu -->
-    <div class="flex mt-9 mb-7 ml-20">
-        <h2 class="font-bold text-6xl text-slate-900 tracking-wider">{Class.class_name}</h2>
-    </div>
+            <!-- Gray Line Span -->
+            <div class="w-96 mx-20 h-px bg-slate-200"></div>
 
-    <!-- Gray Line Span -->
-    <div class="w-96 mx-20 h-px bg-slate-200"></div>
-
-    <!-- Units -->
-    <h2 class="font-bold text-4xl mt-10 ml-20 text-slate-700 uppercase tracking-widest">Units</h2>
-    {#each Class.units as Unit}
-        <div class="my-4 text-center items-center flex group h-24 w-96 hover:translate-x-10 duration-500 ease-in-out cursor-pointer">
-            <h2 class="font-bold text-2xl ml-24 text-slate-500 uppercase tracking-widest">{Unit.unit_name}</h2>
+            <!-- Units -->
+            <h2 class="font-bold text-4xl mt-10 ml-20 text-slate-700 uppercase tracking-widest">Units</h2>
+            {#each Class.units as Unit}
+                <div on:click={() => Lessons = Unit.lessons} class="my-4 text-center items-center flex group h-24 w-96 hover:translate-x-10 duration-500 ease-in-out cursor-pointer">
+                    <h2 class="font-bold text-2xl ml-24 text-slate-500 uppercase tracking-widest">{Unit.unit_name}</h2>
+                </div>
+            {/each}
         </div>
-    {/each}
+
+        <div class="mx-96 my-20">
+            {#each Lessons as lesson}
+                <div class="mt-20">
+                    <a href={lesson.video} class="text-3xl font-black">{lesson.title}</a>
+                    <h2 class="mt-2 text-base">{lesson.description}</h2>
+
+                    <h2 class="mt-4 text-xl font-black">Work</h2>
+                    <h2>{lesson.work}</h2>
+
+                    <h2 class="mt-4 text-xl font-black">Work Solutions</h2>
+                    <h2>{lesson.work_solutions}</h2>
+                </div>
+            {/each}
+        </div>
+        
+    </div>
+    
 
 </body>

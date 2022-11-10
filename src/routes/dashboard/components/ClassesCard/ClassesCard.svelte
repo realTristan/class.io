@@ -8,7 +8,7 @@
     var data = [
         {
             name: "Math", 
-            class_hash: "8d767bf5b72373d12f0efd4406677e9ed076f592", 
+            class_hash: "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020", 
             units: "6",
             students: "84",
             created: "Saturday, October 1st, 2022",
@@ -18,7 +18,7 @@
         },
         {
             name: "Physics", 
-            class_hash: "8d767bf5b72373d12f0efd4406677e9ed076f592", 
+            class_hash: "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020", 
             units: "12",
             students: "21",
             created: "Saturday, October 2nd, 2022",
@@ -28,7 +28,7 @@
         },
         {
             name: "Chemistry", 
-            class_hash: "8d767bf5b72373d12f0efd4406677e9ed076f592", 
+            class_hash: "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020", 
             units: "8",
             students: "94",
             created: "Saturday, October 7th, 2022",
@@ -48,7 +48,7 @@
         // Else, update the data, inserting the new class
         data = [...data, {
             name: "New Class", 
-            class_hash: "8d767bf5b72373d12f0efd4406677e9ed076f592", 
+            class_hash: "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020", 
             units: "0",
             students: "0",
             created: "Saturday, October 8th, 2022",
@@ -56,7 +56,7 @@
             whitelist: false,
             rsl: false
         }];
-        window.location.href='/class/8d767bf5b72373d12f0efd4406677e9ed076f592';
+        window.location.href='/class/e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020';
     }
 </script>
 
