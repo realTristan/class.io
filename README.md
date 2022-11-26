@@ -14,7 +14,7 @@
 - Svelte is 30% faster than other frameworks.
 
 # API Showcase
-
+ 
 <h3>Current State</h3>
 
 ```json
