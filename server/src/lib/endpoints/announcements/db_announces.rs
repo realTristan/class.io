@@ -27,7 +27,7 @@ impl lib::handlers::Database {
     // their announcement, they can. Along with this, a post
     // date is also inserted into the database.
     pub async fn insert_class_announcement(
-        &self, class_hash: &str, data: &Json<AnnouncementDataBody>
+        &self, user_hash: &str, class_hash: &str, data: &Json<AnnouncementDataBody>
     ) -> u64 {
         // Create a new unique identifier for the announcement post
         let announcement_hash: String = global::generate_new_hash(class_hash);
@@ -36,7 +36,7 @@ impl lib::handlers::Database {
         // Query the database, inserting the new announcement
         // along with all of it's data.
         let r = sqlx::query!(
-            "INSERT INTO announcements (class_hash, announcement_hash, author_name, title, description, attachment, date) VALUES (?, ?, ?, ?, ?, ?, ?)", 
+            "INSERT INTO announcements (owner_hash, class_hash, announcement_hash, author_name, title, description, attachment, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
             class_hash, announcement_hash, data.author_name, data.title, data.description, data.attachment, date
         ).execute(&self.conn).await;
         // If an error has occurred, return 0 rows affected
@@ -48,11 +48,14 @@ impl lib::handlers::Database {
     // The delete_class_announcement() function is used
     // to delete a specific announcement post using
     // the provided announcement_hash.
-    pub async fn delete_class_announcement(&self, data: &Json<AnnouncementDataBody>) -> u64 {
+    pub async fn delete_class_announcement(
+        &self, user_hash: &str, data: &Json<AnnouncementDataBody>
+    ) -> u64 {
         // Query the database, deleting the announcement with
         // the incoming requests data.announcement_hash
         let r = sqlx::query!(
-            "DELETE FROM announcements WHERE announcement_hash=?", data.announcement_hash
+            "DELETE FROM announcements WHERE announcement_hash=? AND owner_hash=?", 
+            data.announcement_hash, user_hash
         ).execute(&self.conn).await;
         // If an error has occurred, return 0 rows affected
         if r.is_err() { return 0; }

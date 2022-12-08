@@ -9,8 +9,6 @@ use crate::lib;
 // to make within the database
 #[derive(serde::Deserialize)]
 pub struct ClassDataBody {
-    // The users unique identifier
-    pub user_hash: String,
     // Update the class name
     pub class_name: String,
     // Update whether to use the class whitelist
@@ -30,7 +28,7 @@ async fn get_class_data(
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
     let user: &str = global::get_header(&req, "user");
-    let authorization: &str = global::get_header(&req, "authorization");
+    let access_token: &str = global::get_header(&req, "access_token");
     // the access token consists of the users sha256 encoded firebase token,
     // the current time, and a "super secret key".
     // This also acts as a bearer token from the encoded firebase token
@@ -39,7 +37,7 @@ async fn get_class_data(
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(&user, authorization) { 
+    if !lib::auth::verify(&user, &access_token) { 
         return "{}".to_string()
     }
     // Return the class data
@@ -58,7 +56,7 @@ async fn update_class_data(
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
     let user: &str = global::get_header(&req, "user");
-    let authorization: &str = global::get_header(&req, "authorization");
+    let access_token: &str = global::get_header(&req, "access_token");
     // the access token consists of the users sha256 encoded firebase token,
     // the current time, and a "super secret key".
     // This also acts as a bearer token from the encoded firebase token
@@ -67,13 +65,13 @@ async fn update_class_data(
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(&user, authorization) { 
+    if !lib::auth::verify(&user, &access_token) { 
         return "{}".to_string()
     }
     // Generate a class update query which is the fastest way 
     // for updating multiple values inside the database before 
     // executing the database update using the below function
-    let r: u64 = db.update_class_data(&class_hash, &body).await;
+    let r: u64 = db.update_class_data(&user, &class_hash, &body).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0)
 }
@@ -89,7 +87,7 @@ async fn insert_class_data(
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
     let user: &str = global::get_header(&req, "user");
-    let authorization: &str = global::get_header(&req, "authorization");
+    let access_token: &str = global::get_header(&req, "access_token");
     // the access token consists of the users sha256 encoded firebase token,
     // the current time, and a "super secret key".
     // This also acts as a bearer token from the encoded firebase token
@@ -98,17 +96,17 @@ async fn insert_class_data(
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(&user, authorization) { 
+    if !lib::auth::verify(&user, &access_token) { 
         return "{}".to_string()
     }
 
-    // If the body class_name or user_hash are invalid,
+    // If the body class_name is invalid,
     // return an empty json map
-    if body.class_name.len() < 1 || body.user_hash.len() < 1 { 
+    if body.class_name.len() < 1 { 
         return "{}".to_string() 
     }
     // Insert the class data into the database
-    let r: u64 = db.insert_class_data(&class_hash, &body).await;
+    let r: u64 = db.insert_class_data(&user, &class_hash, &body).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0)
 }

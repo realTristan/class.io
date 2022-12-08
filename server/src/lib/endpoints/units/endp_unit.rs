@@ -32,7 +32,7 @@ async fn add_class_unit(
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
     let user: &str = global::get_header(&req, "user");
-    let authorization: &str = global::get_header(&req, "authorization");
+    let access_token: &str = global::get_header(&req, "access_token");
     // the access token consists of the users sha256 encoded firebase token,
     // the current time, and a "super secret key".
     // This also acts as a bearer token from the encoded firebase token
@@ -41,11 +41,11 @@ async fn add_class_unit(
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(&user, authorization) { 
+    if !lib::auth::verify(&user, &access_token) { 
         return "{}".to_string()
     }
     // Insert the unit data into the database
-    let r: u64 = db.insert_class_unit(&unit_hash, &class_hash, &body).await;
+    let r: u64 = db.insert_class_unit(&user, &unit_hash, &class_hash, &body).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0)
 }
@@ -60,7 +60,7 @@ async fn delete_class_unit(
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
     let user: &str = global::get_header(&req, "user");
-    let authorization: &str = global::get_header(&req, "authorization");
+    let access_token: &str = global::get_header(&req, "access_token");
     // the access token consists of the users sha256 encoded firebase token,
     // the current time, and a "super secret key".
     // This also acts as a bearer token from the encoded firebase token
@@ -69,11 +69,11 @@ async fn delete_class_unit(
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(&user, authorization) { 
+    if !lib::auth::verify(&user, &access_token) { 
         return "{}".to_string()
     }
     // Insert the unit data into the database
-    let r: u64 = db.delete_class_unit(&body).await;
+    let r: u64 = db.delete_class_unit(&user, &body).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0)
 }
@@ -88,7 +88,7 @@ async fn update_class_unit(
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
     let user: &str = global::get_header(&req, "user");
-    let authorization: &str = global::get_header(&req, "authorization");
+    let access_token: &str = global::get_header(&req, "access_token");
     // the access token consists of the users sha256 encoded firebase token,
     // the current time, and a "super secret key".
     // This also acts as a bearer token from the encoded firebase token
@@ -97,11 +97,11 @@ async fn update_class_unit(
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(&user, authorization) { 
+    if !lib::auth::verify(&user, &access_token) { 
         return "{}".to_string()
     }
     // Insert the unit data into the database
-    let r: u64 = db.update_class_unit(&body).await;
+    let r: u64 = db.update_class_unit(&user, &body).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0)
 }

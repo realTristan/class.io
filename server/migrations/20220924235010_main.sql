@@ -16,6 +16,7 @@ CREATE TABLE users (
 );
 CREATE TABLE announcements (
     id INTEGER PRIMARY KEY,
+    owner_hash TEXT NOT NULL,           -- used to verify bearer
     class_hash TEXT NOT NULL,           -- user_hash:time.time()
     announcement_hash TEXT NOT NULL,    -- the announcements unique identifier
 
@@ -30,6 +31,7 @@ CREATE TABLE announcements (
 -- endpoint: get_class_data
 CREATE TABLE whitelists (
     id INTEGER PRIMARY KEY,
+    owner_hash TEXT NOT NULL,       -- used to verify bearer
     class_hash TEXT NOT NULL,       -- user_hash:time.time()
 
     whitelisted_user TEXT NOT NULL  -- The user to be whitelisted's email sha256 encrypted
@@ -51,6 +53,7 @@ CREATE TABLE classes (
 -- endpoint: get_class_data and get_unit_data
 CREATE TABLE units (
     id INTEGER PRIMARY KEY,
+    owner_hash TEXT NOT NULL,       -- used to verify bearer
     class_hash TEXT NOT NULL,       -- user_hash:time.time()
     unit_hash TEXT NOT NULL,        -- class_hash:user_hash:time.time()
 
@@ -62,6 +65,7 @@ CREATE TABLE units (
 -- endpoint: get_unit_lessons
 CREATE TABLE lessons (
     id INTEGER PRIMARY KEY,
+    owner_hash TEXT NOT NULL,        -- used to verify bearer
     unit_hash TEXT NOT NULL,         -- class_hash:user_hash:time.time()
 
     title TEXT NOT NULL,             -- Lesson Title
@@ -74,6 +78,7 @@ CREATE TABLE lessons (
 -- endpoint: get_unit_submissions
 CREATE TABLE submissions (
     id INTEGER PRIMARY KEY,
+    owner_hash TEXT NOT NULL,               -- used to verify bearer
     class_hash TEXT NOT NULL,               -- class_hash:user_hash:time.time()
     submission_hash TEXT NOT NULL,
 

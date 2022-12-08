@@ -53,11 +53,11 @@ impl lib::handlers::Database {
     // The insert_class_unit() function is used to insert a new
     // unit into the database for the provided class. Students who
     // visit the class through the website, will see this unit appear.
-    pub async fn insert_class_unit(&self, unit_hash: &str, class_hash: &str, data: &Json<UnitDataBody>) -> u64 {
+    pub async fn insert_class_unit(&self, user_hash: &str, unit_hash: &str, class_hash: &str, data: &Json<UnitDataBody>) -> u64 {
         // Insert the data into the database
         let r = sqlx::query!(
-            "INSERT INTO units (class_hash, unit_hash, unit_name, locked) VALUES (?, ?, ?, ?)", 
-            class_hash, unit_hash, data.unit_name, 0
+            "INSERT INTO units (owner_hash, class_hash, unit_hash, unit_name, locked) VALUES (?, ?, ?, ?, ?)", 
+            user_hash, class_hash, unit_hash, data.unit_name, 0
         ).execute(&self.conn).await;
 
         // If an error has occurred, return 0 rows affected
@@ -70,9 +70,10 @@ impl lib::handlers::Database {
     // The delete_class_unit() function is used to delete a unit
     // from the units column wherever the provided unit_hash
     // is present. A maximum of 12 units is allowed per class.
-    pub async fn delete_class_unit(&self, data: &Json<UnitDataBody>) -> u64 {
+    pub async fn delete_class_unit(&self, user_hash: &str, data: &Json<UnitDataBody>) -> u64 {
         let r = sqlx::query!(
-            "DELETE FROM units WHERE unit_hash=?", data.unit_hash
+            "DELETE FROM units WHERE unit_hash=? AND owner_hash=?", 
+            data.unit_hash, user_hash
         ).execute(&self.conn).await;
 
         // If an error has occurred, return 0 rows affected
@@ -107,7 +108,10 @@ impl lib::handlers::Database {
         // in the above res: String that have the same
         // unit_hash as the one provided
         let r = sqlx::query(
-            &format!("UPDATE units SET {} unit_hash='{}'", res, data.unit_hash)
+            &format!(
+                "UPDATE units SET {} WHERE unit_hash='{}' AND owner_hash='{}'", 
+                res, data.unit_hash, user_hash
+            )
         ).execute(&self.conn).await;
 
         if r.is_err() { return 0; }

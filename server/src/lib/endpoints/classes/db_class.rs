@@ -79,11 +79,13 @@ impl lib::handlers::Database {
     // 5 classes is allowed per user. To generate the unique
     // class identifier, format the user_hash with the current
     // time in nanoseconds.
-    pub async fn insert_class_data(&self, class_hash: &str, data: &Json<ClassDataBody>) -> u64 {
+    pub async fn insert_class_data(
+        &self, user_hash: &str, class_hash: &str, data: &Json<ClassDataBody>
+    ) -> u64 {
         // Query the database
         let r = sqlx::query!(
             "INSERT INTO classes (owner_hash, class_hash, class_name, rsl, enable_whitelist) VALUES (?, ?, ?, ?, ?)",
-            data.user_hash, class_hash, data.class_name, 0, 0
+            user_hash, class_hash, data.class_name, 0, 0
         ).execute(&self.conn).await;
 
         // If an error has occurred, return 0 rows affected
@@ -128,13 +130,15 @@ impl lib::handlers::Database {
     // any data for the provided class within the database.
     // The function requires a generated class_update_query
     // which can be generated using the function above.
-    pub async fn update_class_data(&self, class_hash: &str, data: &Json<ClassDataBody>) -> u64 {
+    pub async fn update_class_data(
+        &self, user_hash: &str, class_hash: &str, data: &Json<ClassDataBody>
+    ) -> u64 {
         // Generate a new query string. This query string accounts
         // for empty values so that nothing gets corrupted.
         let q: String = self.generate_class_update_query(data);
         // Query the database
         let r = sqlx::query(
-            &format!("UPDATE classes SET {q} WHERE class_hash='{class_hash}'"))
+            &format!("UPDATE classes SET {q} WHERE class_hash='{class_hash}' AND owner_hash='{user_hash}'"))
                 .execute(&self.conn).await;
         // If an error has occurred, return 0 rows affected
         if r.is_err() { return 0; }

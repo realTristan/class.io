@@ -27,7 +27,7 @@ async fn get_class_submissions(
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
     let user: &str = global::get_header(&req, "user");
-    let authorization: &str = global::get_header(&req, "authorization");
+    let access_token: &str = global::get_header(&req, "access_token");
     // the access token consists of the users sha256 encoded firebase token,
     // the current time, and a "super secret key".
     // This also acts as a bearer token from the encoded firebase token
@@ -36,7 +36,7 @@ async fn get_class_submissions(
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(&user, authorization) { 
+    if !lib::auth::verify(&user, &access_token) { 
         return "{}".to_string()
     }
     return db.get_class_submissions(&class_hash).await;
@@ -55,7 +55,7 @@ async fn get_user_submissions(
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
     let user: &str = global::get_header(&req, "user");
-    let authorization: &str = global::get_header(&req, "authorization");
+    let access_token: &str = global::get_header(&req, "access_token");
     // the access token consists of the users sha256 encoded firebase token,
     // the current time, and a "super secret key".
     // This also acts as a bearer token from the encoded firebase token
@@ -64,7 +64,7 @@ async fn get_user_submissions(
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(&user, authorization) { 
+    if !lib::auth::verify(&user, &access_token) { 
         return "{}".to_string()
     }
     return db.get_user_submissions(&class_hash, &user_hash).await;
@@ -82,7 +82,7 @@ async fn insert_class_submission(
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
     let user: &str = global::get_header(&req, "user");
-    let authorization: &str = global::get_header(&req, "authorization");
+    let access_token: &str = global::get_header(&req, "access_token");
     // the access token consists of the users sha256 encoded firebase token,
     // the current time, and a "super secret key".
     // This also acts as a bearer token from the encoded firebase token
@@ -91,11 +91,11 @@ async fn insert_class_submission(
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(&user, authorization) { 
+    if !lib::auth::verify(&user, &access_token) { 
         return "{}".to_string()
     }
     // Insert the submission data into the database
-    let r: u64 = db.insert_class_submission(&class_hash, &body).await;
+    let r: u64 = db.insert_class_submission(&user, &class_hash, &body).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0)
 }
@@ -112,7 +112,7 @@ async fn delete_class_submission(
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
     let user: &str = global::get_header(&req, "user");
-    let authorization: &str = global::get_header(&req, "authorization");
+    let access_token: &str = global::get_header(&req, "access_token");
     // the access token consists of the users sha256 encoded firebase token,
     // the current time, and a "super secret key".
     // This also acts as a bearer token from the encoded firebase token
@@ -121,11 +121,11 @@ async fn delete_class_submission(
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(&user, authorization) { 
+    if !lib::auth::verify(&user, &access_token) { 
         return "{}".to_string()
     }
     // Delete the submission data from the database
-    let r: u64 = db.delete_class_submission(&body).await;
+    let r: u64 = db.delete_class_submission(&user, &body).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0)
 }
