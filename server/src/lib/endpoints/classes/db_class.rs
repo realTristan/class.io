@@ -1,6 +1,6 @@
 use super::endp_class::ClassDataBody;
 use actix_web::web::Json;
-use crate::lib::{self, global};
+use crate::lib;
 
 // The Class data struct is used to store
 // the classes owner_hash, unique class identifier,
