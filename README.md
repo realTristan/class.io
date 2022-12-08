@@ -53,17 +53,15 @@
 ```
 
 # Todo
-<h3>Major</h3>
+<h3>Frontend</h3>
 
 - Add a section to select the unit
 - Add a section to submit homework answers
 - Add a section for the teacher to mark homework answers
-
-<h3> Implementations </h3>
-
 - Implement once homework has been marked, it will email the student
 - Implement auto convert png to pdf for homework submissions
 - Implement google oauth login using firebase
+- Encrypted google oauth token is used as the user_hash
 
 # License
 MIT License
