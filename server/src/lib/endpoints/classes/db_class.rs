@@ -79,9 +79,7 @@ impl lib::handlers::Database {
     // 5 classes is allowed per user. To generate the unique
     // class identifier, format the user_hash with the current
     // time in nanoseconds.
-    pub async fn insert_class_data(&self, data: &Json<ClassDataBody>) -> u64 {
-        // Generate a new class hash using the provided class_hash
-        let class_hash: String = global::generate_new_hash(&data.user_hash);
+    pub async fn insert_class_data(&self, class_hash: &str, data: &Json<ClassDataBody>) -> u64 {
         // Query the database
         let r = sqlx::query!(
             "INSERT INTO classes (owner_hash, class_hash, class_name, rsl, enable_whitelist) VALUES (?, ?, ?, ?, ?)",

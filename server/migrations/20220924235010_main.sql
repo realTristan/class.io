@@ -8,7 +8,7 @@
 */
 CREATE TABLE users (
     id INTEGER PRIMARY KEY,
-    user_hash TEXT NOT NULL,            -- The users email sha256 encrypted
+    user_hash TEXT NOT NULL,            -- The users firebase token sha256 encrypted
 
     user_name TEXT NOT NULL,            -- A name the user can change themselves
     email TEXT NOT NULL,                -- Used for emailing students about their homework

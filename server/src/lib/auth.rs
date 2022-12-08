@@ -18,23 +18,6 @@ lazy_static::lazy_static! {
     };    
 }
 
-// BEARER TOKEN IS SHA256 ENCODE [ (user_hash):(provided auth token):(firebase_token) ]
-// The verify_bearer() function is used to verify whether
-// the provided bearer token is valid. If the bearer is valid
-// then we can proceed with whatever 'secure' function it is we need to do
-pub fn verify_bearer(
-    user_hash: &str, access_token: &str, bearer_token: &str, firebase_token: &str
-) -> bool {
-    // Generate a new bearer token format using the provided
-    // data which will be compared to the provided bearer
-    let gen: String = format!("{}:{}:{}", user_hash, access_token, firebase_token);
-    // SHA256 Encode the generated format above
-    let gen_bearer: String = format!("Bearer {}", sha256::digest(gen));
-    // Return whether the provided bearer token is
-    // equal to the generated one
-    return bearer_token.to_string() == gen_bearer
-}
-
 // The verify() function is used to check whether the
 // provided auth token is valid. It does this by
 // checking whether the token has been created within
@@ -109,7 +92,7 @@ fn storage_handler(
     // overflow. If the user has too many tokens and
     // the cache isn't eventually cleared.. you already
     // know what'll happen lmao.
-    if time > &(last_wipe_time+8) {
+    if time > &(last_wipe_time + 8) || mut_storage.len() > 10  {
         // Clear the users token storage and set
         // the first value of the array to the
         // current time as a string

@@ -29,14 +29,19 @@ async fn get_class_data(
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
-    let access_token: &str = global::get_header(&req, "Access Token");
+    let user: &str = global::get_header(&req, "user");
+    let authorization: &str = global::get_header(&req, "authorization");
+    // the access token consists of the users sha256 encoded firebase token,
+    // the current time, and a "super secret key".
+    // This also acts as a bearer token from the encoded firebase token
+    // which verifies that the user using this endpoint is the owner.
 
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    //if !lib::auth::verify(&class_hash, access_token) { 
-    //    return "{}".to_string()
-    //}
+    if !lib::auth::verify(&user, authorization) { 
+        return "{}".to_string()
+    }
     // Return the class data
     return db.get_class_data(&class_hash).await;
 }
@@ -52,19 +57,17 @@ async fn update_class_data(
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
-    let access_token: &str = global::get_header(&req, "Access Token");
-    let bearer_token: &str = global::get_header(&req, "Authorization");
-    let firebase_token: &str = global::get_header(&req, "Google Auth Token");
+    let user: &str = global::get_header(&req, "user");
+    let authorization: &str = global::get_header(&req, "authorization");
+    // the access token consists of the users sha256 encoded firebase token,
+    // the current time, and a "super secret key".
+    // This also acts as a bearer token from the encoded firebase token
+    // which verifies that the user using this endpoint is the owner.
 
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(&class_hash, access_token) { 
-        return "{}".to_string()
-    }
-    // If the user does not provide a valid bearer token,
-    // return an empty json map
-    if !lib::auth::verify_bearer(&class_hash, access_token, bearer_token, firebase_token) { 
+    if !lib::auth::verify(&user, authorization) { 
         return "{}".to_string()
     }
     // Generate a class update query which is the fastest way 
@@ -85,19 +88,17 @@ async fn insert_class_data(
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
-    let access_token: &str = global::get_header(&req, "Access Token");
-    let bearer_token: &str = global::get_header(&req, "Authorization");
-    let firebase_token: &str = global::get_header(&req, "Google Auth Token");
+    let user: &str = global::get_header(&req, "user");
+    let authorization: &str = global::get_header(&req, "authorization");
+    // the access token consists of the users sha256 encoded firebase token,
+    // the current time, and a "super secret key".
+    // This also acts as a bearer token from the encoded firebase token
+    // which verifies that the user using this endpoint is the owner.
 
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(&class_hash, access_token) { 
-        return "{}".to_string()
-    }
-    // If the user does not provide a valid bearer token,
-    // return an empty json map
-    if !lib::auth::verify_bearer(&class_hash, access_token, bearer_token, firebase_token) { 
+    if !lib::auth::verify(&user, authorization) { 
         return "{}".to_string()
     }
 
@@ -107,7 +108,7 @@ async fn insert_class_data(
         return "{}".to_string() 
     }
     // Insert the class data into the database
-    let r: u64 = db.insert_class_data(&body).await;
+    let r: u64 = db.insert_class_data(&class_hash, &body).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0)
 }

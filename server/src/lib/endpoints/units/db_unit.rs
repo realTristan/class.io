@@ -1,6 +1,6 @@
-use actix_web::web::Json;
-use crate::lib::{self, global};
 use super::endp_unit::UnitDataBody;
+use actix_web::web::Json;
+use crate::lib;
 
 // The Lesson data struct is used to store
 // the class unit's lesson title, description,
@@ -53,10 +53,7 @@ impl lib::handlers::Database {
     // The insert_class_unit() function is used to insert a new
     // unit into the database for the provided class. Students who
     // visit the class through the website, will see this unit appear.
-    pub async fn insert_class_unit(&self, class_hash: &str, data: &Json<UnitDataBody>) -> u64 {
-        // Generate a new unit hash using the provided class_hash
-        let unit_hash: String = global::generate_new_hash(class_hash);
-
+    pub async fn insert_class_unit(&self, unit_hash: &str, class_hash: &str, data: &Json<UnitDataBody>) -> u64 {
         // Insert the data into the database
         let r = sqlx::query!(
             "INSERT INTO units (class_hash, unit_hash, unit_name, locked) VALUES (?, ?, ?, ?)", 

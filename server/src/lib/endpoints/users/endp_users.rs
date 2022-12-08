@@ -22,11 +22,11 @@ pub async fn get_user_data(
     // Get the access token from the request headers. 
     // This tokens is used to make sure that the incoming 
     // request isn't from an abuser.
-    let access_token: &str = global::get_header(&req, "Access Token");
+    let authorization: &str = global::get_header(&req, "authorization");
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(&user_hash, access_token) { return "{}".to_string()}
+    if !lib::auth::verify(&user_hash, authorization) { return "{}".to_string()}
 
     // Once the request has been verified, query the
     // database for the provided user_hash. Once found,
@@ -42,8 +42,8 @@ pub async fn get_user_data(
     // so the frontend can successfully read the
     // response data.
     return format!(
-        "{{\"access_token\": \"{}\", \"user_hash\": \"{}\", \"user_name\": \"{}\", \"classes\": {}}}", 
-            access_token, user_hash, user.user_name, "array of the users class_hashes (select from classes where user_hash = user_hash)"
+        "{{\"authorization\": \"{}\", \"user_hash\": \"{}\", \"user_name\": \"{}\", \"classes\": {}}}", 
+            authorization, user_hash, user.user_name, "array of the users class_hashes (select from classes where user_hash = user_hash)"
     )
 }
 
@@ -59,19 +59,16 @@ pub async fn update_user_data(
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
-    let access_token: &str = global::get_header(&req, "Access Token");
-    let bearer_token: &str = global::get_header(&req, "Authorization");
-    let firebase_token: &str = global::get_header(&req, "Google Auth Token");
+    let authorization: &str = global::get_header(&req, "authorization");
+    // the access token consists of the users sha256 encoded firebase token,
+    // the current time, and a "super secret key".
+    // This also acts as a bearer token from the encoded firebase token
+    // which verifies that the user using this endpoint is the owner.
 
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(&user_hash, access_token) { 
-        return "{}".to_string()
-    }
-    // If the user does not provide a valid bearer token,
-    // return an empty json map
-    if !lib::auth::verify_bearer(&user_hash, access_token, bearer_token, firebase_token) { 
+    if !lib::auth::verify(&user_hash, authorization) { 
         return "{}".to_string()
     }
     // If the incoming request doesn't contain
@@ -97,19 +94,16 @@ async fn insert_user_data(
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
-    let access_token: &str = global::get_header(&req, "Access Token");
-    let bearer_token: &str = global::get_header(&req, "Authorization");
-    let firebase_token: &str = global::get_header(&req, "Google Auth Token");
+    let authorization: &str = global::get_header(&req, "authorization");
+    // the access token consists of the users sha256 encoded firebase token,
+    // the current time, and a "super secret key".
+    // This also acts as a bearer token from the encoded firebase token
+    // which verifies that the user using this endpoint is the owner.
 
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(&user_hash, access_token) { 
-        return "{}".to_string()
-    }
-    // If the user does not provide a valid bearer token,
-    // return an empty json map
-    if !lib::auth::verify_bearer(&user_hash, access_token, bearer_token, firebase_token) { 
+    if !lib::auth::verify(&user_hash, authorization) { 
         return "{}".to_string()
     }
     // Get the current system time. This is used

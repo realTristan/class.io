@@ -23,19 +23,17 @@ async fn add_to_class_whitelist(
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
-    let access_token: &str = global::get_header(&req, "Access Token");
-    let bearer_token: &str = global::get_header(&req, "Authorization");
-    let firebase_token: &str = global::get_header(&req, "Google Auth Token");
+    let user: &str = global::get_header(&req, "user");
+    let authorization: &str = global::get_header(&req, "authorization");
+    // the access token consists of the users sha256 encoded firebase token,
+    // the current time, and a "super secret key".
+    // This also acts as a bearer token from the encoded firebase token
+    // which verifies that the user using this endpoint is the owner.
 
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(&class_hash, access_token) { 
-        return "{}".to_string()
-    }
-    // If the user does not provide a valid bearer token,
-    // return an empty json map
-    if !lib::auth::verify_bearer(&class_hash, access_token, bearer_token, firebase_token) { 
+    if !lib::auth::verify(&user, authorization) { 
         return "{}".to_string()
     }
     // Insert the whitelist data into the database
@@ -51,19 +49,17 @@ async fn delete_from_class_whitelist(
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
-    let access_token: &str = global::get_header(&req, "Access Token");
-    let bearer_token: &str = global::get_header(&req, "Authorization");
-    let firebase_token: &str = global::get_header(&req, "Google Auth Token");
+    let user: &str = global::get_header(&req, "user");
+    let authorization: &str = global::get_header(&req, "authorization");
+    // the access token consists of the users sha256 encoded firebase token,
+    // the current time, and a "super secret key".
+    // This also acts as a bearer token from the encoded firebase token
+    // which verifies that the user using this endpoint is the owner.
 
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(&class_hash, access_token) { 
-        return "{}".to_string()
-    }
-    // If the user does not provide a valid bearer token,
-    // return an empty json map
-    if !lib::auth::verify_bearer(&class_hash, access_token, bearer_token, firebase_token) { 
+    if !lib::auth::verify(&user, authorization) { 
         return "{}".to_string()
     }
     // Delete the whitelist data into the database

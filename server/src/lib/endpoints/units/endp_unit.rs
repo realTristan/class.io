@@ -24,30 +24,28 @@ pub struct UnitDataBody {
 // provided class_hash the function will generate
 // a unique unit identifier using the following format:
 // SHA256(class_hash:current_time)
-#[actix_web::put("/class/{class_hash}/units")]
+#[actix_web::put("/class/{class_hash}/units/{unit_hash}")]
 async fn add_class_unit(
-    req: HttpRequest, db: web::Data<Database>, class_hash: web::Path<String>, body: web::Json<UnitDataBody>
+    req: HttpRequest, db: web::Data<Database>, class_hash: web::Path<String>, unit_hash: web::Path<String>, body: web::Json<UnitDataBody>
 ) -> impl Responder {
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
-    let access_token: &str = global::get_header(&req, "Access Token");
-    let bearer_token: &str = global::get_header(&req, "Authorization");
-    let firebase_token: &str = global::get_header(&req, "Google Auth Token");
+    let user: &str = global::get_header(&req, "user");
+    let authorization: &str = global::get_header(&req, "authorization");
+    // the access token consists of the users sha256 encoded firebase token,
+    // the current time, and a "super secret key".
+    // This also acts as a bearer token from the encoded firebase token
+    // which verifies that the user using this endpoint is the owner.
 
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(&class_hash, access_token) { 
-        return "{}".to_string()
-    }
-    // If the user does not provide a valid bearer token,
-    // return an empty json map
-    if !lib::auth::verify_bearer(&class_hash, access_token, bearer_token, firebase_token) { 
+    if !lib::auth::verify(&user, authorization) { 
         return "{}".to_string()
     }
     // Insert the unit data into the database
-    let r: u64 = db.insert_class_unit(&class_hash, &body).await;
+    let r: u64 = db.insert_class_unit(&unit_hash, &class_hash, &body).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0)
 }
@@ -56,24 +54,22 @@ async fn add_class_unit(
 // delete the provided unit from the database.
 #[actix_web::delete("/class/{class_hash}/units/{unit_hash}")]
 async fn delete_class_unit(
-    req: HttpRequest, db: web::Data<Database>, class_hash: web::Path<String>, body: web::Json<UnitDataBody>
+    req: HttpRequest, db: web::Data<Database>, body: web::Json<UnitDataBody>
 ) -> impl Responder {
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
-    let access_token: &str = global::get_header(&req, "Access Token");
-    let bearer_token: &str = global::get_header(&req, "Authorization");
-    let firebase_token: &str = global::get_header(&req, "Google Auth Token");
+    let user: &str = global::get_header(&req, "user");
+    let authorization: &str = global::get_header(&req, "authorization");
+    // the access token consists of the users sha256 encoded firebase token,
+    // the current time, and a "super secret key".
+    // This also acts as a bearer token from the encoded firebase token
+    // which verifies that the user using this endpoint is the owner.
 
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(&class_hash, access_token) { 
-        return "{}".to_string()
-    }
-    // If the user does not provide a valid bearer token,
-    // return an empty json map
-    if !lib::auth::verify_bearer(&class_hash, access_token, bearer_token, firebase_token) { 
+    if !lib::auth::verify(&user, authorization) { 
         return "{}".to_string()
     }
     // Insert the unit data into the database
@@ -86,24 +82,22 @@ async fn delete_class_unit(
 // modify any data within the unit's database row.
 #[actix_web::post("/class/{class_hash}/units")]
 async fn update_class_unit(
-    req: HttpRequest, db: web::Data<Database>, class_hash: web::Path<String>, body: web::Json<UnitDataBody>
+    req: HttpRequest, db: web::Data<Database>, body: web::Json<UnitDataBody>
 ) -> impl Responder {
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
-    let access_token: &str = global::get_header(&req, "Access Token");
-    let bearer_token: &str = global::get_header(&req, "Authorization");
-    let firebase_token: &str = global::get_header(&req, "Google Auth Token");
+    let user: &str = global::get_header(&req, "user");
+    let authorization: &str = global::get_header(&req, "authorization");
+    // the access token consists of the users sha256 encoded firebase token,
+    // the current time, and a "super secret key".
+    // This also acts as a bearer token from the encoded firebase token
+    // which verifies that the user using this endpoint is the owner.
 
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(&class_hash, access_token) { 
-        return "{}".to_string()
-    }
-    // If the user does not provide a valid bearer token,
-    // return an empty json map
-    if !lib::auth::verify_bearer(&class_hash, access_token, bearer_token, firebase_token) { 
+    if !lib::auth::verify(&user, authorization) { 
         return "{}".to_string()
     }
     // Insert the unit data into the database
