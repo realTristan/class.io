@@ -88,6 +88,7 @@ async fn insert_class_data(
     // sure that the incoming request isn't from an abuser.
     let bearer: &str = global::get_header(&req, "authorization");
     let access_token: &str = global::get_header(&req, "access_token");
+    let owner_id: &str = global::get_header(&req, "user_id");
     // the access token consists of the users sha256 encoded firebase token,
     // the current time, and a "super secret key".
     // This also acts as a bearer token from the encoded firebase token
@@ -106,7 +107,7 @@ async fn insert_class_data(
         return "{}".to_string() 
     }
     // Insert the class data into the database
-    let r: u64 = db.insert_class_data(&bearer, &class_id, &body.class_name).await;
+    let r: u64 = db.insert_class_data(&bearer, &owner_id, &class_id, &body.class_name).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0)
 }

@@ -8,7 +8,8 @@
 */
 CREATE TABLE users (
     id INTEGER PRIMARY KEY,
-    bearer TEXT NOT NULL,            -- The users firebase token sha256 encrypted
+    user_id TEXT NOT NULL,              -- Random id given to the user
+    bearer TEXT NOT NULL,               -- The users firebase token sha256 encrypted
 
     user_name TEXT NOT NULL,            -- A name the user can change themselves
     email TEXT NOT NULL,                -- Used for emailing students about their homework
@@ -41,6 +42,7 @@ CREATE TABLE whitelists (
 -- endpoint: get_class_data
 CREATE TABLE classes (
     id INTEGER PRIMARY KEY,
+    owner_id TEXT NOT NULL,
     owner_bearer TEXT NOT NULL,           -- The users email sha256 encrypted
     class_id TEXT NOT NULL,           -- bearer:time.time()
 

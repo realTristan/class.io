@@ -15,9 +15,9 @@ pub struct UserDataBody { user_name: String, email: String }
 // bearer. This function is necessary for the frontend
 // dashboard page. To ensure the security of the endpoint,
 //  a valid auth token is required.
-#[actix_web::get("/user/{bearer}")]
+#[actix_web::get("/user/{user_id}")]
 pub async fn get_user_data(
-    req: HttpRequest, db: web::Data<Database>, bearer: web::Path<String>
+    req: HttpRequest, db: web::Data<Database>, user_id: web::Path<String>
 ) -> impl Responder {
     // Get the access token from the request headers. 
     // This tokens is used to make sure that the incoming 
@@ -26,12 +26,12 @@ pub async fn get_user_data(
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(&bearer, authorization) { return "{}".to_string()}
+    if !lib::auth::verify(&user_id, authorization) { return "{}".to_string()}
 
     // Once the request has been verified, query the
-    // database for the provided bearer. Once found,
+    // database for the provided user_id. Once found,
     // return all the data from said user.
-    let user = db.query_user_by_id(&bearer).await;
+    let user = db.query_user_by_id(&user_id).await;
     // Check whether or not the user is invalid
     if user.is_none() { return "{}".to_string() }
     // Else, if the user is valid, unwrap the
@@ -42,8 +42,8 @@ pub async fn get_user_data(
     // so the frontend can successfully read the
     // response data.
     return format!(
-        "{{\"authorization\": \"{}\", \"bearer\": \"{}\", \"user_name\": \"{}\", \"classes\": {}}}", 
-            authorization, bearer, user.user_name, "array of the users class_ides (select from classes where bearer = bearer)"
+        "{{\"authorization\": \"{}\", \"user_id\": \"{}\", \"user_name\": \"{}\", \"classes\": {}}}", 
+            authorization, user_id, user.user_name, "array of the users class_ides (select from classes where user_id = user_id)"
     )
 }
 

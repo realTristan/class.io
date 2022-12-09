@@ -1,4 +1,4 @@
-use crate::lib;
+use crate::lib::{self, global};
 
 // The User data struct is used to store
 // all of the users data from the database
@@ -39,10 +39,13 @@ impl lib::handlers::Database {
         // If the user already, exists, return 0
         if self.user_exists(bearer).await { return 0; }
 
+        // Generate a new user id
+        let user_id: String = global::generate_new_id(&format!("{email}:{registration_date}"));
+
         // Insert the user into the database
         let r = sqlx::query!(
-            "INSERT INTO users (bearer, user_name, email, registration_date) VALUES (?, ?, ?, ?)",
-            bearer, user_name, email, registration_date
+            "INSERT INTO users (bearer, user_id, user_name, email, registration_date) VALUES (?, ?, ?, ?, ?)",
+            bearer, user_id, user_name, email, registration_date
         ).execute(&self.conn).await;
         // If an error has occurred return 0 rows affected
         if r.is_err() { return 0; }
@@ -67,10 +70,10 @@ impl lib::handlers::Database {
     // the database for an user with the provided hash
     // Once found, the function will return the users
     // name, hash, and id
-    pub async fn query_user_by_id(&self, bearer: &str) -> Option<User> {
+    pub async fn query_user_by_id(&self, user_id: &str) -> Option<User> {
         // Query the database
         let r = sqlx::query_as!(
-            User, "SELECT * FROM users WHERE bearer=?", bearer
+            User, "SELECT * FROM users WHERE user_id=?", user_id
         ).fetch_one(&self.conn).await;
 
         // If the user is invalid, return none

@@ -80,15 +80,15 @@ impl lib::handlers::Database {
     // class identifier, format the bearer with the current
     // time in nanoseconds.
     pub async fn insert_class_data(
-        &self, bearer: &str, class_id: &str, class_name: &str
+        &self, bearer: &str, owner_id: &str, class_id: &str, class_name: &str
     ) -> u64 {
         // If the class already exists, return the function.
         if self.class_exists(class_id).await { return 0; }
 
         // Query the database
         let r = sqlx::query!(
-            "INSERT INTO classes (owner_bearer, class_id, class_name, rsl, enable_whitelist) VALUES (?, ?, ?, ?, ?)",
-            bearer, class_id, class_name, 0, 0
+            "INSERT INTO classes (owner_bearer, owner_id, class_id, class_name, rsl, enable_whitelist) VALUES (?, ?, ?, ?, ?, ?)",
+            bearer, owner_id, class_id, class_name, 0, 0
         ).execute(&self.conn).await;
 
         // If an error has occurred, return 0 rows affected
