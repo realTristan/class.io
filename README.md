@@ -11,7 +11,7 @@
 
 ```json
 {
-    "class_hash": "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020", 
+    "class_id": "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020", 
     "class_name": "test_class_name", 
     "enable_whitelist": false,
     "rsl":false, 
@@ -53,7 +53,7 @@
 - Implement once homework has been marked, it will email the student
 - Implement auto convert png to pdf for homework submissions
 - Implement google oauth login using firebase
-- Encrypted google oauth token is used as the user_hash
+- Encrypted google oauth token is used as the user_id
 
 # License
 MIT License
