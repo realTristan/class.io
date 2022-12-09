@@ -1,17 +1,9 @@
 # class.io ![Stars](https://img.shields.io/github/stars/realTristan/class.io?color=brightgreen) ![Watchers](https://img.shields.io/github/watchers/realTristan/class.io?label=Watchers)
-
 ![Capture](https://user-images.githubusercontent.com/75189508/193428491-28348d48-5a33-4975-8dfa-9c339f8f9db4.PNG)
 
 # About
-<h3>Why Rust?</h3>
-
-- I wanted to learn Rust
-- Rust is fast, lightweight and great for low-memory usage.
-
-<h3>Why Svelte and Tailwind CSS?</h3>
-
-- I wanted to learn Tailwind and get better at Svelte
-- Svelte is 30% faster than other frameworks.
+- This project was built primarily for the backend portion of this application. The frontend is just extra.
+- I love writing backend applications and wanted to try doing it with Rust. I instantly fell inlove with not only the speed of Rust, but it's simplicity and security when writing code.
 
 # API Showcase
  
