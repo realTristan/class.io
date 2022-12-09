@@ -176,13 +176,16 @@ impl lib::handlers::Database {
     // units and lessons.
     pub async fn get_class_data(&self, class_id: &str) -> String {
         let class = self.get_class_basic_data(class_id).await;
+        // If the class doesn't exist, return an empty
+        // json map. This is required before proceeding 
+        // with anything else to avoid errors
+        if class.is_none() { return "{}".to_string() }
+
+        // If the class does exist, get all of it's data
         let units = self.get_class_units(class_id).await;
         let whitelist = self.get_class_whitelist(class_id).await;
         let announcements = self.get_class_announcements(class_id).await;
-        // If the class is non existent, then return
-        // an empty json map. This is required before
-        // proceeding with anything else to avoid errors
-        if class.is_none() { return "{}".to_string() }
+
         // Else, unwrap the class data so that
         // it can be used in the response json
         let class: Class = class.unwrap();
