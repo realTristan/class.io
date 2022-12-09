@@ -53,11 +53,15 @@ impl lib::handlers::Database {
     // The insert_class_unit() function is used to insert a new
     // unit into the database for the provided class. Students who
     // visit the class through the website, will see this unit appear.
-    pub async fn insert_class_unit(&self, user_hash: &str, unit_hash: &str, class_hash: &str, data: &Json<UnitDataBody>) -> u64 {
+    pub async fn insert_class_unit(
+        &self, user_hash: &str, unit_hash: &str, class_hash: &str, unit_name: &str
+    ) -> u64 {
+        if self.unit_exists(unit_hash).await { return 0; }
+        
         // Insert the data into the database
         let r = sqlx::query!(
             "INSERT INTO units (owner_hash, class_hash, unit_hash, unit_name, locked) VALUES (?, ?, ?, ?, ?)", 
-            user_hash, class_hash, unit_hash, data.unit_name, 0
+            user_hash, class_hash, unit_hash, unit_name, 0
         ).execute(&self.conn).await;
 
         // If an error has occurred, return 0 rows affected
@@ -67,13 +71,25 @@ impl lib::handlers::Database {
         return r.unwrap().rows_affected();
     }
 
+    // The unit_exists() function is used to check whether
+    // the provided unit hash already exists. This function
+    // is called in the insert_class_unit() function.
+    async fn unit_exists(&self, unit_hash: &str) -> bool {
+        // Query the database
+        let r = sqlx::query!(
+            "SELECT * FROM units WHERE unit_hash=?", unit_hash
+        ).fetch_one(&self.conn).await;
+        // Return whether valid query data has been obtained
+        return !r.is_err();
+    }
+
     // The delete_class_unit() function is used to delete a unit
     // from the units column wherever the provided unit_hash
     // is present. A maximum of 12 units is allowed per class.
-    pub async fn delete_class_unit(&self, user_hash: &str, data: &Json<UnitDataBody>) -> u64 {
+    pub async fn delete_class_unit(&self, user_hash: &str, unit_hash: &str) -> u64 {
         let r = sqlx::query!(
             "DELETE FROM units WHERE unit_hash=? AND owner_hash=?", 
-            data.unit_hash, user_hash
+            unit_hash, user_hash
         ).execute(&self.conn).await;
 
         // If an error has occurred, return 0 rows affected
@@ -87,7 +103,7 @@ impl lib::handlers::Database {
     // unit data replacing the current data, with that of the provided
     // Json<UnitDataBody> values. In order to prevent null values
     // being updated, the function first determines which values are null.
-    pub async fn update_class_unit(&self, data: &Json<UnitDataBody>) -> u64 {
+    pub async fn update_class_unit(&self, user_hash: &str, data: &Json<UnitDataBody>) -> u64 {
         let mut res: String = String::new();
         // If the provided data's enable_whitelist integer bool
         // isn't invalid (equal to 2) then append the

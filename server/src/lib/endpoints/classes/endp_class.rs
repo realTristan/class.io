@@ -106,7 +106,7 @@ async fn insert_class_data(
         return "{}".to_string() 
     }
     // Insert the class data into the database
-    let r: u64 = db.insert_class_data(&user, &class_hash, &body).await;
+    let r: u64 = db.insert_class_data(&user, &class_hash, &body.class_name).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0)
 }

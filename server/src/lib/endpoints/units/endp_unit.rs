@@ -19,14 +19,14 @@ pub struct UnitDataBody {
     pub locked: i64
 }
 
-// The add_class_unit() endpoint is used to create
+// The insert_class_unit() endpoint is used to create
 // a new unit for the provided class. Using the 
 // provided class_hash the function will generate
 // a unique unit identifier using the following format:
 // SHA256(class_hash:current_time)
-#[actix_web::put("/class/{class_hash}/units/{unit_hash}")]
-async fn add_class_unit(
-    req: HttpRequest, db: web::Data<Database>, class_hash: web::Path<String>, unit_hash: web::Path<String>, body: web::Json<UnitDataBody>
+#[actix_web::put("/class/{class_hash}/units/")]
+async fn insert_class_unit(
+    req: HttpRequest, db: web::Data<Database>, class_hash: web::Path<String>, body: web::Json<UnitDataBody>
 ) -> impl Responder {
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
@@ -38,6 +38,11 @@ async fn add_class_unit(
     // This also acts as a bearer token from the encoded firebase token
     // which verifies that the user using this endpoint is the owner.
 
+    // Generate a new unit hash. Generate a unit hash inside the api
+    // so that if someone finds a way to abuse the api, they can't just
+    // use an existing unit hash.
+    let unit_hash: String = global::generate_new_hash(&class_hash);
+
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
@@ -45,7 +50,7 @@ async fn add_class_unit(
         return "{}".to_string()
     }
     // Insert the unit data into the database
-    let r: u64 = db.insert_class_unit(&user, &unit_hash, &class_hash, &body).await;
+    let r: u64 = db.insert_class_unit(&user, &unit_hash, &class_hash, &body.unit_name).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0)
 }
@@ -73,7 +78,7 @@ async fn delete_class_unit(
         return "{}".to_string()
     }
     // Insert the unit data into the database
-    let r: u64 = db.delete_class_unit(&user, &body).await;
+    let r: u64 = db.delete_class_unit(&user, &body.unit_hash).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0)
 }

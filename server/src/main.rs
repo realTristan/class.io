@@ -36,7 +36,7 @@ async fn main() -> std::io::Result<()> {
             .service(endp_class::insert_class_data)
 
             // Class Units
-            .service(endp_unit::add_class_unit)
+            .service(endp_unit::insert_class_unit)
             .service(endp_unit::delete_class_unit)
             .service(endp_unit::update_class_unit)
 

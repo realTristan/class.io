@@ -80,18 +80,33 @@ impl lib::handlers::Database {
     // class identifier, format the user_hash with the current
     // time in nanoseconds.
     pub async fn insert_class_data(
-        &self, user_hash: &str, class_hash: &str, data: &Json<ClassDataBody>
+        &self, user_hash: &str, class_hash: &str, class_name: &str
     ) -> u64 {
+        // If the class already exists, return the function.
+        if self.class_exists(class_hash).await { return 0; }
+
         // Query the database
         let r = sqlx::query!(
             "INSERT INTO classes (owner_hash, class_hash, class_name, rsl, enable_whitelist) VALUES (?, ?, ?, ?, ?)",
-            user_hash, class_hash, data.class_name, 0, 0
+            user_hash, class_hash, class_name, 0, 0
         ).execute(&self.conn).await;
 
         // If an error has occurred, return 0 rows affected
         if r.is_err() { return 0; }
         // Else, return the amount of affected rows
         return r.unwrap().rows_affected();
+    }
+
+    // The class_exists() function is used to check whether
+    // the provided class hash already exists. This function
+    // is called in the insert_class_data() function.
+    async fn class_exists(&self, class_hash: &str) -> bool {
+        // Query the database
+        let r = sqlx::query!(
+            "SELECT * FROM classes WHERE class_hash=?", class_hash
+        ).fetch_one(&self.conn).await;
+        // Return whether valid query data has been obtained
+        return !r.is_err();
     }
 
     // The get_class_update_query() function is used

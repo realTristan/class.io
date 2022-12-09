@@ -1,6 +1,4 @@
-use actix_web::web::Json;
-use crate::lib;
-use super::endp_submissions::SubmissionDataBody;
+use crate::lib::{self, global};
 
 // The Submission data struct is used to store
 // the work: submitter_hash, submissions_hash,
@@ -49,21 +47,18 @@ impl lib::handlers::Database {
     // a unique submission hash before inserting the data, which
     // is used within the delete_class_submission() function
     pub async fn insert_class_submission(
-        &self, user_hash: &str, class_hash: &str, data: &Json<SubmissionDataBody>
+        &self, class_hash: &str, submission_hash: &str, submitter_hash: &str, data: &str
     ) -> u64 {
-        // Get the current time since epoch. This duration is later converted
-        // into nanoseconds to ensure that the class hash is 100% unique.
-        let time: std::time::Duration = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH).unwrap();
-        // Generate a new hash using the provided
-        // class hash, and the current time as nanoseconds.
-        let submission_hash: String = format!("{}:{}", data.submitter_hash, time.as_nanos());
-        let date: i64 = time.as_secs() as i64;
+        // If the submission already exists, return
+        if self.class_submission_exists(submission_hash).await { return 0; }
+
+        // Get the current date to put into the database
+        let date: i64 = global::get_time() as i64;
 
         // Insert the data into the database
         let r = sqlx::query!(
-            "INSERT INTO submissions (user_hash, class_hash, submission_hash, submitter_hash, submission_date, data) VALUES (?, ?, ?, ?, ?)", 
-            user_hash, class_hash, submission_hash, data.submitter_hash, date, data.data
+            "INSERT INTO submissions (class_hash, submission_hash, submitter_hash, submission_date, data) VALUES (?, ?, ?, ?, ?)", 
+            class_hash, submission_hash, submitter_hash, date, data
         ).execute(&self.conn).await;
 
         // If an error has occurred, return 0 rows affected
@@ -73,18 +68,30 @@ impl lib::handlers::Database {
         return r.unwrap().rows_affected();
     }
 
+    // The class_submission_exists() function is used to check whether
+    // the provided submission hash already exists. This function
+    // is called in the insert_class_submission() function.
+    async fn class_submission_exists(&self, submission_hash: &str) -> bool {
+        // Query the database
+        let r = sqlx::query!(
+            "SELECT * FROM submissions WHERE submission_hash=?", submission_hash
+        ).fetch_one(&self.conn).await;
+        // Return whether valid query data has been obtained
+        return !r.is_err();
+    }
+
     // The delete_class_submission() function is used to
     // delete a submission from the database. This function
     // is called when a student wants to unsubmit a portion
     // of their work.
     pub async fn delete_class_submission(
-        &self, user_hash: &str, data: &Json<SubmissionDataBody>
+        &self, submitter_hash: &str, submission_hash: &str
     ) -> u64 {
         // Query the database, deleting all data revolving around
         // the provided submission hash
         let r = sqlx::query!(
-            "DELETE FROM submissions WHERE submission_hash=? AND owner_hash=?", 
-            data.submission_hash, user_hash
+            "DELETE FROM submissions WHERE submission_hash=? AND submitter_hash=?", 
+            submission_hash, submitter_hash
         ).execute(&self.conn).await;
 
         // If an error has occurred, return 0 rows affected

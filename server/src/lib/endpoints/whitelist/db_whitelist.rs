@@ -1,6 +1,4 @@
-use actix_web::web::Json;
 use crate::lib;
-use super::endp_whitelist::WhitelistDataBody;
 
 // The Whitelist data struct is used for querying
 // the whitelisted users for a specific class.
@@ -28,11 +26,11 @@ impl lib::handlers::Database {
     // an user from the provided class's whitelist. This
     // user can no longer access the provided class.
     pub async fn delete_from_class_whitelist(
-        &self, user_hash: &str, class_hash: &str, data: Json<WhitelistDataBody>
+        &self, user_hash: &str, class_hash: &str, user: &str
     ) -> u64 {
         let r = sqlx::query!(
             "DELETE FROM whitelists WHERE owner_hash=? AND class_hash=? AND whitelisted_user=?", 
-            user_hash, class_hash, data.user
+            user_hash, class_hash, user
         ).execute(&self.conn).await;
 
         // If an error has occurred, return 0 rows affected
@@ -47,11 +45,11 @@ impl lib::handlers::Database {
     // whitelist can access the class info. The whitelist only
     // works if the teacher has enabled the class whitelist setting
     pub async fn insert_class_whitelist(
-        &self, user_hash: &str, class_hash: &str, data: Json<WhitelistDataBody>
+        &self, user_hash: &str, class_hash: &str, user: &str
     ) -> u64 {
         let r = sqlx::query!(
             "INSERT INTO whitelists (owner_hash, class_hash, whitelisted_user) VALUES (?, ?, ?)", 
-            user_hash, class_hash, data.user
+            user_hash, class_hash, user
         ).execute(&self.conn).await;
 
         // If an error has occurred, return 0 rows affected

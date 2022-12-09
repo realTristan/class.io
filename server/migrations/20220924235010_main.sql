@@ -78,7 +78,6 @@ CREATE TABLE lessons (
 -- endpoint: get_unit_submissions
 CREATE TABLE submissions (
     id INTEGER PRIMARY KEY,
-    owner_hash TEXT NOT NULL,               -- used to verify bearer
     class_hash TEXT NOT NULL,               -- class_hash:user_hash:time.time()
     submission_hash TEXT NOT NULL,
 

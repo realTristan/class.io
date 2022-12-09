@@ -8,7 +8,6 @@ use super::endp_announces::AnnouncementDataBody;
 // along with any attachments the author has posted with it.
 pub struct Announcement {
     // The announcement's author name
-    // Use the get_user_data endpoint to get this
     author_name: String,
     // The announcement title
     title: String,
@@ -27,17 +26,19 @@ impl lib::handlers::Database {
     // their announcement, they can. Along with this, a post
     // date is also inserted into the database.
     pub async fn insert_class_announcement(
-        &self, user_hash: &str, class_hash: &str, data: &Json<AnnouncementDataBody>
+        &self, user_hash: &str, class_hash: &str, announcement_hash: &str, data: &Json<AnnouncementDataBody>
     ) -> u64 {
-        // Create a new unique identifier for the announcement post
-        let announcement_hash: String = global::generate_new_hash(class_hash);
+        // If the announcement hash already exists, return the function
+        if self.class_announcement_exists(announcement_hash).await { return 0; }
+
+        // Get the current date of the announcement post
         let date: i64 = global::get_time() as i64;
         
         // Query the database, inserting the new announcement
         // along with all of it's data.
         let r = sqlx::query!(
             "INSERT INTO announcements (owner_hash, class_hash, announcement_hash, author_name, title, description, attachment, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
-            class_hash, announcement_hash, data.author_name, data.title, data.description, data.attachment, date
+            user_hash, class_hash, announcement_hash, data.author_name, data.title, data.description, data.attachment, date
         ).execute(&self.conn).await;
         // If an error has occurred, return 0 rows affected
         if r.is_err() { return 0; }
@@ -45,17 +46,29 @@ impl lib::handlers::Database {
         return r.unwrap().rows_affected();
     }
 
+    // The class_announcement_exists() function is used to check whether
+    // the provided announcement hash already exists. This function
+    // is called in the insert_class_announcement() function.
+    async fn class_announcement_exists(&self, announcement_hash: &str) -> bool {
+        // Query the database
+        let r = sqlx::query!(
+            "SELECT * FROM announcements WHERE announcement_hash=?", announcement_hash
+        ).fetch_one(&self.conn).await;
+        // Return whether valid query data has been obtained
+        return !r.is_err();
+    }
+
     // The delete_class_announcement() function is used
     // to delete a specific announcement post using
     // the provided announcement_hash.
     pub async fn delete_class_announcement(
-        &self, user_hash: &str, data: &Json<AnnouncementDataBody>
+        &self, user_hash: &str, announcement_hash: &str
     ) -> u64 {
         // Query the database, deleting the announcement with
         // the incoming requests data.announcement_hash
         let r = sqlx::query!(
             "DELETE FROM announcements WHERE announcement_hash=? AND owner_hash=?", 
-            data.announcement_hash, user_hash
+            announcement_hash, user_hash
         ).execute(&self.conn).await;
         // If an error has occurred, return 0 rows affected
         if r.is_err() { return 0; }

@@ -25,9 +25,10 @@ pub struct AnnouncementDataBody {
 // to insert a new announcement into the database.
 // A unique announcement identifier is created
 // for if the user wants to later delete the post.
-#[actix_web::put("/class/{class_hash}/announcements")]
+#[actix_web::put("/class/{class_hash}/announcements/{announcement_hash}")]
 async fn insert_class_announcement(
-    req: HttpRequest, db: web::Data<Database>, class_hash: web::Path<String>, body: web::Json<AnnouncementDataBody>
+    req: HttpRequest, db: web::Data<Database>, class_hash: web::Path<String>, 
+    announcement_hash: web::Path<String>, body: web::Json<AnnouncementDataBody>
 ) -> impl Responder {
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
@@ -45,7 +46,9 @@ async fn insert_class_announcement(
     if !lib::auth::verify(&user, access_token) { 
         return "{}".to_string()
     }
-    let r: u64 = db.insert_class_announcement(&user, &class_hash, &body).await;
+    let r: u64 = db.insert_class_announcement(
+        &user, &class_hash, &announcement_hash, &body
+    ).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0)
 }
@@ -75,7 +78,7 @@ async fn delete_class_announcement(
     if !lib::auth::verify(&user, access_token) { 
         return "{}".to_string()
     }
-    let r: u64 = db.delete_class_announcement(&user, &body).await;
+    let r: u64 = db.delete_class_announcement(&user, &body.announcement_hash).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0)
 }

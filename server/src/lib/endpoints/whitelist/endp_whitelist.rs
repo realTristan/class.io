@@ -37,7 +37,7 @@ async fn add_to_class_whitelist(
         return "{}".to_string()
     }
     // Insert the whitelist data into the database
-    let r: u64 = db.insert_class_whitelist(&user, &class_hash, body).await;
+    let r: u64 = db.insert_class_whitelist(&user, &class_hash, &body.user).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0)
 }
@@ -63,7 +63,7 @@ async fn delete_from_class_whitelist(
         return "{}".to_string()
     }
     // Delete the whitelist data into the database
-    let r: u64 = db.delete_from_class_whitelist(&user, &class_hash, body).await;
+    let r: u64 = db.delete_from_class_whitelist(&user, &class_hash, &body.user).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0)
 }

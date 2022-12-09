@@ -8,8 +8,7 @@ use crate::lib;
 // the easiest way for reading what modifications
 // to make within the database
 #[derive(serde::Deserialize)]
-pub struct SubmissionDataBody { 
-    pub submitter_hash: String,
+pub struct SubmissionDataBody {
     pub submission_hash: String,
     pub data: String
 }
@@ -74,9 +73,10 @@ async fn get_user_submissions(
 // to insert a new submission into the database.
 // This endpoint requires a bearer token, therefore
 // the student submitting their work must be signed in.
-#[actix_web::put("/class/{class_hash}/submissions")]
+#[actix_web::put("/class/{class_hash}/submissions/{submission_hash}")]
 async fn insert_class_submission(
-    req: HttpRequest, db: web::Data<Database>, class_hash: web::Path<String>, body: web::Json<SubmissionDataBody>
+    req: HttpRequest, db: web::Data<Database>, class_hash: web::Path<String>, 
+    submission_hash: web::Path<String>, body: web::Json<SubmissionDataBody>
 ) -> impl Responder {
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
@@ -95,7 +95,7 @@ async fn insert_class_submission(
         return "{}".to_string()
     }
     // Insert the submission data into the database
-    let r: u64 = db.insert_class_submission(&user, &class_hash, &body).await;
+    let r: u64 = db.insert_class_submission(&class_hash, &submission_hash, &user, &body.data).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0)
 }
@@ -104,9 +104,9 @@ async fn insert_class_submission(
 // delete a submission from the database. This endpoint
 // is called when the signed in student wants to undo
 // their work submission.
-#[actix_web::delete("/class/{class_hash}/submissions")]
+#[actix_web::delete("/class/{class_hash}/submissions/{submission_hash}")]
 async fn delete_class_submission(
-    req: HttpRequest, db: web::Data<Database>, body: web::Json<SubmissionDataBody>
+    req: HttpRequest, db: web::Data<Database>, submission_hash: web::Path<String>, body: web::Json<SubmissionDataBody>
 ) -> impl Responder {
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
@@ -125,7 +125,7 @@ async fn delete_class_submission(
         return "{}".to_string()
     }
     // Delete the submission data from the database
-    let r: u64 = db.delete_class_submission(&user, &body).await;
+    let r: u64 = db.delete_class_submission(&user, &submission_hash).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0)
 }
