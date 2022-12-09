@@ -4,6 +4,7 @@
 # About
 - This project was built primarily for the backend portion of this application. The frontend is just extra.
 - I love writing backend applications and wanted to try doing it with Rust. I instantly fell inlove with not only the speed of Rust, but it's simplicity and security when writing code.
+- The database uses sqlite with sqlx (https://github.com/launchbadge/sqlx/tree/main/examples/sqlite/todos)
 
 # API Showcase
  
