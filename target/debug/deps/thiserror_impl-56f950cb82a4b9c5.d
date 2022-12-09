@@ -1,0 +1,12 @@
+/Users/tristan/Desktop/class.io/server/target/debug/deps/libthiserror_impl-56f950cb82a4b9c5.dylib: /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.36/src/lib.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.36/src/ast.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.36/src/attr.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.36/src/expand.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.36/src/fmt.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.36/src/generics.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.36/src/prop.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.36/src/valid.rs
+
+/Users/tristan/Desktop/class.io/server/target/debug/deps/thiserror_impl-56f950cb82a4b9c5.d: /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.36/src/lib.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.36/src/ast.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.36/src/attr.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.36/src/expand.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.36/src/fmt.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.36/src/generics.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.36/src/prop.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.36/src/valid.rs
+
+/Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.36/src/lib.rs:
+/Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.36/src/ast.rs:
+/Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.36/src/attr.rs:
+/Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.36/src/expand.rs:
+/Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.36/src/fmt.rs:
+/Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.36/src/generics.rs:
+/Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.36/src/prop.rs:
+/Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/thiserror-impl-1.0.36/src/valid.rs:

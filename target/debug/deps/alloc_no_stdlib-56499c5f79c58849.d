@@ -1,0 +1,10 @@
+/Users/tristan/Desktop/class.io/server/target/debug/deps/alloc_no_stdlib-56499c5f79c58849.rmeta: /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/alloc-no-stdlib-2.0.4/src/lib.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/alloc-no-stdlib-2.0.4/src/allocated_memory/mod.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/alloc-no-stdlib-2.0.4/src/allocated_memory/index_macro.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/alloc-no-stdlib-2.0.4/src/stack_allocator.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/alloc-no-stdlib-2.0.4/src/allocated_stack_memory.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/alloc-no-stdlib-2.0.4/src/init.rs
+
+/Users/tristan/Desktop/class.io/server/target/debug/deps/alloc_no_stdlib-56499c5f79c58849.d: /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/alloc-no-stdlib-2.0.4/src/lib.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/alloc-no-stdlib-2.0.4/src/allocated_memory/mod.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/alloc-no-stdlib-2.0.4/src/allocated_memory/index_macro.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/alloc-no-stdlib-2.0.4/src/stack_allocator.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/alloc-no-stdlib-2.0.4/src/allocated_stack_memory.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/alloc-no-stdlib-2.0.4/src/init.rs
+
+/Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/alloc-no-stdlib-2.0.4/src/lib.rs:
+/Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/alloc-no-stdlib-2.0.4/src/allocated_memory/mod.rs:
+/Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/alloc-no-stdlib-2.0.4/src/allocated_memory/index_macro.rs:
+/Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/alloc-no-stdlib-2.0.4/src/stack_allocator.rs:
+/Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/alloc-no-stdlib-2.0.4/src/allocated_stack_memory.rs:
+/Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/alloc-no-stdlib-2.0.4/src/init.rs:

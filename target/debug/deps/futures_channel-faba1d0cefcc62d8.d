@@ -1,0 +1,10 @@
+/Users/tristan/Desktop/class.io/server/target/debug/deps/futures_channel-faba1d0cefcc62d8.rmeta: /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-channel-0.3.24/src/lib.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-channel-0.3.24/src/lock.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-channel-0.3.24/src/mpsc/mod.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-channel-0.3.24/src/mpsc/queue.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-channel-0.3.24/src/mpsc/sink_impl.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-channel-0.3.24/src/oneshot.rs
+
+/Users/tristan/Desktop/class.io/server/target/debug/deps/futures_channel-faba1d0cefcc62d8.d: /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-channel-0.3.24/src/lib.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-channel-0.3.24/src/lock.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-channel-0.3.24/src/mpsc/mod.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-channel-0.3.24/src/mpsc/queue.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-channel-0.3.24/src/mpsc/sink_impl.rs /Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-channel-0.3.24/src/oneshot.rs
+
+/Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-channel-0.3.24/src/lib.rs:
+/Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-channel-0.3.24/src/lock.rs:
+/Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-channel-0.3.24/src/mpsc/mod.rs:
+/Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-channel-0.3.24/src/mpsc/queue.rs:
+/Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-channel-0.3.24/src/mpsc/sink_impl.rs:
+/Users/tristan/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-channel-0.3.24/src/oneshot.rs:
