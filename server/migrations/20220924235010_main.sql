@@ -47,7 +47,6 @@ CREATE TABLE classes (
     class_id TEXT NOT NULL,           -- bearer:time.time()
 
     class_name TEXT NOT NULL,           -- Ex: MHF4UI
-    rsl INTEGER NOT NULL,               -- Require Student Login BOOL
     enable_whitelist INTEGER NOT NULL   -- Whether to use the whitelist for this class
 );
 

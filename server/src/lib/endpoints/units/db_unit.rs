@@ -111,7 +111,7 @@ impl lib::handlers::Database {
         if data.unit_name.len() > 0 {
             res.push_str(&format!("unit_name='{}',", data.unit_name));
         }
-        // If the provided data's rsl integer bool
+        // If the provided data's locked integer bool
         // isn't invalid (equal to 2) then append the
         // updated value to the result string
         if data.locked != 2 { // 2 == Invalid

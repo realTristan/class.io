@@ -12,14 +12,12 @@ pub struct ClassDataBody {
     // Update the class name
     pub class_name: String,
     // Update whether to use the class whitelist
-    pub enable_whitelist: i64,
-    // Update whether to require student logins
-    pub rsl: i64
+    pub enable_whitelist: i64
 }
 
 // The get_class_data() endpoint is used to get the class's
-// whitelist[String Array], announcements, rsl[bool], 
-// class_name, enable_whitelist[bool]
+// whitelist[String Array], announcements, class_name,
+// enable_whitelist[bool], etc.
 #[actix_web::get("/class/{class_id}")]
 async fn get_class_data(
     req: HttpRequest, db: web::Data<Database>, class_id: web::Path<String>

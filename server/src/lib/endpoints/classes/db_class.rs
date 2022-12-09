@@ -5,13 +5,12 @@ use crate::lib;
 // The Class data struct is used to store
 // the classes owner_bearer, unique class identifier,
 // class name, class whitelist array, class announcements,
-// rsl bool, and the class units.
+// and the class units.
 pub struct Class {
     // The Class Name
     class_name: String,
-    // Whether the students need to be logged in to
-    // access this class
-    rsl: i64,
+    // Unique class owner identifier
+    owner_id: String,
     // Whether to the use the class whitelist
     enable_whitelist: i64,
 }
@@ -27,7 +26,7 @@ impl lib::handlers::Database {
 
         // Insert into CLASSES column
         sqlx::query!(
-            "INSERT INTO classes (owner_bearer, class_id, class_name, rsl, enable_whitelist) VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO classes (owner_bearer, class_id, class_name, enable_whitelist) VALUES (?, ?, ?, ?, ?)",
             "822f3d5b9c91b570a4f1848c5d147b4709d2fb96", "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020", "Advanced Functions", 0, 0
         ).execute(&self.conn).await.unwrap();
 
@@ -87,8 +86,8 @@ impl lib::handlers::Database {
 
         // Query the database
         let r = sqlx::query!(
-            "INSERT INTO classes (owner_bearer, owner_id, class_id, class_name, rsl, enable_whitelist) VALUES (?, ?, ?, ?, ?, ?)",
-            bearer, owner_id, class_id, class_name, 0, 0
+            "INSERT INTO classes (owner_bearer, owner_id, class_id, class_name, enable_whitelist) VALUES (?, ?, ?, ?, ?)",
+            bearer, owner_id, class_id, class_name, 0
         ).execute(&self.conn).await;
 
         // If an error has occurred, return 0 rows affected
@@ -124,12 +123,6 @@ impl lib::handlers::Database {
         // VALUE IS INVALID NOT 2
         if data.enable_whitelist != 2 { // 2 == Invalid
             res.push_str(&format!("enable_whitelist={},", data.enable_whitelist));
-        }
-        // If the provided data's rsl integer bool
-        // isn't invalid (equal to 2) then append the
-        // updated value to the result string
-        if data.rsl != 2 { // 2 == Invalid
-            res.push_str(&format!("rsl={},", data.rsl));
         }
         // If the provided data's class_name length
         // is valid (greater than 0) then append the
@@ -168,7 +161,7 @@ impl lib::handlers::Database {
         // Get the class primary data. This includes the class:
         // class_name, whitelist[bool], rls[bool], and class_id
         let r = sqlx::query_as!(
-            Class, "SELECT class_name, rsl, enable_whitelist FROM classes WHERE class_id=?", class_id
+            Class, "SELECT class_name, owner_id, enable_whitelist FROM classes WHERE class_id=?", class_id
         ).fetch_one(&self.conn).await;
         // Return empty if an error has occurred
         if r.is_err() { return None; }
@@ -197,15 +190,15 @@ impl lib::handlers::Database {
         // Return a formatted string of all the class data
         return format!(
             "{{
-                \"class_id\": \"{}\", 
-                \"class_name\": \"{}\", 
-                \"enable_whitelist\":{}, 
-                \"rsl\":{}, 
-                \"units\": [{}], 
-                \"whitelist\": [{}], 
+                \"class_id\": \"{}\",
+                \"owner_id\": \"{}\",
+                \"class_name\": \"{}\",
+                \"enable_whitelist\":{},
+                \"units\": [{}],
+                \"whitelist\": [{}],
                 \"announcements\": [{}]
             }}", 
-            class_id, class.class_name, class.enable_whitelist==1, class.rsl==1, 
+            class_id, class.owner_id, class.class_name, class.enable_whitelist==1, 
             self.get_units_json(units).await, self.get_whitelist_json(whitelist), self.get_announcements_json(announcements),
         );
     }
