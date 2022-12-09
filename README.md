@@ -1,5 +1,5 @@
 # class.io ![Stars](https://img.shields.io/github/stars/realTristan/class.io?color=brightgreen) ![Watchers](https://img.shields.io/github/watchers/realTristan/class.io?label=Watchers)
-
+This project was built primarily for the backend portion of this application. The frontend is just extra.
 ![Capture](https://user-images.githubusercontent.com/75189508/193428491-28348d48-5a33-4975-8dfa-9c339f8f9db4.PNG)
 
 # About
