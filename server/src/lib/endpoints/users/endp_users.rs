@@ -10,14 +10,14 @@ use crate::lib;
 #[derive(serde::Deserialize)]
 pub struct UserDataBody { user_name: String, email: String }
 
-// The GET /user/<user_hash> endpoint is used
+// The GET /user/<bearer> endpoint is used
 // to get an users dashboard settings through their
-// user_hash. This function is necessary for the frontend
+// bearer. This function is necessary for the frontend
 // dashboard page. To ensure the security of the endpoint,
 //  a valid auth token is required.
-#[actix_web::get("/user/{user_hash}")]
+#[actix_web::get("/user/{bearer}")]
 pub async fn get_user_data(
-    req: HttpRequest, db: web::Data<Database>, user_hash: web::Path<String>
+    req: HttpRequest, db: web::Data<Database>, bearer: web::Path<String>
 ) -> impl Responder {
     // Get the access token from the request headers. 
     // This tokens is used to make sure that the incoming 
@@ -26,12 +26,12 @@ pub async fn get_user_data(
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(&user_hash, authorization) { return "{}".to_string()}
+    if !lib::auth::verify(&bearer, authorization) { return "{}".to_string()}
 
     // Once the request has been verified, query the
-    // database for the provided user_hash. Once found,
+    // database for the provided bearer. Once found,
     // return all the data from said user.
-    let user = db.query_user_by_hash(&user_hash).await;
+    let user = db.query_user_by_id(&bearer).await;
     // Check whether or not the user is invalid
     if user.is_none() { return "{}".to_string() }
     // Else, if the user is valid, unwrap the
@@ -42,19 +42,19 @@ pub async fn get_user_data(
     // so the frontend can successfully read the
     // response data.
     return format!(
-        "{{\"authorization\": \"{}\", \"user_hash\": \"{}\", \"user_name\": \"{}\", \"classes\": {}}}", 
-            authorization, user_hash, user.user_name, "array of the users class_hashes (select from classes where user_hash = user_hash)"
+        "{{\"authorization\": \"{}\", \"bearer\": \"{}\", \"user_name\": \"{}\", \"classes\": {}}}", 
+            authorization, bearer, user.user_name, "array of the users class_ides (select from classes where bearer = bearer)"
     )
 }
 
-// The POST /user/{user_hash} endpoint is used
+// The POST /user/{bearer} endpoint is used
 // to get an users dashboard settings through their
-// user_hash. This function is necessary for the frontend
+// bearer. This function is necessary for the frontend
 // dashboard page. To ensure the security of the endpoint,
 // a valid auth token is required.
-#[actix_web::post("/user/{user_hash}")]
+#[actix_web::post("/user/{bearer}")]
 pub async fn update_user_data(
-    req: HttpRequest, db: web::Data<Database>, user_hash: web::Path<String>, body: web::Json<UserDataBody>
+    req: HttpRequest, db: web::Data<Database>, bearer: web::Path<String>, body: web::Json<UserDataBody>
 ) -> impl Responder {
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
@@ -68,7 +68,7 @@ pub async fn update_user_data(
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(&user_hash, authorization) { 
+    if !lib::auth::verify(&bearer, authorization) { 
         return "{}".to_string()
     }
     // If the incoming request doesn't contain
@@ -76,7 +76,7 @@ pub async fn update_user_data(
     if body.user_name.len() < 1 { return "{}".to_string() }
 
     // Else, update the users 'user_name' in the database
-    let r: u64 = db.update_user_name(&user_hash, &body.user_name).await;
+    let r: u64 = db.update_user_name(&bearer, &body.user_name).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0)
 }
@@ -87,9 +87,9 @@ pub async fn update_user_data(
 // provided email and the current date as the registration time.
 // This endpoint is called whenever an user logs into the website
 // using firebase google auth.
-#[actix_web::put("/user/{user_hash}")]
+#[actix_web::put("/user/{bearer}")]
 async fn insert_user_data(
-    req: HttpRequest, db: web::Data<Database>, user_hash: web::Path<String>, body: web::Json<UserDataBody>
+    req: HttpRequest, db: web::Data<Database>, bearer: web::Path<String>, body: web::Json<UserDataBody>
 ) -> String {
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
@@ -103,7 +103,7 @@ async fn insert_user_data(
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(&user_hash, authorization) { 
+    if !lib::auth::verify(&bearer, authorization) { 
         return "{}".to_string()
     }
     // Get the current system time. This is used
@@ -112,10 +112,10 @@ async fn insert_user_data(
     let time: u64 = global::get_time();
     
     // Insert the user into the database
-    // Along with this insertion is the user_hash, user_name
+    // Along with this insertion is the bearer, user_name
     // user's email and the time of registration
     let r: u64 = db.insert_user(
-        &user_hash, &body.user_name, 
+        &bearer, &body.user_name, 
         &body.email, time as i64
     ).await;
     // Return whether more than 0 rows were affected

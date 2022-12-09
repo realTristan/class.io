@@ -8,12 +8,12 @@ pub struct Whitelist { pub whitelisted_user: String }
 impl lib::handlers::Database {
     // The get_class_whitelist() function is used to return
     // an array containing all the users that are allowed to
-    // see the content within the provided class_hash
-    pub async fn get_class_whitelist(&self, class_hash: &str) -> Vec<Whitelist> {
+    // see the content within the provided class_id
+    pub async fn get_class_whitelist(&self, class_id: &str) -> Vec<Whitelist> {
         // Fetch all the whitelisted users that have
         // access to the provided class.
         let r = sqlx::query_as!(
-            Whitelist, "SELECT whitelisted_user FROM whitelists WHERE class_hash=?", class_hash
+            Whitelist, "SELECT whitelisted_user FROM whitelists WHERE class_id=?", class_id
         ).fetch_all(&self.conn).await;
         // Return empty if an error has occurred
         if r.is_err() { return vec![]; }
@@ -26,11 +26,11 @@ impl lib::handlers::Database {
     // an user from the provided class's whitelist. This
     // user can no longer access the provided class.
     pub async fn delete_from_class_whitelist(
-        &self, user_hash: &str, class_hash: &str, user: &str
+        &self, bearer: &str, class_id: &str, user: &str
     ) -> u64 {
         let r = sqlx::query!(
-            "DELETE FROM whitelists WHERE owner_hash=? AND class_hash=? AND whitelisted_user=?", 
-            user_hash, class_hash, user
+            "DELETE FROM whitelists WHERE owner_bearer=? AND class_id=? AND whitelisted_user=?", 
+            bearer, class_id, user
         ).execute(&self.conn).await;
 
         // If an error has occurred, return 0 rows affected
@@ -45,11 +45,11 @@ impl lib::handlers::Database {
     // whitelist can access the class info. The whitelist only
     // works if the teacher has enabled the class whitelist setting
     pub async fn insert_class_whitelist(
-        &self, user_hash: &str, class_hash: &str, user: &str
+        &self, bearer: &str, class_id: &str, user: &str
     ) -> u64 {
         let r = sqlx::query!(
-            "INSERT INTO whitelists (owner_hash, class_hash, whitelisted_user) VALUES (?, ?, ?)", 
-            user_hash, class_hash, user
+            "INSERT INTO whitelists (owner_bearer, class_id, whitelisted_user) VALUES (?, ?, ?)", 
+            bearer, class_id, user
         ).execute(&self.conn).await;
 
         // If an error has occurred, return 0 rows affected

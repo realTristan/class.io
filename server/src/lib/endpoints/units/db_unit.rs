@@ -24,7 +24,7 @@ pub struct Lesson {
 // lessons that come along with the unit.
 pub struct Unit {
     // The unique unit identifier
-    unit_hash: String,
+    unit_id: String,
     // The Unit's Name
     unit_name: String,
     // Whether students can access this unit yet
@@ -35,13 +35,13 @@ pub struct Unit {
 impl lib::handlers::Database {
     // The get_class_units() function is used to
     // easily get all the units corresponding with
-    // the provided class_hash.
-    pub async fn get_class_units(&self, class_hash: &str) -> Vec<Unit> {
+    // the provided class_id.
+    pub async fn get_class_units(&self, class_id: &str) -> Vec<Unit> {
         // Fetch all the units that are in the class.
         // By the end of the function, all the unit data
         // will be neatly categorized.
         let r = sqlx::query_as!(
-            Unit, "SELECT unit_hash, unit_name, locked FROM units WHERE class_hash=?", class_hash
+            Unit, "SELECT unit_id, unit_name, locked FROM units WHERE class_id=?", class_id
         ).fetch_all(&self.conn).await;
         // Return empty if an error has occurred
         if r.is_err() { return vec![]; }
@@ -54,14 +54,14 @@ impl lib::handlers::Database {
     // unit into the database for the provided class. Students who
     // visit the class through the website, will see this unit appear.
     pub async fn insert_class_unit(
-        &self, user_hash: &str, unit_hash: &str, class_hash: &str, unit_name: &str
+        &self, bearer: &str, unit_id: &str, class_id: &str, unit_name: &str
     ) -> u64 {
-        if self.unit_exists(unit_hash).await { return 0; }
+        if self.unit_exists(unit_id).await { return 0; }
         
         // Insert the data into the database
         let r = sqlx::query!(
-            "INSERT INTO units (owner_hash, class_hash, unit_hash, unit_name, locked) VALUES (?, ?, ?, ?, ?)", 
-            user_hash, class_hash, unit_hash, unit_name, 0
+            "INSERT INTO units (owner_bearer, class_id, unit_id, unit_name, locked) VALUES (?, ?, ?, ?, ?)", 
+            bearer, class_id, unit_id, unit_name, 0
         ).execute(&self.conn).await;
 
         // If an error has occurred, return 0 rows affected
@@ -74,22 +74,22 @@ impl lib::handlers::Database {
     // The unit_exists() function is used to check whether
     // the provided unit hash already exists. This function
     // is called in the insert_class_unit() function.
-    async fn unit_exists(&self, unit_hash: &str) -> bool {
+    async fn unit_exists(&self, unit_id: &str) -> bool {
         // Query the database
         let r = sqlx::query!(
-            "SELECT * FROM units WHERE unit_hash=?", unit_hash
+            "SELECT * FROM units WHERE unit_id=?", unit_id
         ).fetch_one(&self.conn).await;
         // Return whether valid query data has been obtained
         return !r.is_err();
     }
 
     // The delete_class_unit() function is used to delete a unit
-    // from the units column wherever the provided unit_hash
+    // from the units column wherever the provided unit_id
     // is present. A maximum of 12 units is allowed per class.
-    pub async fn delete_class_unit(&self, user_hash: &str, unit_hash: &str) -> u64 {
+    pub async fn delete_class_unit(&self, bearer: &str, unit_id: &str) -> u64 {
         let r = sqlx::query!(
-            "DELETE FROM units WHERE unit_hash=? AND owner_hash=?", 
-            unit_hash, user_hash
+            "DELETE FROM units WHERE unit_id=? AND owner_bearer=?", 
+            unit_id, bearer
         ).execute(&self.conn).await;
 
         // If an error has occurred, return 0 rows affected
@@ -103,7 +103,7 @@ impl lib::handlers::Database {
     // unit data replacing the current data, with that of the provided
     // Json<UnitDataBody> values. In order to prevent null values
     // being updated, the function first determines which values are null.
-    pub async fn update_class_unit(&self, user_hash: &str, data: &Json<UnitDataBody>) -> u64 {
+    pub async fn update_class_unit(&self, bearer: &str, data: &Json<UnitDataBody>) -> u64 {
         let mut res: String = String::new();
         // If the provided data's enable_whitelist integer bool
         // isn't invalid (equal to 2) then append the
@@ -122,11 +122,11 @@ impl lib::handlers::Database {
 
         // Query the database, updating all the values
         // in the above res: String that have the same
-        // unit_hash as the one provided
+        // unit_id as the one provided
         let r = sqlx::query(
             &format!(
-                "UPDATE units SET {} WHERE unit_hash='{}' AND owner_hash='{}'", 
-                res, data.unit_hash, user_hash
+                "UPDATE units SET {} WHERE unit_id='{}' AND owner_bearer='{}'", 
+                res, data.unit_id, bearer
             )
         ).execute(&self.conn).await;
 
@@ -136,9 +136,9 @@ impl lib::handlers::Database {
 
     // The get_unit_lessons() function is used to get all
     // the lesson data that comes with the provided unit hash.
-    async fn get_unit_lessons(&self, unit_hash: &str) -> Vec<Lesson> {
+    async fn get_unit_lessons(&self, unit_id: &str) -> Vec<Lesson> {
         let r = sqlx::query_as!(
-            Lesson, "SELECT title, description, video, work, work_solutions FROM lessons WHERE unit_hash=?", unit_hash
+            Lesson, "SELECT title, description, video, work, work_solutions FROM lessons WHERE unit_id=?", unit_id
         ).fetch_all(&self.conn).await;
         // Return empty if an error has occurred
         if r.is_err() { return vec![]; }
@@ -157,7 +157,7 @@ impl lib::handlers::Database {
         // string array of maps
         for u in units {
             // Get the lessons that correspond with the unit
-            let l: Vec<Lesson> = self.get_unit_lessons(&u.unit_hash).await;
+            let l: Vec<Lesson> = self.get_unit_lessons(&u.unit_id).await;
             // Append the unit json to the result string
             r.push_str(
                 &format!("{{

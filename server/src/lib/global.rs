@@ -30,10 +30,10 @@ pub fn get_time() -> u64 {
     return time.as_secs();
 }
 
-// The generate_new_hash() function is used to generate
-// a unique hash using the provided identifier (class_hash, user_hash, etc.)
+// The generate_new_id() function is used to generate
+// a unique hash using the provided identifier (class_id, bearer, etc.)
 // and the current time in nanoseconds.
-pub fn generate_new_hash(identifier: &str) -> String {
+pub fn generate_new_id(identifier: &str) -> String {
     // Get the current time since epoch. This duration is later converted
     // into nanoseconds to ensure that the class hash is 100% unique.
     let time: std::time::Duration = std::time::SystemTime::now()

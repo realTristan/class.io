@@ -10,7 +10,7 @@ use crate::lib;
 #[derive(serde::Deserialize)]
 pub struct AnnouncementDataBody { 
     // The announcements unique identifier
-    pub announcement_hash: String,
+    pub announcement_id: String,
     // The announcement attachment (image, file, etc.)
     pub attachment: String,
     // The announcement content/description
@@ -25,15 +25,15 @@ pub struct AnnouncementDataBody {
 // to insert a new announcement into the database.
 // A unique announcement identifier is created
 // for if the user wants to later delete the post.
-#[actix_web::put("/class/{class_hash}/announcements/{announcement_hash}")]
+#[actix_web::put("/class/{class_id}/announcements/{announcement_id}")]
 async fn insert_class_announcement(
-    req: HttpRequest, db: web::Data<Database>, class_hash: web::Path<String>, 
-    announcement_hash: web::Path<String>, body: web::Json<AnnouncementDataBody>
+    req: HttpRequest, db: web::Data<Database>, class_id: web::Path<String>, 
+    announcement_id: web::Path<String>, body: web::Json<AnnouncementDataBody>
 ) -> impl Responder {
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
-    let user: &str = global::get_header(&req, "user");
+    let bearer: &str = global::get_header(&req, "authorization");
     let access_token: &str = global::get_header(&req, "access_token");
     // the access token consists of the users sha256 encoded firebase token,
     // the current time, and a "super secret key".
@@ -43,11 +43,11 @@ async fn insert_class_announcement(
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(&user, access_token) { 
+    if !lib::auth::verify(&bearer, access_token) { 
         return "{}".to_string()
     }
     let r: u64 = db.insert_class_announcement(
-        &user, &class_hash, &announcement_hash, &body
+        &bearer, &class_id, &announcement_id, &body
     ).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0)
@@ -58,14 +58,14 @@ async fn insert_class_announcement(
 // to delete an announcement from the database. This
 // function requires a bearer token which means the
 // user making the announcement must be signed in.
-#[actix_web::delete("/class/{class_hash}/announcements")]
+#[actix_web::delete("/class/{class_id}/announcements")]
 async fn delete_class_announcement(
     req: HttpRequest, db: web::Data<Database>, body: web::Json<AnnouncementDataBody>
 ) -> impl Responder {
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
-    let user: &str = global::get_header(&req, "user");
+    let bearer: &str = global::get_header(&req, "authorization");
     let access_token: &str = global::get_header(&req, "access_token");
     // the access token consists of the users sha256 encoded firebase token,
     // the current time, and a "super secret key".
@@ -75,10 +75,10 @@ async fn delete_class_announcement(
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(&user, access_token) { 
+    if !lib::auth::verify(&bearer, access_token) { 
         return "{}".to_string()
     }
-    let r: u64 = db.delete_class_announcement(&user, &body.announcement_hash).await;
+    let r: u64 = db.delete_class_announcement(&bearer, &body.announcement_id).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0)
 }

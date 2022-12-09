@@ -22,7 +22,7 @@ lazy_static::lazy_static! {
 // provided auth token is valid. It does this by
 // checking whether the token has been created within
 // the past 8 seconds. If so, return true, else, return false.
-pub fn verify(user_hash: &str, access_token: &str) -> bool {
+pub fn verify(bearer: &str, access_token: &str) -> bool {
     // Lock the TOKEN STORAGE so we can access it's data
     let _token_storage = TOKEN_STORAGE.lock();
     // If an error has occurred, return false
@@ -39,7 +39,7 @@ pub fn verify(user_hash: &str, access_token: &str) -> bool {
     // This is required so that we can append the access_token
     // to the users token storage, or so that we can clear
     // the token storage if full.
-    let mut_storage: Option<&mut Vec<String>> = token_storage.get_mut(user_hash);
+    let mut_storage: Option<&mut Vec<String>> = token_storage.get_mut(bearer);
 
     // If the user doesn't already exist within the
     // token storage return true
@@ -47,7 +47,7 @@ pub fn verify(user_hash: &str, access_token: &str) -> bool {
         // Insert the user into the token storage
         // along with the current time and auth token
         token_storage.insert(
-            user_hash.to_string(), 
+            bearer.to_string(), 
             [time.to_string(), access_token.to_string()].to_vec()
         );
         // Return true as the token did not
@@ -65,7 +65,7 @@ pub fn verify(user_hash: &str, access_token: &str) -> bool {
     // Check whether the auth token was generated
     // within the past 8 seconds
     for i in 0..8 {
-        let gen: String = format!("{}:{}:{}", user_hash, time-i, SUPER_SECRET_CODE);
+        let gen: String = format!("{}:{}:{}", bearer, time-i, SUPER_SECRET_CODE);
         // If the provided auth token is equal to the
         // generated auth token, return true
         if access_token == sha256::digest(gen) {

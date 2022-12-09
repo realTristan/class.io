@@ -20,16 +20,16 @@ pub struct Announcement {
 // Database Implementation
 impl lib::handlers::Database {
     // The insert_class_announcement() function is used to
-    // create a new announcement for the provided class_hash.
+    // create a new announcement for the provided class_id.
     // A unique announcement identifier is created before hand
     // so that if the announcement author wants to delete
     // their announcement, they can. Along with this, a post
     // date is also inserted into the database.
     pub async fn insert_class_announcement(
-        &self, user_hash: &str, class_hash: &str, announcement_hash: &str, data: &Json<AnnouncementDataBody>
+        &self, bearer: &str, class_id: &str, announcement_id: &str, data: &Json<AnnouncementDataBody>
     ) -> u64 {
         // If the announcement hash already exists, return the function
-        if self.class_announcement_exists(announcement_hash).await { return 0; }
+        if self.class_announcement_exists(announcement_id).await { return 0; }
 
         // Get the current date of the announcement post
         let date: i64 = global::get_time() as i64;
@@ -37,8 +37,8 @@ impl lib::handlers::Database {
         // Query the database, inserting the new announcement
         // along with all of it's data.
         let r = sqlx::query!(
-            "INSERT INTO announcements (owner_hash, class_hash, announcement_hash, author_name, title, description, attachment, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
-            user_hash, class_hash, announcement_hash, data.author_name, data.title, data.description, data.attachment, date
+            "INSERT INTO announcements (owner_bearer, class_id, announcement_id, author_name, title, description, attachment, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
+            bearer, class_id, announcement_id, data.author_name, data.title, data.description, data.attachment, date
         ).execute(&self.conn).await;
         // If an error has occurred, return 0 rows affected
         if r.is_err() { return 0; }
@@ -49,10 +49,10 @@ impl lib::handlers::Database {
     // The class_announcement_exists() function is used to check whether
     // the provided announcement hash already exists. This function
     // is called in the insert_class_announcement() function.
-    async fn class_announcement_exists(&self, announcement_hash: &str) -> bool {
+    async fn class_announcement_exists(&self, announcement_id: &str) -> bool {
         // Query the database
         let r = sqlx::query!(
-            "SELECT * FROM announcements WHERE announcement_hash=?", announcement_hash
+            "SELECT * FROM announcements WHERE announcement_id=?", announcement_id
         ).fetch_one(&self.conn).await;
         // Return whether valid query data has been obtained
         return !r.is_err();
@@ -60,15 +60,15 @@ impl lib::handlers::Database {
 
     // The delete_class_announcement() function is used
     // to delete a specific announcement post using
-    // the provided announcement_hash.
+    // the provided announcement_id.
     pub async fn delete_class_announcement(
-        &self, user_hash: &str, announcement_hash: &str
+        &self, bearer: &str, announcement_id: &str
     ) -> u64 {
         // Query the database, deleting the announcement with
-        // the incoming requests data.announcement_hash
+        // the incoming requests data.announcement_id
         let r = sqlx::query!(
-            "DELETE FROM announcements WHERE announcement_hash=? AND owner_hash=?", 
-            announcement_hash, user_hash
+            "DELETE FROM announcements WHERE announcement_id=? AND owner_bearer=?", 
+            announcement_id, bearer
         ).execute(&self.conn).await;
         // If an error has occurred, return 0 rows affected
         if r.is_err() { return 0; }
@@ -78,12 +78,12 @@ impl lib::handlers::Database {
 
     // The get_class_announcements() function is used
     // to get all the announcements a teacher has
-    // made within provided class_hash.
-    pub async fn get_class_announcements(&self, class_hash: &str) -> Vec<Announcement> {
+    // made within provided class_id.
+    pub async fn get_class_announcements(&self, class_id: &str) -> Vec<Announcement> {
         // Fetch all the announcements that the
         // class owner has created.
         let r = sqlx::query_as!(
-            Announcement, "SELECT author_name, title, description, attachment FROM announcements WHERE class_hash=?", class_hash
+            Announcement, "SELECT author_name, title, description, attachment FROM announcements WHERE class_id=?", class_id
         ).fetch_all(&self.conn).await;
         // Return empty if an error has occurred
         if r.is_err() { return vec![]; }
