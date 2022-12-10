@@ -53,13 +53,13 @@ impl lib::handlers::Database {
             sqlx::query!(
             "INSERT INTO users (bearer, user_id, user_name, email, registration_date) VALUES (?, ?, ?, ?, ?)",
             bearer, user_id, user_name, email, date
-        )
-            .execute(&self.conn)
-            .await;
+        ).execute(&self.conn).await;
+
         // If an error has occurred return 0 rows affected
         if r.is_err() {
             return 0;
         }
+
         // Else unwrap the result and return the
         // amount of rows affected
         return r.unwrap().rows_affected();
@@ -70,9 +70,10 @@ impl lib::handlers::Database {
     // If it is, return true.. else return false.
     async fn user_exists(&self, bearer: &str) -> bool {
         // Query the database
-        let r = sqlx::query!("SELECT * FROM users WHERE bearer=?", bearer)
-            .fetch_one(&self.conn)
-            .await;
+        let r = sqlx::query!(
+            "SELECT * FROM users WHERE bearer=?", bearer
+        ).fetch_one(&self.conn).await;
+
         // Return whether valid query data has been obtained
         return !r.is_err();
     }
@@ -83,14 +84,15 @@ impl lib::handlers::Database {
     // name, hash, and id
     pub async fn query_user_by_id(&self, user_id: &str) -> Option<User> {
         // Query the database
-        let r = sqlx::query_as!(User, "SELECT * FROM users WHERE user_id=?", user_id)
-            .fetch_one(&self.conn)
-            .await;
+        let r = sqlx::query_as!(
+            User, "SELECT * FROM users WHERE user_id=?", user_id
+        ).fetch_one(&self.conn).await;
 
         // If the user is invalid, return none
         if r.is_err() {
             return None;
         }
+
         // Return the 'User' object containing all of
         // the requested user's data
         return Some(r.unwrap());
@@ -101,16 +103,14 @@ impl lib::handlers::Database {
     pub async fn update_user_name(&self, bearer: &str, new_name: &str) -> u64 {
         let r = sqlx::query!(
             "UPDATE users SET user_name=? WHERE bearer=?",
-            new_name,
-            bearer
-        )
-        .execute(&self.conn)
-        .await;
+            new_name, bearer
+        ).execute(&self.conn).await;
 
         // If an error has occurred, return 0 rows affected
         if r.is_err() {
             return 0;
         }
+        
         // Else, return the actual amount of rows that
         // have been affected by the insertion
         return r.unwrap().rows_affected();

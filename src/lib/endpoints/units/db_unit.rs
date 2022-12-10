@@ -44,14 +44,13 @@ impl lib::handlers::Database {
             Unit,
             "SELECT unit_id, unit_name, locked FROM units WHERE class_id=?",
             class_id
-        )
-        .fetch_all(&self.conn)
-        .await;
+        ).fetch_all(&self.conn).await;
 
         // Return empty if an error has occurred
         if r.is_err() {
             return vec![];
         }
+
         // Else if no error has occurred, return
         // the unwrapped array of all the units
         return r.unwrap();
@@ -81,6 +80,7 @@ impl lib::handlers::Database {
         if r.is_err() {
             return 0;
         }
+
         // Else, return the actual amount of rows that
         // have been affected by the insertion
         return r.unwrap().rows_affected();
@@ -105,11 +105,8 @@ impl lib::handlers::Database {
     pub async fn delete_class_unit(&self, bearer: &str, unit_id: &str) -> u64 {
         let r = sqlx::query!(
             "DELETE FROM units WHERE unit_id=? AND owner_bearer=?",
-            unit_id,
-            bearer
-        )
-        .execute(&self.conn)
-        .await;
+            unit_id, bearer
+        ).execute(&self.conn).await;
 
         // If an error has occurred, return 0 rows affected
         if r.is_err() {
@@ -133,6 +130,7 @@ impl lib::handlers::Database {
         if data.unit_name.len() > 0 {
             res.push_str(&format!("unit_name='{}',", data.unit_name));
         }
+
         // If the provided data's locked integer bool
         // isn't invalid (equal to 2) then append the
         // updated value to the result string
@@ -140,6 +138,7 @@ impl lib::handlers::Database {
             // 2 == Invalid
             res.push_str(&format!("locked={},", data.locked));
         }
+
         // Remove the trailing comma
         let res: String = res[..res.len() - 1].to_string();
 
@@ -149,13 +148,15 @@ impl lib::handlers::Database {
         let r = sqlx::query(&format!(
             "UPDATE units SET {} WHERE unit_id='{}' AND owner_bearer='{}'",
             res, data.unit_id, bearer
-        ))
-        .execute(&self.conn)
-        .await;
+        )).execute(&self.conn).await;
 
+        // Return 0 if an error has occured
         if r.is_err() {
             return 0;
         }
+
+        // Else if no error, return the amount of 
+        // rows affected (success)
         return r.unwrap().rows_affected();
     }
 
@@ -166,13 +167,13 @@ impl lib::handlers::Database {
             Lesson,
             "SELECT title, description, video, work, work_solutions FROM lessons WHERE unit_id=?",
             unit_id
-        )
-        .fetch_all(&self.conn)
-        .await;
+        ).fetch_all(&self.conn).await;
+
         // Return empty if an error has occurred
         if r.is_err() {
             return vec![];
         }
+
         // Else if no error has occurred, return
         // the unwrapped array of all the units
         return r.unwrap();

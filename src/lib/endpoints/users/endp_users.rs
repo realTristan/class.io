@@ -33,7 +33,7 @@ pub async fn get_user_data(
     // token and is trying to abuse the api, return
     // an empty json map
     if !lib::auth::verify(bearer, access_token) {
-        return "{{\"failed\": {}}}".to_string();
+        return "{\"error\": \"invalid request\"}".to_string();
     }
 
     // Once the request has been verified, query the
@@ -42,8 +42,9 @@ pub async fn get_user_data(
     let user = db.query_user_by_id(&user_id).await;
     // Check whether or not the user is invalid
     if user.is_none() {
-        return "{{\"failed\": {}}}".to_string();
+        return "{\"error\": \"invalid request\"}".to_string();
     }
+    
     // Else, if the user is valid, unwrap the
     // object so it can be read
     let user = user.unwrap();
@@ -82,13 +83,15 @@ pub async fn update_user_data(
     // token and is trying to abuse the api, return
     // an empty json map
     if !lib::auth::verify(bearer, access_token) {
-        return "{{\"failed\": {}}}".to_string();
+        return "{\"error\": \"invalid request\"}".to_string();
     }
+
     // If the incoming request doesn't contain
     // a new user_name, return an empty json map
     if body.user_name.len() < 1 {
-        return "{{\"failed\": {}}}".to_string();
+        return "{\"error\": \"invalid request\"}".to_string();
     }
+
     // Else, update the users 'user_name' in the database
     let r: u64 = db.update_user_name(bearer, &body.user_name).await;
 
@@ -122,8 +125,9 @@ async fn insert_user_data(
     // token and is trying to abuse the api, return
     // an empty json map
     if !lib::auth::verify(bearer, access_token) {
-        return "{{\"failed\": {}}}".to_string();
+        return "{\"error\": \"invalid request\"}".to_string();
     }
+    
     // Get the current system time. This is used
     // for inserting the users registration date
     // into the database.

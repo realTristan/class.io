@@ -68,7 +68,7 @@ async fn get_user_submissions(
     // token and is trying to abuse the api, return
     // an empty json map
     if !lib::auth::verify(bearer, access_token) {
-        return "{}".to_string();
+        return "{\"error\": \"invalid request\"}".to_string();
     }
     return db.get_user_submissions(&class_id, bearer).await;
 }
@@ -99,12 +99,14 @@ async fn insert_class_submission(
     // token and is trying to abuse the api, return
     // an empty json map
     if !lib::auth::verify(submitter_bearer, access_token) {
-        return "{}".to_string();
+        return "{\"error\": \"invalid request\"}".to_string();
     }
+
     // Insert the submission data into the database
     let r: u64 = db
         .insert_class_submission(&class_id, &submission_id, submitter_bearer, &body.data)
         .await;
+
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0);
 }
@@ -133,12 +135,14 @@ async fn delete_class_submission(
     // token and is trying to abuse the api, return
     // an empty json map
     if !lib::auth::verify(submitter_bearer, access_token) {
-        return "{}".to_string();
+        return "{\"error\": \"invalid request\"}".to_string();
     }
+
     // Delete the submission data from the database
     let r: u64 = db
         .delete_class_submission(submitter_bearer, &submission_id)
         .await;
+
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0);
 }

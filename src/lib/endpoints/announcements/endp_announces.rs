@@ -47,7 +47,7 @@ async fn insert_class_announcement(
     // token and is trying to abuse the api, return
     // an empty json map
     if !lib::auth::verify(bearer, access_token) {
-        return "{{\"failed\": {}}}".to_string();
+        return "{\"error\": \"invalid request\"}".to_string();
     }
     let r: u64 = db
         .insert_class_announcement(bearer, &class_id, &announcement_id, &body)
@@ -80,7 +80,7 @@ async fn delete_class_announcement(
     // token and is trying to abuse the api, return
     // an empty json map
     if !lib::auth::verify(bearer, access_token) {
-        return "{{\"failed\": {}}}".to_string();
+        return "{\"error\": \"invalid request\"}".to_string();
     }
     let r: u64 = db
         .delete_class_announcement(bearer, &body.announcement_id)

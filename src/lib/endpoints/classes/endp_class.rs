@@ -38,7 +38,7 @@ async fn get_class_data(
     // token and is trying to abuse the api, return
     // an empty json map
     if !lib::auth::verify(bearer, access_token) {
-        return "{{\"failed\": {}}}".to_string();
+        return "{\"error\": \"invalid request\"}".to_string();
     }
     // Return the class data
     return db.get_class_data(&class_id).await;
@@ -69,8 +69,9 @@ async fn update_class_data(
     // token and is trying to abuse the api, return
     // an empty json map
     if !lib::auth::verify(bearer, access_token) {
-        return "{{\"failed\": {}}}".to_string();
+        return "{\"error\": \"invalid request\"}".to_string();
     }
+
     // Generate a class update query which is the fastest way
     // for updating multiple values inside the database before
     // executing the database update using the below function
@@ -103,18 +104,20 @@ async fn insert_class_data(
     // token and is trying to abuse the api, return
     // an empty json map
     if !lib::auth::verify(bearer, access_token) {
-        return "{{\"failed\": {}}}".to_string();
+        return "{\"error\": \"invalid request\"}".to_string();
     }
 
     // If the body class_name is invalid,
     // return an empty json map
     if body.class_name.len() < 1 {
-        return "{{\"failed\": {}}}".to_string();
+        return "{\"error\": \"invalid request\"}".to_string();
     }
+
     // Insert the class data into the database
     let r: u64 = db
         .insert_class_data(&bearer, &class_id, &body.class_name)
         .await;
+
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0);
 }

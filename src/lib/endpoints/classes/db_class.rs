@@ -41,10 +41,7 @@ impl lib::handlers::Database {
             "INSERT INTO whitelists (class_id, whitelisted_user) VALUES (?, ?)",
             "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020",
             "test_whitelisted_user1"
-        )
-        .execute(&self.conn)
-        .await
-        .unwrap();
+        ).execute(&self.conn).await.unwrap();
 
         // Insert into LESSONS column
         sqlx::query!(
@@ -59,10 +56,7 @@ impl lib::handlers::Database {
             "random_unit_id",
             "Polynomials",
             0
-        )
-        .execute(&self.conn)
-        .await
-        .unwrap();
+        ).execute(&self.conn).await.unwrap();
 
         // Insert into UNITS column
         sqlx::query!(
@@ -71,10 +65,7 @@ impl lib::handlers::Database {
             "random_unit_id",
             "Functions",
             0
-        )
-        .execute(&self.conn)
-        .await
-        .unwrap();
+        ).execute(&self.conn).await.unwrap();
 
         // Insert into UNITS column
         sqlx::query!(
@@ -83,10 +74,7 @@ impl lib::handlers::Database {
             "random_unit_id",
             "Calculus",
             0
-        )
-        .execute(&self.conn)
-        .await
-        .unwrap();
+        ).execute(&self.conn).await.unwrap();
 
         // Insert into SUBMISSIONS column
         sqlx::query!(
@@ -119,6 +107,7 @@ impl lib::handlers::Database {
         if r.is_err() {
             return 0;
         }
+
         // Else, return the amount of affected rows
         return r.unwrap().rows_affected();
     }
@@ -128,8 +117,7 @@ impl lib::handlers::Database {
     async fn get_class_owner_id(&self, bearer: &str) -> String {
         // Query the database
         let r = sqlx::query!("SELECT user_id FROM users WHERE bearer=?", bearer)
-            .fetch_one(&self.conn)
-            .await;
+            .fetch_one(&self.conn).await;
         return r.unwrap().user_id;
     }
 
@@ -139,8 +127,7 @@ impl lib::handlers::Database {
     async fn class_exists(&self, class_id: &str) -> bool {
         // Query the database
         let r = sqlx::query!("SELECT * FROM classes WHERE class_id=?", class_id)
-            .fetch_one(&self.conn)
-            .await;
+            .fetch_one(&self.conn).await;
         // Return whether valid query data has been obtained
         return !r.is_err();
     }
@@ -185,16 +172,17 @@ impl lib::handlers::Database {
         // Generate a new query string. This query string accounts
         // for empty values so that nothing gets corrupted.
         let q: String = self.generate_class_update_query(data);
+        
         // Query the database
         let r = sqlx::query(&format!(
             "UPDATE classes SET {q} WHERE class_id='{class_id}' AND owner_bearer='{bearer}'"
-        ))
-        .execute(&self.conn)
-        .await;
+        )).execute(&self.conn).await;
+        
         // If an error has occurred, return 0 rows affected
         if r.is_err() {
             return 0;
         }
+
         // Else, return the amount of affected rows
         return r.unwrap().rows_affected();
     }
@@ -209,13 +197,13 @@ impl lib::handlers::Database {
             Class,
             "SELECT class_name, owner_id, enable_whitelist FROM classes WHERE class_id=?",
             class_id
-        )
-        .fetch_one(&self.conn)
-        .await;
+        ).fetch_one(&self.conn).await;
+
         // Return empty if an error has occurred
         if r.is_err() {
             return None;
         }
+
         // Else, if no error has occured, return
         // the queried class data
         return Some(r.unwrap());
@@ -260,7 +248,7 @@ impl lib::handlers::Database {
             class.enable_whitelist == 1,
             self.get_units_json(units).await,
             self.get_whitelist_json(whitelist),
-            self.get_announcements_json(announcements),
+            self.get_announcements_json(announcements)
         );
     }
 }

@@ -71,6 +71,7 @@ impl lib::handlers::Database {
         if r.is_err() {
             return 0;
         }
+
         // Else, return the actual amount of rows that
         // have been affected by the insertion
         return r.unwrap().rows_affected();
@@ -84,9 +85,8 @@ impl lib::handlers::Database {
         let r = sqlx::query!(
             "SELECT * FROM submissions WHERE submission_id=?",
             submission_id
-        )
-        .fetch_one(&self.conn)
-        .await;
+        ).fetch_one(&self.conn).await;
+
         // Return whether valid query data has been obtained
         return !r.is_err();
     }
@@ -106,14 +106,13 @@ impl lib::handlers::Database {
             "DELETE FROM submissions WHERE submission_id=? AND submitter_bearer=?",
             submission_id,
             submitter_bearer
-        )
-        .execute(&self.conn)
-        .await;
+        ).execute(&self.conn).await;
 
         // If an error has occurred, return 0 rows affected
         if r.is_err() {
             return 0;
         }
+
         // Else, return the actual amount of rows that
         // have been affected by the insertion
         return r.unwrap().rows_affected();
@@ -135,6 +134,7 @@ impl lib::handlers::Database {
         if r.is_err() {
             return "{}".to_string();
         }
+
         // Else if no error has occurred, return
         // the unwrapped array of all the units
         return format!("[{}]", self.get_submission_json(r.unwrap()));
@@ -154,14 +154,13 @@ impl lib::handlers::Database {
                             FROM submissions WHERE class_id=? AND submitter_bearer=?",
             class_id,
             bearer
-        )
-        .fetch_all(&self.conn)
-        .await;
+        ).fetch_all(&self.conn).await;
 
         // Return empty if an error has occurred
         if r.is_err() {
             return "{}".to_string();
         }
+        
         // Else if no error has occurred, return
         // the unwrapped array of all the units
         return format!("[{}]", self.get_submission_json(r.unwrap()));

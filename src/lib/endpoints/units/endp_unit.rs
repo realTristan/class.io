@@ -49,12 +49,12 @@ async fn insert_class_unit(
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(&bearer, &access_token) {
-        return "{{\"failed\": {}}}".to_string();
+    if !lib::auth::verify(bearer, access_token) {
+        return "{\"error\": \"invalid request\"}".to_string();
     }
     // Insert the unit data into the database
     let r: u64 = db
-        .insert_class_unit(&bearer, &unit_id, &class_id, &body.unit_name)
+        .insert_class_unit(bearer, &unit_id, &class_id, &body.unit_name)
         .await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0);
@@ -81,11 +81,11 @@ async fn delete_class_unit(
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(&bearer, &access_token) {
-        return "{{\"failed\": {}}}".to_string();
+    if !lib::auth::verify(bearer, access_token) {
+        return "{\"error\": \"invalid request\"}".to_string();
     }
     // Insert the unit data into the database
-    let r: u64 = db.delete_class_unit(&bearer, &body.unit_id).await;
+    let r: u64 = db.delete_class_unit(bearer, &body.unit_id).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0);
 }
@@ -111,11 +111,11 @@ async fn update_class_unit(
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(&bearer, &access_token) {
-        return "{{\"failed\": {}}}".to_string();
+    if !lib::auth::verify(bearer, access_token) {
+        return "{\"error\": \"invalid request\"}".to_string();
     }
     // Insert the unit data into the database
-    let r: u64 = db.update_class_unit(&bearer, &body).await;
+    let r: u64 = db.update_class_unit(bearer, &body).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0);
 }

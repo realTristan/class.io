@@ -39,12 +39,14 @@ async fn add_to_class_whitelist(
     // token and is trying to abuse the api, return
     // an empty json map
     if !lib::auth::verify(bearer, access_token) {
-        return "{{\"failed\": {}}}".to_string();
+        return "{\"error\": \"invalid request\"}".to_string();
     }
+    
     // Insert the whitelist data into the database
     let r: u64 = db
         .insert_class_whitelist(bearer, &class_id, &body.user)
         .await;
+
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0);
 }
@@ -70,12 +72,14 @@ async fn delete_from_class_whitelist(
     // token and is trying to abuse the api, return
     // an empty json map
     if !lib::auth::verify(bearer, access_token) {
-        return "{{\"failed\": {}}}".to_string();
+        return "{\"error\": \"invalid request\"}".to_string();
     }
+
     // Delete the whitelist data into the database
     let r: u64 = db
         .delete_from_class_whitelist(bearer, &class_id, &body.user)
         .await;
+
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0);
 }

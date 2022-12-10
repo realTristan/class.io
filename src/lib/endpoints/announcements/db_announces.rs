@@ -46,6 +46,7 @@ impl lib::handlers::Database {
             "INSERT INTO announcements (owner_bearer, class_id, announcement_id, author_name, title, description, attachment, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
             bearer, class_id, announcement_id, data.author_name, data.title, data.description, data.attachment, date
         ).execute(&self.conn).await;
+
         // If an error has occurred, return 0 rows affected
         if r.is_err() {
             return 0;
@@ -62,9 +63,8 @@ impl lib::handlers::Database {
         let r = sqlx::query!(
             "SELECT * FROM announcements WHERE announcement_id=?",
             announcement_id
-        )
-        .fetch_one(&self.conn)
-        .await;
+        ).fetch_one(&self.conn).await;
+
         // Return whether valid query data has been obtained
         return !r.is_err();
     }
@@ -77,11 +77,9 @@ impl lib::handlers::Database {
         // the incoming requests data.announcement_id
         let r = sqlx::query!(
             "DELETE FROM announcements WHERE announcement_id=? AND owner_bearer=?",
-            announcement_id,
-            bearer
-        )
-        .execute(&self.conn)
-        .await;
+            announcement_id, bearer
+        ).execute(&self.conn).await;
+
         // If an error has occurred, return 0 rows affected
         if r.is_err() {
             return 0;
@@ -97,8 +95,10 @@ impl lib::handlers::Database {
         // Fetch all the announcements that the
         // class owner has created.
         let r = sqlx::query_as!(
-            Announcement, "SELECT author_name, title, description, attachment FROM announcements WHERE class_id=?", class_id
+            Announcement, "SELECT author_name, title, description, attachment FROM announcements WHERE class_id=?", 
+            class_id
         ).fetch_all(&self.conn).await;
+
         // Return empty if an error has occurred
         if r.is_err() {
             return vec![];

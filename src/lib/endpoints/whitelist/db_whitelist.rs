@@ -15,16 +15,14 @@ impl lib::handlers::Database {
         // Fetch all the whitelisted users that have
         // access to the provided class.
         let r = sqlx::query_as!(
-            Whitelist,
-            "SELECT whitelisted_user FROM whitelists WHERE class_id=?",
-            class_id
-        )
-        .fetch_all(&self.conn)
-        .await;
+            Whitelist, "SELECT whitelisted_user FROM whitelists WHERE class_id=?", class_id
+        ).fetch_all(&self.conn).await;
+
         // Return empty if an error has occurred
         if r.is_err() {
             return vec![];
         }
+
         // Return the unwrapped array of all
         // the class whitelisted users
         return r.unwrap();
@@ -41,12 +39,8 @@ impl lib::handlers::Database {
     ) -> u64 {
         let r = sqlx::query!(
             "DELETE FROM whitelists WHERE owner_bearer=? AND class_id=? AND whitelisted_user=?",
-            bearer,
-            class_id,
-            user
-        )
-        .execute(&self.conn)
-        .await;
+            bearer, class_id, user
+        ).execute(&self.conn).await;
 
         // If an error has occurred, return 0 rows affected
         if r.is_err() {
@@ -66,14 +60,13 @@ impl lib::handlers::Database {
             sqlx::query!(
             "INSERT INTO whitelists (owner_bearer, class_id, whitelisted_user) VALUES (?, ?, ?)", 
             bearer, class_id, user
-        )
-            .execute(&self.conn)
-            .await;
+        ).execute(&self.conn).await;
 
         // If an error has occurred, return 0 rows affected
         if r.is_err() {
             return 0;
         }
+
         // Else, return the actual amount of rows that
         // have been affected by the insertion
         return r.unwrap().rows_affected();
