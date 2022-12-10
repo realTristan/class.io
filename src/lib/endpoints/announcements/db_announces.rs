@@ -1,6 +1,6 @@
-use actix_web::web::Json;
-use crate::lib::{self, global};
 use super::endp_announces::AnnouncementDataBody;
+use crate::lib::{self, global};
+use actix_web::web::Json;
 
 // The Announcement data struct is used to
 // store the announcement author's unique identifier,
@@ -14,7 +14,7 @@ pub struct Announcement {
     // The announcements content
     description: String,
     // Any images/videos attached with the announcement
-    attachment: String   // Base64 encode images, etc.
+    attachment: String, // Base64 encode images, etc.
 }
 
 // Database Implementation
@@ -26,14 +26,20 @@ impl lib::handlers::Database {
     // their announcement, they can. Along with this, a post
     // date is also inserted into the database.
     pub async fn insert_class_announcement(
-        &self, bearer: &str, class_id: &str, announcement_id: &str, data: &Json<AnnouncementDataBody>
+        &self,
+        bearer: &str,
+        class_id: &str,
+        announcement_id: &str,
+        data: &Json<AnnouncementDataBody>,
     ) -> u64 {
         // If the announcement hash already exists, return the function
-        if self.class_announcement_exists(announcement_id).await { return 0; }
+        if self.class_announcement_exists(announcement_id).await {
+            return 0;
+        }
 
         // Get the current date of the announcement post
         let date: i64 = global::get_time() as i64;
-        
+
         // Query the database, inserting the new announcement
         // along with all of it's data.
         let r = sqlx::query!(
@@ -41,7 +47,9 @@ impl lib::handlers::Database {
             bearer, class_id, announcement_id, data.author_name, data.title, data.description, data.attachment, date
         ).execute(&self.conn).await;
         // If an error has occurred, return 0 rows affected
-        if r.is_err() { return 0; }
+        if r.is_err() {
+            return 0;
+        }
         // Else, return the amount of affected rows
         return r.unwrap().rows_affected();
     }
@@ -52,8 +60,11 @@ impl lib::handlers::Database {
     async fn class_announcement_exists(&self, announcement_id: &str) -> bool {
         // Query the database
         let r = sqlx::query!(
-            "SELECT * FROM announcements WHERE announcement_id=?", announcement_id
-        ).fetch_one(&self.conn).await;
+            "SELECT * FROM announcements WHERE announcement_id=?",
+            announcement_id
+        )
+        .fetch_one(&self.conn)
+        .await;
         // Return whether valid query data has been obtained
         return !r.is_err();
     }
@@ -61,17 +72,20 @@ impl lib::handlers::Database {
     // The delete_class_announcement() function is used
     // to delete a specific announcement post using
     // the provided announcement_id.
-    pub async fn delete_class_announcement(
-        &self, bearer: &str, announcement_id: &str
-    ) -> u64 {
+    pub async fn delete_class_announcement(&self, bearer: &str, announcement_id: &str) -> u64 {
         // Query the database, deleting the announcement with
         // the incoming requests data.announcement_id
         let r = sqlx::query!(
-            "DELETE FROM announcements WHERE announcement_id=? AND owner_bearer=?", 
-            announcement_id, bearer
-        ).execute(&self.conn).await;
+            "DELETE FROM announcements WHERE announcement_id=? AND owner_bearer=?",
+            announcement_id,
+            bearer
+        )
+        .execute(&self.conn)
+        .await;
         // If an error has occurred, return 0 rows affected
-        if r.is_err() { return 0; }
+        if r.is_err() {
+            return 0;
+        }
         // Else, return the amount of affected rows
         return r.unwrap().rows_affected();
     }
@@ -86,7 +100,9 @@ impl lib::handlers::Database {
             Announcement, "SELECT author_name, title, description, attachment FROM announcements WHERE class_id=?", class_id
         ).fetch_all(&self.conn).await;
         // Return empty if an error has occurred
-        if r.is_err() { return vec![]; }
+        if r.is_err() {
+            return vec![];
+        }
         // Return the unwrapped array of all
         // the class announcements
         return r.unwrap();
@@ -102,18 +118,18 @@ impl lib::handlers::Database {
         // append each of the announcement's data to a formatted
         // string array of maps
         announcements.iter().for_each(|f| {
-            r.push_str(
-                &format!("{{
+            r.push_str(&format!(
+                "{{
                     \"author_name\": \"{}\", 
                     \"title\": \"{}\", 
                     \"description\": \"{}\", 
                     \"attachment\": \"{}\"
-                }},", 
+                }},",
                 f.author_name, f.title, f.description, f.attachment
             ))
         });
         // Remove the last comma of the string array
         // before returning the new json map result
-        return r[..r.len()-1].to_string();
+        return r[..r.len() - 1].to_string();
     }
 }

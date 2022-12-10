@@ -2,7 +2,9 @@ use crate::lib;
 
 // The Whitelist data struct is used for querying
 // the whitelisted users for a specific class.
-pub struct Whitelist { pub whitelisted_user: String }
+pub struct Whitelist {
+    pub whitelisted_user: String,
+}
 
 // Database Implementation
 impl lib::handlers::Database {
@@ -13,28 +15,43 @@ impl lib::handlers::Database {
         // Fetch all the whitelisted users that have
         // access to the provided class.
         let r = sqlx::query_as!(
-            Whitelist, "SELECT whitelisted_user FROM whitelists WHERE class_id=?", class_id
-        ).fetch_all(&self.conn).await;
+            Whitelist,
+            "SELECT whitelisted_user FROM whitelists WHERE class_id=?",
+            class_id
+        )
+        .fetch_all(&self.conn)
+        .await;
         // Return empty if an error has occurred
-        if r.is_err() { return vec![]; }
+        if r.is_err() {
+            return vec![];
+        }
         // Return the unwrapped array of all
         // the class whitelisted users
         return r.unwrap();
     }
 
-    // The delete_from_class_whitelist() function deletes 
+    // The delete_from_class_whitelist() function deletes
     // an user from the provided class's whitelist. This
     // user can no longer access the provided class.
     pub async fn delete_from_class_whitelist(
-        &self, bearer: &str, class_id: &str, user: &str
+        &self,
+        bearer: &str,
+        class_id: &str,
+        user: &str,
     ) -> u64 {
         let r = sqlx::query!(
-            "DELETE FROM whitelists WHERE owner_bearer=? AND class_id=? AND whitelisted_user=?", 
-            bearer, class_id, user
-        ).execute(&self.conn).await;
+            "DELETE FROM whitelists WHERE owner_bearer=? AND class_id=? AND whitelisted_user=?",
+            bearer,
+            class_id,
+            user
+        )
+        .execute(&self.conn)
+        .await;
 
         // If an error has occurred, return 0 rows affected
-        if r.is_err() { return 0; }
+        if r.is_err() {
+            return 0;
+        }
         // Else, return the actual amount of rows that
         // have been affected by the insertion
         return r.unwrap().rows_affected();
@@ -44,16 +61,19 @@ impl lib::handlers::Database {
     // user into the provided class's whitelist. Users in this
     // whitelist can access the class info. The whitelist only
     // works if the teacher has enabled the class whitelist setting
-    pub async fn insert_class_whitelist(
-        &self, bearer: &str, class_id: &str, user: &str
-    ) -> u64 {
-        let r = sqlx::query!(
+    pub async fn insert_class_whitelist(&self, bearer: &str, class_id: &str, user: &str) -> u64 {
+        let r =
+            sqlx::query!(
             "INSERT INTO whitelists (owner_bearer, class_id, whitelisted_user) VALUES (?, ?, ?)", 
             bearer, class_id, user
-        ).execute(&self.conn).await;
+        )
+            .execute(&self.conn)
+            .await;
 
         // If an error has occurred, return 0 rows affected
-        if r.is_err() { return 0; }
+        if r.is_err() {
+            return 0;
+        }
         // Else, return the actual amount of rows that
         // have been affected by the insertion
         return r.unwrap().rows_affected();
@@ -72,6 +92,6 @@ impl lib::handlers::Database {
         });
         // Remove the last comma of the string array
         // before returning the new json map result
-        return r[..r.len()-1].to_string();
+        return r[..r.len() - 1].to_string();
     }
 }
