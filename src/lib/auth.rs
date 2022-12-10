@@ -15,7 +15,7 @@ static SUPER_SECRET_CODE: &str = "super_secret_code";
 lazy_static::lazy_static! {
     static ref TOKEN_STORAGE: Mutex<HashMap<String, Vec<String>>> = {
         Mutex::new(HashMap::new())
-    };    
+    };
 }
 
 // The verify() function is used to check whether the
@@ -26,7 +26,9 @@ pub fn verify(bearer: &str, access_token: &str) -> bool {
     // Lock the TOKEN STORAGE so we can access it's data
     let _token_storage = TOKEN_STORAGE.lock();
     // If an error has occurred, return false
-    if _token_storage.is_err() { return false; }
+    if _token_storage.is_err() {
+        return false;
+    }
 
     // Unwrap the token storage data
     let mut token_storage = _token_storage.unwrap();
@@ -47,8 +49,8 @@ pub fn verify(bearer: &str, access_token: &str) -> bool {
         // Insert the user into the token storage
         // along with the current time and auth token
         token_storage.insert(
-            bearer.to_string(), 
-            [time.to_string(), access_token.to_string()].to_vec()
+            bearer.to_string(),
+            [time.to_string(), access_token.to_string()].to_vec(),
         );
         // Return true as the token did not
         // previously exist in the token storage
@@ -60,12 +62,14 @@ pub fn verify(bearer: &str, access_token: &str) -> bool {
     // Execute the storage handler
     // If the function returns false, then the provided
     // auth token has already been used within the past 8 seconds.
-    if !storage_handler(mut_storage, access_token, &time) { return false };
+    if !storage_handler(mut_storage, access_token, &time) {
+        return false;
+    };
 
     // Check whether the auth token was generated
     // within the past 8 seconds
     for i in 0..8 {
-        let gen: String = format!("{}:{}:{}", bearer, time-i, SUPER_SECRET_CODE);
+        let gen: String = format!("{}:{}:{}", bearer, time - i, SUPER_SECRET_CODE);
         // If the provided auth token is equal to the
         // generated auth token, return true
         if access_token == sha256::digest(gen) {
@@ -82,9 +86,7 @@ pub fn verify(bearer: &str, access_token: &str) -> bool {
 // within the past 8 seconds. This is function is
 // necessary to prevent abusers from using the same
 // token more than once.
-fn storage_handler(
-    mut_storage: &mut Vec<String>, access_token: &str, time: &u64
-) -> bool {
+fn storage_handler(mut_storage: &mut Vec<String>, access_token: &str, time: &u64) -> bool {
     // Get the last storage wipe time
     let last_wipe_time: u64 = mut_storage[0].parse().unwrap();
     // If the last wipe happened over 8 seconds ago,
@@ -92,7 +94,7 @@ fn storage_handler(
     // overflow. If the user has too many tokens and
     // the cache isn't eventually cleared.. you already
     // know what'll happen lmao.
-    if time > &(last_wipe_time + 8) || mut_storage.len() > 10  {
+    if time > &(last_wipe_time + 8) || mut_storage.len() > 10 {
         // Clear the users token storage and set
         // the first value of the array to the
         // current time as a string
@@ -107,5 +109,5 @@ fn storage_handler(
     // cleared, check whether the access_token is already existant
     // in the token storage. If it is, return false, thus the
     // user is using an unauthorized token. Else, return true.
-    return !mut_storage.contains(&access_token.to_string())
+    return !mut_storage.contains(&access_token.to_string());
 }
