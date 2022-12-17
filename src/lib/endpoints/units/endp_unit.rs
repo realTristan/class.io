@@ -3,11 +3,6 @@ use actix_web::{web, HttpRequest, Responder};
 use lib::global;
 use lib::handlers::Database;
 
-//
-// The unit hash is just the class_id:time.now()
-// The class hash is in the url
-//
-
 // The UnitDataBody struct is used to read the
 // incoming requests http request body. This is
 // the easiest way for reading what modifications
@@ -28,9 +23,13 @@ pub struct UnitDataBody {
 async fn insert_class_unit(
     req: HttpRequest,
     db: web::Data<Database>,
-    class_id: web::Path<String>,
-    body: web::Json<UnitDataBody>,
+    body: web::Json<UnitDataBody>
 ) -> impl Responder {
+    // Get the class id
+    let class_id: &str = match req.match_info().get("class_id") {
+        Some(id) => id,
+        None => return "{\"error\": \"invalid request\"}".to_string(),
+    };
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
@@ -66,7 +65,7 @@ async fn insert_class_unit(
 async fn delete_class_unit(
     req: HttpRequest,
     db: web::Data<Database>,
-    body: web::Json<UnitDataBody>,
+    body: web::Json<UnitDataBody>
 ) -> impl Responder {
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
@@ -96,7 +95,7 @@ async fn delete_class_unit(
 async fn update_class_unit(
     req: HttpRequest,
     db: web::Data<Database>,
-    body: web::Json<UnitDataBody>,
+    body: web::Json<UnitDataBody>
 ) -> impl Responder {
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make

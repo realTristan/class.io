@@ -19,11 +19,13 @@ pub struct SubmissionDataBody {
 // so that teachers can see all the work their students
 // have submitted.
 #[actix_web::get("/class/{class_id}/submissions/")]
-async fn get_class_submissions(
-    req: HttpRequest,
-    db: web::Data<Database>,
-    class_id: web::Path<String>,
-) -> impl Responder {
+async fn get_class_submissions(req: HttpRequest,  db: web::Data<Database>) -> impl Responder {
+    // Get the class id
+    let class_id: &str = match req.match_info().get("class_id") {
+        Some(id) => id,
+        None => return "{\"error\": \"invalid request\"}".to_string(),
+    };
+
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
@@ -49,11 +51,13 @@ async fn get_class_submissions(
 // is called for the student to see all of their
 // previous work submissions.
 #[actix_web::get("/class/{class_id}/submissions/")]
-async fn get_user_submissions(
-    req: HttpRequest,
-    db: web::Data<Database>,
-    class_id: web::Path<String>,
-) -> impl Responder {
+async fn get_user_submissions(req: HttpRequest, db: web::Data<Database>) -> impl Responder {
+    // Get the class id
+    let class_id: &str = match req.match_info().get("class_id") {
+        Some(id) => id,
+        None => return "{\"error\": \"invalid request\"}".to_string(),
+    };
+
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
@@ -81,10 +85,19 @@ async fn get_user_submissions(
 async fn insert_class_submission(
     req: HttpRequest,
     db: web::Data<Database>,
-    class_id: web::Path<String>,
-    submission_id: web::Path<String>,
-    body: web::Json<SubmissionDataBody>,
+    body: web::Json<SubmissionDataBody>
 ) -> impl Responder {
+    // Get the class id
+    let class_id: &str = match req.match_info().get("class_id") {
+        Some(id) => id,
+        None => return "{\"error\": \"invalid request\"}".to_string(),
+    };
+    // Get the submission id
+    let submission_id: &str = match req.match_info().get("submission_id") {
+        Some(id) => id,
+        None => return "{\"error\": \"invalid request\"}".to_string(),
+    };
+
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
@@ -116,11 +129,17 @@ async fn insert_class_submission(
 // is called when the signed in student wants to undo
 // their work submission.
 #[actix_web::delete("/class/{class_id}/submissions/{submission_id}/")]
-async fn delete_class_submission(
-    req: HttpRequest,
-    db: web::Data<Database>,
-    submission_id: web::Path<String>,
-) -> impl Responder {
+async fn delete_class_submission(req: HttpRequest, db: web::Data<Database>) -> impl Responder {
+    // Get the class id
+    let _class_id: &str = match req.match_info().get("class_id") {
+        Some(id) => id,
+        None => return "{\"error\": \"invalid request\"}".to_string(),
+    };
+    // Get the submission id
+    let submission_id: &str = match req.match_info().get("submission_id") {
+        Some(id) => id,
+        None => return "{\"error\": \"invalid request\"}".to_string(),
+    };
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.

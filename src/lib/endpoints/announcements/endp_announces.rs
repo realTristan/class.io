@@ -27,12 +27,21 @@ pub struct AnnouncementDataBody {
 // for if the user wants to later delete the post.
 #[actix_web::put("/class/{class_id}/announcements/{announcement_id}")]
 async fn insert_class_announcement(
-    req: HttpRequest,
-    db: web::Data<Database>,
-    class_id: web::Path<String>,
-    announcement_id: web::Path<String>,
-    body: web::Json<AnnouncementDataBody>,
+    req: HttpRequest, 
+    db: web::Data<Database>, 
+    body: web::Json<AnnouncementDataBody>
 ) -> impl Responder {
+    // Get the class id
+    let class_id: &str = match req.match_info().get("class_id") {
+        Some(id) => id,
+        None => return "{\"error\": \"invalid request\"}".to_string(),
+    };
+    // Get the announcement id
+    let announcement_id: &str = match req.match_info().get("announcement_id") {
+        Some(id) => id,
+        None => return "{\"error\": \"invalid request\"}".to_string(),
+    };
+
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
@@ -62,10 +71,16 @@ async fn insert_class_announcement(
 // user making the announcement must be signed in.
 #[actix_web::delete("/class/{class_id}/announcements")]
 async fn delete_class_announcement(
-    req: HttpRequest,
-    db: web::Data<Database>,
-    body: web::Json<AnnouncementDataBody>,
+    req: HttpRequest, 
+    db: web::Data<Database>, 
+    body: web::Json<AnnouncementDataBody>
 ) -> impl Responder {
+    // Get the class id
+    let _class_id: &str = match req.match_info().get("class_id") {
+        Some(id) => id,
+        None => return "{\"error\": \"invalid request\"}".to_string(),
+    };
+
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.

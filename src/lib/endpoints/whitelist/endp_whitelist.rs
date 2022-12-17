@@ -22,9 +22,14 @@ pub struct WhitelistDataBody {
 async fn add_to_class_whitelist(
     req: HttpRequest,
     db: web::Data<Database>,
-    class_id: web::Path<String>,
-    body: web::Json<WhitelistDataBody>,
+    body: web::Json<WhitelistDataBody>
 ) -> impl Responder {
+    // Get the class id
+    let class_id: &str = match req.match_info().get("class_id") {
+        Some(id) => id,
+        None => return "{\"error\": \"invalid request\"}".to_string(),
+    };
+    
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
@@ -55,9 +60,14 @@ async fn add_to_class_whitelist(
 async fn delete_from_class_whitelist(
     req: HttpRequest,
     db: web::Data<Database>,
-    class_id: web::Path<String>,
-    body: web::Json<WhitelistDataBody>,
+    body: web::Json<WhitelistDataBody>
 ) -> impl Responder {
+    // Get the class id
+    let class_id: &str = match req.match_info().get("class_id") {
+        Some(id) => id,
+        None => return "{\"error\": \"invalid request\"}".to_string(),
+    };
+
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.

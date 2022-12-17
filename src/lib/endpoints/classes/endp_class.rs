@@ -19,11 +19,13 @@ pub struct ClassDataBody {
 // whitelist[String Array], announcements, class_name,
 // enable_whitelist[bool], etc.
 #[actix_web::get("/class/{class_id}")]
-async fn get_class_data(
-    req: HttpRequest,
-    db: web::Data<Database>,
-    class_id: web::Path<String>,
-) -> impl Responder {
+async fn get_class_data(req: HttpRequest, db: web::Data<Database>) -> impl Responder {
+    // Get the class id
+    let class_id: &str = match req.match_info().get("class_id") {
+        Some(id) => id,
+        None => return "{\"error\": \"invalid request\"}".to_string(),
+    };
+
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
@@ -50,11 +52,15 @@ async fn get_class_data(
 // and requires a special bearer token to work.
 #[actix_web::post("/class/{class_id}")]
 async fn update_class_data(
-    req: HttpRequest,
-    db: web::Data<Database>,
-    class_id: web::Path<String>,
-    body: web::Json<ClassDataBody>,
+    req: HttpRequest, 
+    db: web::Data<Database>, 
+    body: web::Json<ClassDataBody>
 ) -> impl Responder {
+    // Get the class id
+    let class_id: &str = match req.match_info().get("class_id") {
+        Some(id) => id,
+        None => return "{\"error\": \"invalid request\"}".to_string(),
+    };
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
@@ -85,11 +91,16 @@ async fn update_class_data(
 // values. A Maximum of 5 classes is allowed.
 #[actix_web::put("/class/{class_id}")]
 async fn insert_class_data(
-    req: HttpRequest,
-    db: web::Data<Database>,
-    class_id: web::Path<String>,
-    body: web::Json<ClassDataBody>,
+    req: HttpRequest, 
+    db: web::Data<Database>, 
+    body: web::Json<ClassDataBody>
 ) -> impl Responder {
+    // Get the class id
+    let class_id: &str = match req.match_info().get("class_id") {
+        Some(id) => id,
+        None => return "{\"error\": \"invalid request\"}".to_string(),
+    };
+
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.

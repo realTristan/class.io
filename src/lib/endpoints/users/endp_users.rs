@@ -19,11 +19,12 @@ pub struct UserDataBody {
 // dashboard page. To ensure the security of the endpoint,
 //  a valid auth token is required.
 #[actix_web::get("/user/{user_id}")]
-pub async fn get_user_data(
-    req: HttpRequest,
-    db: web::Data<Database>,
-    user_id: web::Path<String>,
-) -> impl Responder {
+pub async fn get_user_data(req: HttpRequest, db: web::Data<Database>) -> impl Responder {
+    // Get the class id
+    let user_id: &str = match req.match_info().get("user_id") {
+        Some(id) => id,
+        None => return "{\"error\": \"invalid request\"}".to_string(),
+    };
     // Get the access token from the request headers.
     // This tokens is used to make sure that the incoming
     // request isn't from an abuser.
@@ -62,7 +63,7 @@ pub async fn get_user_data(
 pub async fn update_user_data(
     req: HttpRequest,
     db: web::Data<Database>,
-    body: web::Json<UserDataBody>,
+    body: web::Json<UserDataBody>
 ) -> impl Responder {
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
@@ -104,7 +105,7 @@ pub async fn update_user_data(
 async fn insert_user_data(
     req: HttpRequest,
     db: web::Data<Database>,
-    body: web::Json<UserDataBody>,
+    body: web::Json<UserDataBody>
 ) -> impl Responder {
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
