@@ -42,13 +42,11 @@ impl lib::handlers::Database {
             bearer, class_id, user
         ).execute(&self.conn).await;
 
-        // If an error has occurred, return 0 rows affected
-        if r.is_err() {
-            return 0;
-        }
-        // Else, return the actual amount of rows that
-        // have been affected by the insertion
-        return r.unwrap().rows_affected();
+        // Return the result of the query
+        return match r {
+            Ok(v) => v.rows_affected(),
+            Err(_) => 0,
+        };
     }
 
     // The insert_class_whitelist() function is used to add an
@@ -62,14 +60,11 @@ impl lib::handlers::Database {
             bearer, class_id, user
         ).execute(&self.conn).await;
 
-        // If an error has occurred, return 0 rows affected
-        if r.is_err() {
-            return 0;
-        }
-
-        // Else, return the actual amount of rows that
-        // have been affected by the insertion
-        return r.unwrap().rows_affected();
+        // Return query result
+        return match r {
+            Ok(v) => v.rows_affected(),
+            Err(_) => 0,
+        };
     }
 
     // The get_whitelist_json() function is used to

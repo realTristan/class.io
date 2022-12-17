@@ -47,12 +47,11 @@ impl lib::handlers::Database {
             bearer, class_id, announcement_id, data.author_name, data.title, data.description, data.attachment, date
         ).execute(&self.conn).await;
 
-        // If an error has occurred, return 0 rows affected
-        if r.is_err() {
-            return 0;
-        }
-        // Else, return the amount of affected rows
-        return r.unwrap().rows_affected();
+        // Return query result
+        return match r {
+            Ok(r) => r.rows_affected(),
+            Err(_) => 0,
+        };
     }
 
     // The class_announcement_exists() function is used to check whether
@@ -80,12 +79,13 @@ impl lib::handlers::Database {
             announcement_id, bearer
         ).execute(&self.conn).await;
 
-        // If an error has occurred, return 0 rows affected
-        if r.is_err() {
-            return 0;
-        }
-        // Else, return the amount of affected rows
-        return r.unwrap().rows_affected();
+        // Return query result
+        return match r {
+            // If an error has occurred, return 0 rows affected
+            Err(_) => 0,
+            // Else, return the amount of affected rows
+            Ok(r) => r.rows_affected(),
+        };
     }
 
     // The get_class_announcements() function is used
@@ -99,13 +99,14 @@ impl lib::handlers::Database {
             class_id
         ).fetch_all(&self.conn).await;
 
-        // Return empty if an error has occurred
-        if r.is_err() {
-            return vec![];
-        }
-        // Return the unwrapped array of all
-        // the class announcements
-        return r.unwrap();
+        // Return query result
+        return match r {
+            // Return empty if an error has occurred
+            Err(_) => vec![],
+            // Return the unwrapped array of all
+            // the class announcements
+            Ok(r) => r,
+        };
     }
 
     // The get_announcements_json() function is used to

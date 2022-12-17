@@ -36,8 +36,8 @@ async fn insert_class_announcement(
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
-    let bearer: &str = global::get_header(&req, "authorization");
-    let access_token: &str = global::get_header(&req, "access_token");
+    let bearer: String = global::get_header(&req, "authorization");
+    let access_token: String = global::get_header(&req, "access_token");
     // the access token consists of the users sha256 encoded firebase token,
     // the current time, and a "super secret key".
     // This also acts as a bearer token from the encoded firebase token
@@ -46,11 +46,11 @@ async fn insert_class_announcement(
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(bearer, access_token) {
+    if !lib::auth::verify(&bearer, &access_token) {
         return "{\"error\": \"invalid request\"}".to_string();
     }
     let r: u64 = db
-        .insert_class_announcement(bearer, &class_id, &announcement_id, &body)
+        .insert_class_announcement(&bearer, &class_id, &announcement_id, &body)
         .await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0);
@@ -69,8 +69,8 @@ async fn delete_class_announcement(
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
-    let bearer: &str = global::get_header(&req, "authorization");
-    let access_token: &str = global::get_header(&req, "access_token");
+    let bearer: String = global::get_header(&req, "authorization");
+    let access_token: String = global::get_header(&req, "access_token");
     // the access token consists of the users sha256 encoded firebase token,
     // the current time, and a "super secret key".
     // This also acts as a bearer token from the encoded firebase token
@@ -79,11 +79,11 @@ async fn delete_class_announcement(
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(bearer, access_token) {
+    if !lib::auth::verify(&bearer, &access_token) {
         return "{\"error\": \"invalid request\"}".to_string();
     }
     let r: u64 = db
-        .delete_class_announcement(bearer, &body.announcement_id)
+        .delete_class_announcement(&bearer, &body.announcement_id)
         .await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0);

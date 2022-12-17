@@ -55,14 +55,11 @@ impl lib::handlers::Database {
             bearer, user_id, user_name, email, date
         ).execute(&self.conn).await;
 
-        // If an error has occurred return 0 rows affected
-        if r.is_err() {
-            return 0;
-        }
-
-        // Else unwrap the result and return the
-        // amount of rows affected
-        return r.unwrap().rows_affected();
+        // Return query result
+        return match r {
+            Ok(r) => r.rows_affected(),
+            Err(_) => 0,
+        };
     }
 
     // The user_exists() function is used to check whether
@@ -88,14 +85,11 @@ impl lib::handlers::Database {
             User, "SELECT * FROM users WHERE user_id=?", user_id
         ).fetch_one(&self.conn).await;
 
-        // If the user is invalid, return none
-        if r.is_err() {
-            return None;
-        }
-
-        // Return the 'User' object containing all of
-        // the requested user's data
-        return Some(r.unwrap());
+        // Return query result
+        return match r {
+            Ok(r) => Some(r),
+            Err(_) => None,
+        };
     }
 
     // The update_user_name() function is used to
@@ -106,13 +100,10 @@ impl lib::handlers::Database {
             new_name, bearer
         ).execute(&self.conn).await;
 
-        // If an error has occurred, return 0 rows affected
-        if r.is_err() {
-            return 0;
-        }
-        
-        // Else, return the actual amount of rows that
-        // have been affected by the insertion
-        return r.unwrap().rows_affected();
+        // Return query result
+        return match r {
+            Ok(r) => r.rows_affected(),
+            Err(_) => 0,
+        };
     }
 }

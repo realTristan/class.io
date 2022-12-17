@@ -27,8 +27,8 @@ async fn get_class_data(
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
-    let bearer: &str = global::get_header(&req, "authorization");
-    let access_token: &str = global::get_header(&req, "access_token");
+    let bearer: String = global::get_header(&req, "authorization");
+    let access_token: String = global::get_header(&req, "access_token");
     // the access token consists of the users sha256 encoded firebase token,
     // the current time, and a "super secret key".
     // This also acts as a bearer token from the encoded firebase token
@@ -37,7 +37,7 @@ async fn get_class_data(
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(bearer, access_token) {
+    if !lib::auth::verify(&bearer, &access_token) {
         return "{\"error\": \"invalid request\"}".to_string();
     }
     // Return the class data
@@ -58,8 +58,8 @@ async fn update_class_data(
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
-    let bearer: &str = global::get_header(&req, "authorization");
-    let access_token: &str = global::get_header(&req, "access_token");
+    let bearer: String = global::get_header(&req, "authorization");
+    let access_token: String = global::get_header(&req, "access_token");
     // the access token consists of the users sha256 encoded firebase token,
     // the current time, and a "super secret key".
     // This also acts as a bearer token from the encoded firebase token
@@ -68,14 +68,14 @@ async fn update_class_data(
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(bearer, access_token) {
+    if !lib::auth::verify(&bearer, &access_token) {
         return "{\"error\": \"invalid request\"}".to_string();
     }
 
     // Generate a class update query which is the fastest way
     // for updating multiple values inside the database before
     // executing the database update using the below function
-    let r: u64 = db.update_class_data(bearer, &class_id, &body).await;
+    let r: u64 = db.update_class_data(&bearer, &class_id, &body).await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0);
 }
@@ -93,8 +93,8 @@ async fn insert_class_data(
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
-    let bearer: &str = global::get_header(&req, "authorization");
-    let access_token: &str = global::get_header(&req, "access_token");
+    let bearer: String = global::get_header(&req, "authorization");
+    let access_token: String = global::get_header(&req, "access_token");
     // the access token consists of the users sha256 encoded firebase token,
     // the current time, and a "super secret key".
     // This also acts as a bearer token from the encoded firebase token
@@ -103,7 +103,7 @@ async fn insert_class_data(
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(bearer, access_token) {
+    if !lib::auth::verify(&bearer, &access_token) {
         return "{\"error\": \"invalid request\"}".to_string();
     }
 

@@ -95,7 +95,10 @@ impl lib::handlers::Database {
         }
 
         // Get the bearer owner id
-        let owner_id: &str = &self.get_class_owner_id(bearer).await;
+        let owner_id: String = match self.get_class_owner_id(bearer).await {
+            Some(r) => r,
+            None => return 0
+        };
 
         // Query the database
         let r = sqlx::query!(
@@ -103,22 +106,25 @@ impl lib::handlers::Database {
             bearer, owner_id, class_id, class_name, 0
         ).execute(&self.conn).await;
 
-        // If an error has occurred, return 0 rows affected
-        if r.is_err() {
-            return 0;
-        }
-
-        // Else, return the amount of affected rows
-        return r.unwrap().rows_affected();
+        // Return query result
+        return match r {
+            Ok(r) => r.rows_affected(),
+            Err(_) => 0
+        };
     }
 
     // The get_class_owner_id() function is used to get
     // the user_id of the bearer token owner
-    async fn get_class_owner_id(&self, bearer: &str) -> String {
+    async fn get_class_owner_id(&self, bearer: &str) -> Option<String> {
         // Query the database
         let r = sqlx::query!("SELECT user_id FROM users WHERE bearer=?", bearer)
             .fetch_one(&self.conn).await;
-        return r.unwrap().user_id;
+        
+        // Return the user_id if not none
+        return match r {
+            Ok(r) => Some(r.user_id),
+            Err(_) => None
+        };
     }
 
     // The class_exists() function is used to check whether
@@ -178,13 +184,11 @@ impl lib::handlers::Database {
             "UPDATE classes SET {q} WHERE class_id='{class_id}' AND owner_bearer='{bearer}'"
         )).execute(&self.conn).await;
         
-        // If an error has occurred, return 0 rows affected
-        if r.is_err() {
-            return 0;
-        }
-
-        // Else, return the amount of affected rows
-        return r.unwrap().rows_affected();
+        // Return query result
+        return match r {
+            Ok(r) => r.rows_affected(),
+            Err(_) => 0,
+        };
     }
 
     // The get_class_basic_data() function is used to get
@@ -199,14 +203,11 @@ impl lib::handlers::Database {
             class_id
         ).fetch_one(&self.conn).await;
 
-        // Return empty if an error has occurred
-        if r.is_err() {
-            return None;
-        }
-
-        // Else, if no error has occured, return
-        // the queried class data
-        return Some(r.unwrap());
+        // Return query result
+        return match r {
+            Ok(r) => Some(r),
+            Err(_) => None,
+        };
     }
 
     // The get_class_data() function is used to get all data

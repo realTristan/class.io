@@ -28,8 +28,8 @@ async fn add_to_class_whitelist(
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
-    let bearer: &str = global::get_header(&req, "authorization");
-    let access_token: &str = global::get_header(&req, "access_token");
+    let bearer: String = global::get_header(&req, "authorization");
+    let access_token: String = global::get_header(&req, "access_token");
     // the access token consists of the users sha256 encoded firebase token,
     // the current time, and a "super secret key".
     // This also acts as a bearer token from the encoded firebase token
@@ -38,13 +38,13 @@ async fn add_to_class_whitelist(
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(bearer, access_token) {
+    if !lib::auth::verify(&bearer, &access_token) {
         return "{\"error\": \"invalid request\"}".to_string();
     }
     
     // Insert the whitelist data into the database
     let r: u64 = db
-        .insert_class_whitelist(bearer, &class_id, &body.user)
+        .insert_class_whitelist(&bearer, &class_id, &body.user)
         .await;
 
     // Return whether more than 0 rows were affected
@@ -61,8 +61,8 @@ async fn delete_from_class_whitelist(
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
-    let bearer: &str = global::get_header(&req, "authorization");
-    let access_token: &str = global::get_header(&req, "access_token");
+    let bearer: String = global::get_header(&req, "authorization");
+    let access_token: String = global::get_header(&req, "access_token");
     // the access token consists of the users sha256 encoded firebase token,
     // the current time, and a "super secret key".
     // This also acts as a bearer token from the encoded firebase token
@@ -71,13 +71,13 @@ async fn delete_from_class_whitelist(
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(bearer, access_token) {
+    if !lib::auth::verify(&bearer, &access_token) {
         return "{\"error\": \"invalid request\"}".to_string();
     }
 
     // Delete the whitelist data into the database
     let r: u64 = db
-        .delete_from_class_whitelist(bearer, &class_id, &body.user)
+        .delete_from_class_whitelist(&bearer, &class_id, &body.user)
         .await;
 
     // Return whether more than 0 rows were affected

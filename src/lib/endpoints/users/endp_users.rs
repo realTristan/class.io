@@ -27,27 +27,22 @@ pub async fn get_user_data(
     // Get the access token from the request headers.
     // This tokens is used to make sure that the incoming
     // request isn't from an abuser.
-    let bearer: &str = global::get_header(&req, "authorization");
-    let access_token: &str = global::get_header(&req, "access_token");
+    let bearer: String = global::get_header(&req, "authorization");
+    let access_token: String = global::get_header(&req, "access_token");
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(bearer, access_token) {
+    if !lib::auth::verify(&bearer, &access_token) {
         return "{\"error\": \"invalid request\"}".to_string();
     }
 
     // Once the request has been verified, query the
     // database for the provided user_id. Once found,
     // return all the data from said user.
-    let user = db.query_user_by_id(&user_id).await;
-    // Check whether or not the user is invalid
-    if user.is_none() {
-        return "{\"error\": \"invalid request\"}".to_string();
-    }
-    
-    // Else, if the user is valid, unwrap the
-    // object so it can be read
-    let user = user.unwrap();
+    let user = match db.query_user_by_id(&user_id).await {
+        Some(v) => v,
+        None => return "{\"error\": \"invalid request\"}".to_string(),
+    };
 
     // Return a formatted string as a json map
     // so the frontend can successfully read the
@@ -72,8 +67,8 @@ pub async fn update_user_data(
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
-    let bearer: &str = global::get_header(&req, "authorization");
-    let access_token: &str = global::get_header(&req, "access_token");
+    let bearer: String = global::get_header(&req, "authorization");
+    let access_token: String = global::get_header(&req, "access_token");
     // the access token consists of the users sha256 encoded firebase token,
     // the current time, and a "super secret key".
     // This also acts as a bearer token from the encoded firebase token
@@ -82,7 +77,7 @@ pub async fn update_user_data(
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(bearer, access_token) {
+    if !lib::auth::verify(&bearer, &access_token) {
         return "{\"error\": \"invalid request\"}".to_string();
     }
 
@@ -93,7 +88,7 @@ pub async fn update_user_data(
     }
 
     // Else, update the users 'user_name' in the database
-    let r: u64 = db.update_user_name(bearer, &body.user_name).await;
+    let r: u64 = db.update_user_name(&bearer, &body.user_name).await;
 
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0);
@@ -114,8 +109,8 @@ async fn insert_user_data(
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
     // sure that the incoming request isn't from an abuser.
-    let bearer: &str = global::get_header(&req, "authorization");
-    let access_token: &str = global::get_header(&req, "access_token");
+    let bearer: String = global::get_header(&req, "authorization");
+    let access_token: String = global::get_header(&req, "access_token");
     // the access token consists of the users sha256 encoded firebase token,
     // the current time, and a "super secret key".
     // This also acts as a bearer token from the encoded firebase token
@@ -124,7 +119,7 @@ async fn insert_user_data(
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
     // an empty json map
-    if !lib::auth::verify(bearer, access_token) {
+    if !lib::auth::verify(&bearer, &access_token) {
         return "{\"error\": \"invalid request\"}".to_string();
     }
     
@@ -137,7 +132,7 @@ async fn insert_user_data(
     // Along with this insertion is the bearer, user_name
     // user's email and the time of registration
     let r: u64 = db
-        .insert_user(bearer, &body.user_name, &body.email, date)
+        .insert_user(&bearer, &body.user_name, &body.email, date)
         .await;
     // Return whether more than 0 rows were affected
     return format!("{{\"success\": {}}}", r > 0);

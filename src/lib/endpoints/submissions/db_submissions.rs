@@ -67,14 +67,14 @@ impl lib::handlers::Database {
             class_id, submission_id, submitter_bearer, date, data
         ).execute(&self.conn).await;
 
-        // If an error has occurred, return 0 rows affected
-        if r.is_err() {
-            return 0;
-        }
-
-        // Else, return the actual amount of rows that
-        // have been affected by the insertion
-        return r.unwrap().rows_affected();
+        // Return query result
+        return match r {
+            // If an error has occurred, return 0 rows affected
+            Err(_) => 0,
+            // Else, return the actual amount of rows that
+            // have been affected by the insertion
+            Ok(r) => r.rows_affected(),
+        };
     }
 
     // The class_submission_exists() function is used to check whether
@@ -108,14 +108,14 @@ impl lib::handlers::Database {
             submitter_bearer
         ).execute(&self.conn).await;
 
-        // If an error has occurred, return 0 rows affected
-        if r.is_err() {
-            return 0;
-        }
-
-        // Else, return the actual amount of rows that
-        // have been affected by the insertion
-        return r.unwrap().rows_affected();
+        // Return query result
+        return match r {
+            // If an error has occurred, return 0 rows affected
+            Err(_) => 0,
+            // Else, return the actual amount of rows that
+            // have been affected by the deletion
+            Ok(r) => r.rows_affected(),
+        };
     }
 
     // The get_class_submissions() function is used to
@@ -130,14 +130,13 @@ impl lib::handlers::Database {
             class_id
         ).fetch_all(&self.conn).await;
 
-        // Return empty if an error has occurred
-        if r.is_err() {
-            return "{}".to_string();
-        }
-
-        // Else if no error has occurred, return
-        // the unwrapped array of all the units
-        return format!("[{}]", self.get_submission_json(r.unwrap()));
+        // Return query result
+        return match r {
+            // If an error has occurred, return an empty json map
+            Err(_) => "{}".to_string(),
+            // Else, return the formatted json map of all the submissions
+            Ok(r) => format!("[{}]", self.get_submission_json(r)),
+        };
     }
 
     // The get_user_submissions() function is used to get all the
@@ -150,19 +149,17 @@ impl lib::handlers::Database {
         // and the submission data from the submissions column.
         let r = sqlx::query_as!(
             Submission,
-            "SELECT submitter_bearer, submission_id, submission_date, data 
-                            FROM submissions WHERE class_id=? AND submitter_bearer=?",
+            "SELECT submitter_bearer, submission_id, submission_date, data FROM submissions WHERE class_id=? AND submitter_bearer=?",
             class_id,
             bearer
         ).fetch_all(&self.conn).await;
 
-        // Return empty if an error has occurred
-        if r.is_err() {
-            return "{}".to_string();
-        }
-        
-        // Else if no error has occurred, return
-        // the unwrapped array of all the units
-        return format!("[{}]", self.get_submission_json(r.unwrap()));
+        // Return query result
+        return match r {
+            // If an error has occurred, return an empty json map
+            Err(_) => "{}".to_string(),
+            // Else, return the formatted json map of all the submissions
+            Ok(r) => format!("[{}]", self.get_submission_json(r)),
+        };
     }
 }

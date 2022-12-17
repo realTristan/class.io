@@ -76,14 +76,11 @@ impl lib::handlers::Database {
             bearer, class_id, unit_id, unit_name, 0
         ).execute(&self.conn).await;
 
-        // If an error has occurred, return 0 rows affected
-        if r.is_err() {
-            return 0;
-        }
-
-        // Else, return the actual amount of rows that
-        // have been affected by the insertion
-        return r.unwrap().rows_affected();
+        // Return the result of the query
+        return match r {
+            Ok(v) => v.rows_affected(),
+            Err(_) => 0,
+        };
     }
 
     // The unit_exists() function is used to check whether
@@ -108,14 +105,11 @@ impl lib::handlers::Database {
             unit_id, bearer
         ).execute(&self.conn).await;
 
-        // If an error has occurred, return 0 rows affected
-        if r.is_err() {
-            return 0;
-        }
-
-        // Else, return the actual amount of rows that
-        // have been affected by the insertion
-        return r.unwrap().rows_affected();
+        // Return query result
+        return match r {
+            Ok(v) => v.rows_affected(),
+            Err(_) => 0,
+        };
     }
 
     // The update_class_unit() function is used to update a class's
@@ -150,14 +144,11 @@ impl lib::handlers::Database {
             res, data.unit_id, bearer
         )).execute(&self.conn).await;
 
-        // Return 0 if an error has occured
-        if r.is_err() {
-            return 0;
-        }
-
-        // Else if no error, return the amount of 
-        // rows affected (success)
-        return r.unwrap().rows_affected();
+        // Return query result
+        return match r {
+            Ok(v) => v.rows_affected(),
+            Err(_) => 0,
+        };
     }
 
     // The get_unit_lessons() function is used to get all
@@ -169,14 +160,11 @@ impl lib::handlers::Database {
             unit_id
         ).fetch_all(&self.conn).await;
 
-        // Return empty if an error has occurred
-        if r.is_err() {
-            return vec![];
-        }
-
-        // Else if no error has occurred, return
-        // the unwrapped array of all the units
-        return r.unwrap();
+        // Return query result
+        return match r {
+            Ok(v) => v,
+            Err(_) => vec![],
+        };
     }
 
     // The get_units_json() function is used to generate
