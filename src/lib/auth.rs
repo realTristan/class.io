@@ -24,21 +24,10 @@ lazy_static::lazy_static! {
 // the past 8 seconds. If so, return true, else, return false.
 pub fn verify(bearer: &str, access_token: &str) -> bool {
     // Lock the TOKEN STORAGE so we can access it's data
-<<<<<<< HEAD
     let mut token_storage = match TOKEN_STORAGE.lock() {
         Ok(token_storage) => token_storage,
         Err(_) => return false,
     };
-=======
-    let _token_storage = TOKEN_STORAGE.lock();
-    // If an error has occurred, return false
-    if _token_storage.is_err() {
-        return false;
-    }
-
-    // Unwrap the token storage data
-    let mut token_storage = _token_storage.unwrap();
->>>>>>> 1f289d66a80cb76481f1a96014a9c9dac0508d8b
     // Get the system time since epoch. This value
     // is used to check how long ago the auth token was
     // generated. Doing this prevents users from consecutively
@@ -73,11 +62,7 @@ pub fn verify(bearer: &str, access_token: &str) -> bool {
     // Execute the storage handler
     // If the function returns false, then the provided
     // auth token has already been used within the past 8 seconds.
-<<<<<<< HEAD
     if !storage_handler(bearer_storage, access_token, &time) {
-=======
-    if !storage_handler(mut_storage, access_token, &time) {
->>>>>>> 1f289d66a80cb76481f1a96014a9c9dac0508d8b
         return false;
     };
 
@@ -101,11 +86,7 @@ pub fn verify(bearer: &str, access_token: &str) -> bool {
 // within the past 8 seconds. This is function is
 // necessary to prevent abusers from using the same
 // token more than once.
-<<<<<<< HEAD
 fn storage_handler(bearer_storage: &mut Vec<String>, access_token: &str, time: &u64) -> bool {
-=======
-fn storage_handler(mut_storage: &mut Vec<String>, access_token: &str, time: &u64) -> bool {
->>>>>>> 1f289d66a80cb76481f1a96014a9c9dac0508d8b
     // Get the last storage wipe time
     let last_wipe_time: u64 = bearer_storage[0].parse().unwrap();
     // If the last wipe happened over 8 seconds ago,
@@ -113,11 +94,7 @@ fn storage_handler(mut_storage: &mut Vec<String>, access_token: &str, time: &u64
     // overflow. If the user has too many tokens and
     // the cache isn't eventually cleared.. you already
     // know what'll happen lmao.
-<<<<<<< HEAD
     if time > &(last_wipe_time + 8) || bearer_storage.len() > 10 {
-=======
-    if time > &(last_wipe_time + 8) || mut_storage.len() > 10 {
->>>>>>> 1f289d66a80cb76481f1a96014a9c9dac0508d8b
         // Clear the users token storage and set
         // the first value of the array to the
         // current time as a string
@@ -132,9 +109,5 @@ fn storage_handler(mut_storage: &mut Vec<String>, access_token: &str, time: &u64
     // cleared, check whether the access_token is already existant
     // in the token storage. If it is, return false, thus the
     // user is using an unauthorized token. Else, return true.
-<<<<<<< HEAD
     return !bearer_storage.contains(&access_token.to_string());
-=======
-    return !mut_storage.contains(&access_token.to_string());
->>>>>>> 1f289d66a80cb76481f1a96014a9c9dac0508d8b
 }
