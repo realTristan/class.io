@@ -1,8 +1,7 @@
 // Library Usages
+use super::global;
 use std::collections::HashMap;
 use std::sync::Mutex;
-
-use super::global;
 
 // The SUPER_SECRET_CODE is what's used to prevent
 // users trying to abuse the api from being able
@@ -38,25 +37,22 @@ pub fn verify(bearer: &str, access_token: &str) -> bool {
     // This is required so that we can append the access_token
     // to the users token storage, or so that we can clear
     // the token storage if full.
-    let bearer_storage: Option<&mut Vec<String>> = token_storage.get_mut(bearer);
-
+    //
     // If the user doesn't already exist within the
     // token storage return true
-    if bearer_storage.is_none() {
-        // Insert the user into the token storage
-        // along with the current time and auth token
-        token_storage.insert(
-            bearer.to_string(),
-            [time.to_string(), access_token.to_string()].to_vec(),
-        );
-        // Return true as the token did not
-        // previously exist in the token storage
-        return true;
-    }
-    // Unwrap the mutable bearer storage
-    let bearer_storage: &mut Vec<String> = match bearer_storage {
+    let bearer_storage: &mut Vec<String> = match token_storage.get_mut(bearer) {
         Some(bearer_storage) => bearer_storage,
-        None => return false,
+        None => {
+            // Insert the user into the token storage
+            // along with the current time and auth token
+            token_storage.insert(
+                bearer.to_string(),
+                [time.to_string(), access_token.to_string()].to_vec(),
+            );
+            // Return true as the token did not
+            // previously exist in the token storage
+            return true;
+        }
     };
 
     // Execute the storage handler
