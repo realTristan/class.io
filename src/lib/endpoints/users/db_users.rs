@@ -6,6 +6,8 @@ use crate::lib::{self, global};
 pub struct User {
     // Row Increment ID
     pub id: i64,
+    // The unique user identifier
+    pub user_id: String,
     // The user hash (aka: the user id)
     pub bearer: String,
     // The users name
@@ -13,7 +15,7 @@ pub struct User {
     // The users email
     pub email: String,
     // The Users registration date (used for bearer token)
-    pub registration_date: i64
+    pub registration_date: i64,
 }
 
 // Database Implemenetation that contains all the
@@ -23,35 +25,41 @@ impl lib::handlers::Database {
     // insert a fake user for testing the backend
     // database functions
     pub async fn insert_test_user(&self) -> u64 {
-        return self.insert_user(
-            "822f3d5b9c91b570a4f1848c5d147b4709d2fb96", "realtristan", 
-            "realtristan@gmail.com", 0
-        ).await;
+        return self
+            .insert_user(
+                "822f3d5b9c91b570a4f1848c5d147b4709d2fb96",
+                "realtristan",
+                "realtristan@gmail.com",
+                0,
+            )
+            .await;
     }
 
     // The insert_user() function is used to insert a
     // new user into the database. Although if the user
     // already exists within the database, the function
     // returns 0 for 0 rows changed.
-    pub async fn insert_user(
-        &self, bearer: &str, user_name: &str, email: &str, registration_date: i64
-    ) -> u64 {
+    pub async fn insert_user(&self, bearer: &str, user_name: &str, email: &str, date: i64) -> u64 {
         // If the user already, exists, return 0
-        if self.user_exists(bearer).await { return 0; }
+        if self.user_exists(bearer).await {
+            return 0;
+        }
 
         // Generate a new user id
-        let user_id: String = global::generate_new_id(&format!("{email}:{registration_date}"));
+        let user_id: String = global::generate_new_id(&format!("{email}:{bearer}:{date}"));
 
         // Insert the user into the database
-        let r = sqlx::query!(
+        let r =
+            sqlx::query!(
             "INSERT INTO users (bearer, user_id, user_name, email, registration_date) VALUES (?, ?, ?, ?, ?)",
-            bearer, user_id, user_name, email, registration_date
+            bearer, user_id, user_name, email, date
         ).execute(&self.conn).await;
-        // If an error has occurred return 0 rows affected
-        if r.is_err() { return 0; }
-        // Else unwrap the result and return the
-        // amount of rows affected
-        return r.unwrap().rows_affected();
+
+        // Return query result
+        return match r {
+            Ok(r) => r.rows_affected(),
+            Err(_) => 0,
+        };
     }
 
     // The user_exists() function is used to check whether
@@ -62,6 +70,7 @@ impl lib::handlers::Database {
         let r = sqlx::query!(
             "SELECT * FROM users WHERE bearer=?", bearer
         ).fetch_one(&self.conn).await;
+
         // Return whether valid query data has been obtained
         return !r.is_err();
     }
@@ -76,24 +85,25 @@ impl lib::handlers::Database {
             User, "SELECT * FROM users WHERE user_id=?", user_id
         ).fetch_one(&self.conn).await;
 
-        // If the user is invalid, return none
-        if r.is_err() { return None }
-        // Return the 'User' object containing all of
-        // the requested user's data
-        return Some(r.unwrap())
+        // Return query result
+        return match r {
+            Ok(r) => Some(r),
+            Err(_) => None,
+        };
     }
 
-    // The update_user_name() function is used to 
+    // The update_user_name() function is used to
     // modify the incoming users profile name.
     pub async fn update_user_name(&self, bearer: &str, new_name: &str) -> u64 {
-        let r = sqlx::query!("UPDATE users SET user_name=? WHERE bearer=?",
+        let r = sqlx::query!(
+            "UPDATE users SET user_name=? WHERE bearer=?",
             new_name, bearer
         ).execute(&self.conn).await;
 
-        // If an error has occurred, return 0 rows affected
-        if r.is_err() { return 0; }
-        // Else, return the actual amount of rows that
-        // have been affected by the insertion
-        return r.unwrap().rows_affected();
+        // Return query result
+        return match r {
+            Ok(r) => r.rows_affected(),
+            Err(_) => 0,
+        };
     }
 }

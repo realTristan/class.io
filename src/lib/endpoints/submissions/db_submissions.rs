@@ -11,7 +11,7 @@ struct Submission {
     // The date the work was submitted
     submission_date: i64,
     // The submission data. (ex: the file, the answers, etc.)
-    data: String
+    data: String,
 }
 
 // Database Implementation
@@ -26,8 +26,8 @@ impl lib::handlers::Database {
         // append each of the lesson's data to a formatted
         // string array of maps
         submissions.iter().for_each(|s| {
-            r.push_str(
-                &format!("{{
+            r.push_str(&format!(
+                "{{
                     \"submitter_bearer\": \"{}\", 
                     \"submission_id\": \"{}\", 
                     \"submission_date\": \"{}\", 
@@ -38,7 +38,7 @@ impl lib::handlers::Database {
         });
         // Remove the last comma of the string array
         // before returning the new json map result
-        return r[..r.len()-1].to_string();
+        return r[..r.len() - 1].to_string();
     }
 
     // The insert_class_submission() function is used to
@@ -47,10 +47,16 @@ impl lib::handlers::Database {
     // a unique submission hash before inserting the data, which
     // is used within the delete_class_submission() function
     pub async fn insert_class_submission(
-        &self, class_id: &str, submission_id: &str, submitter_bearer: &str, data: &str
+        &self,
+        class_id: &str,
+        submission_id: &str,
+        submitter_bearer: &str,
+        data: &str,
     ) -> u64 {
         // If the submission already exists, return
-        if self.class_submission_exists(submission_id).await { return 0; }
+        if self.class_submission_exists(submission_id).await {
+            return 0;
+        }
 
         // Get the current date to put into the database
         let date: i64 = global::get_time() as i64;
@@ -61,11 +67,14 @@ impl lib::handlers::Database {
             class_id, submission_id, submitter_bearer, date, data
         ).execute(&self.conn).await;
 
-        // If an error has occurred, return 0 rows affected
-        if r.is_err() { return 0; }
-        // Else, return the actual amount of rows that
-        // have been affected by the insertion
-        return r.unwrap().rows_affected();
+        // Return query result
+        return match r {
+            // If an error has occurred, return 0 rows affected
+            Err(_) => 0,
+            // Else, return the actual amount of rows that
+            // have been affected by the insertion
+            Ok(r) => r.rows_affected(),
+        };
     }
 
     // The class_submission_exists() function is used to check whether
@@ -74,8 +83,10 @@ impl lib::handlers::Database {
     async fn class_submission_exists(&self, submission_id: &str) -> bool {
         // Query the database
         let r = sqlx::query!(
-            "SELECT * FROM submissions WHERE submission_id=?", submission_id
+            "SELECT * FROM submissions WHERE submission_id=?",
+            submission_id
         ).fetch_one(&self.conn).await;
+
         // Return whether valid query data has been obtained
         return !r.is_err();
     }
@@ -85,23 +96,29 @@ impl lib::handlers::Database {
     // is called when a student wants to unsubmit a portion
     // of their work.
     pub async fn delete_class_submission(
-        &self, submitter_bearer: &str, submission_id: &str
+        &self,
+        submitter_bearer: &str,
+        submission_id: &str,
     ) -> u64 {
         // Query the database, deleting all data revolving around
         // the provided submission hash
         let r = sqlx::query!(
-            "DELETE FROM submissions WHERE submission_id=? AND submitter_bearer=?", 
-            submission_id, submitter_bearer
+            "DELETE FROM submissions WHERE submission_id=? AND submitter_bearer=?",
+            submission_id,
+            submitter_bearer
         ).execute(&self.conn).await;
 
-        // If an error has occurred, return 0 rows affected
-        if r.is_err() { return 0; }
-        // Else, return the actual amount of rows that
-        // have been affected by the insertion
-        return r.unwrap().rows_affected();
+        // Return query result
+        return match r {
+            // If an error has occurred, return 0 rows affected
+            Err(_) => 0,
+            // Else, return the actual amount of rows that
+            // have been affected by the deletion
+            Ok(r) => r.rows_affected(),
+        };
     }
 
-    // The get_class_submissions() function is used to 
+    // The get_class_submissions() function is used to
     // return all the submissions for the provided class.
     // This function is used in the dashboard of the website
     // where the teachers can mark the students submitted work.
@@ -113,11 +130,13 @@ impl lib::handlers::Database {
             class_id
         ).fetch_all(&self.conn).await;
 
-        // Return empty if an error has occurred
-        if r.is_err() { return "{}".to_string() }
-        // Else if no error has occurred, return
-        // the unwrapped array of all the units
-        return format!("[{}]", self.get_submission_json(r.unwrap()));
+        // Return query result
+        return match r {
+            // If an error has occurred, return an empty json map
+            Err(_) => "{}".to_string(),
+            // Else, return the formatted json map of all the submissions
+            Ok(r) => format!("[{}]", self.get_submission_json(r)),
+        };
     }
 
     // The get_user_submissions() function is used to get all the
@@ -129,15 +148,18 @@ impl lib::handlers::Database {
         // Query the database selecting the submitter_bearer, submission_id, submission_date
         // and the submission data from the submissions column.
         let r = sqlx::query_as!(
-            Submission, "SELECT submitter_bearer, submission_id, submission_date, data 
-                            FROM submissions WHERE class_id=? AND submitter_bearer=?", 
-            class_id, bearer
+            Submission,
+            "SELECT submitter_bearer, submission_id, submission_date, data FROM submissions WHERE class_id=? AND submitter_bearer=?",
+            class_id,
+            bearer
         ).fetch_all(&self.conn).await;
 
-        // Return empty if an error has occurred
-        if r.is_err() { return "{}".to_string() }
-        // Else if no error has occurred, return
-        // the unwrapped array of all the units
-        return format!("[{}]", self.get_submission_json(r.unwrap()));
+        // Return query result
+        return match r {
+            // If an error has occurred, return an empty json map
+            Err(_) => "{}".to_string(),
+            // Else, return the formatted json map of all the submissions
+            Ok(r) => format!("[{}]", self.get_submission_json(r)),
+        };
     }
 }
