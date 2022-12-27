@@ -49,8 +49,7 @@ impl lib::handlers::Database {
         let user_id: String = global::generate_new_id(&format!("{email}:{bearer}:{date}"));
 
         // Insert the user into the database
-        let r =
-            sqlx::query!(
+        let r = sqlx::query!(
             "INSERT INTO users (bearer, user_id, user_name, email, registration_date) VALUES (?, ?, ?, ?, ?)",
             bearer, user_id, user_name, email, date
         ).execute(&self.conn).await;
