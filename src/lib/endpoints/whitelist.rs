@@ -18,7 +18,7 @@ async fn add_to_class_whitelist(
     let class_id: &str = match req.match_info().get("class_id") {
         Some(id) => id,
         None => return serde_json::json!({
-            "status": "400",
+            "status": 400,
             "response": "Invalid request"
         }).to_string()
     };
@@ -33,7 +33,7 @@ async fn add_to_class_whitelist(
     // an invalid request response json
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
-            "status": "400",
+            "status": 400,
             "response": "Invalid request"
         }).to_string()
     }
@@ -41,11 +41,11 @@ async fn add_to_class_whitelist(
     // Insert the whitelist data into the database
     return match db.insert_class_whitelist(&bearer, &class_id, &body.user).await {
         true => serde_json::json!({
-            "status": "200",
+            "status": 200,
             "response": "Success"
         }).to_string(),
         false => serde_json::json!({
-            "status": "400",
+            "status": 400,
             "response": "Failed to insert whitelist data"
         }).to_string()
     };
@@ -59,7 +59,7 @@ async fn delete_from_class_whitelist(
     let class_id: &str = match req.match_info().get("class_id") {
         Some(id) => id,
         None => return serde_json::json!({
-            "status": "400",
+            "status": 400,
             "response": "Invalid request"
         }).to_string()
     };
@@ -74,7 +74,7 @@ async fn delete_from_class_whitelist(
     // an invalid request response json
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
-            "status": "400",
+            "status": 400,
             "response": "Invalid request"
         }).to_string()
     }
@@ -82,11 +82,11 @@ async fn delete_from_class_whitelist(
     // Delete the whitelist data into the database
     return match db.delete_from_class_whitelist(&bearer, &class_id, &body.user).await {
         true => serde_json::json!({
-            "status": "200",
+            "status": 200,
             "response": "Success"
         }).to_string(),
         false => serde_json::json!({
-            "status": "400",
+            "status": 400,
             "response": "Failed to delete whitelist data"
         }).to_string()
     };

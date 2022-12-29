@@ -15,7 +15,7 @@ pub async fn get_user_data(req: HttpRequest, db: web::Data<Database>) -> impl Re
     let user_id: &str = match req.match_info().get("user_id") {
         Some(id) => id,
         None => return serde_json::json!({
-            "status": "400",
+            "status": 400,
             "response": "Invalid user id"
         }).to_string()
     };
@@ -30,7 +30,7 @@ pub async fn get_user_data(req: HttpRequest, db: web::Data<Database>) -> impl Re
     // an invalid request response json
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
-            "status": "400",
+            "status": 400,
             "response": "Invalid request"
         }).to_string()
     }
@@ -41,7 +41,7 @@ pub async fn get_user_data(req: HttpRequest, db: web::Data<Database>) -> impl Re
     let user = match db.query_user_by_id(&user_id).await {
         Some(v) => v,
         None => return serde_json::json!({
-            "status": "400",
+            "status": 400,
             "response": "Failed to fetch user data"
         }).to_string()
     };
@@ -50,7 +50,7 @@ pub async fn get_user_data(req: HttpRequest, db: web::Data<Database>) -> impl Re
     // so the frontend can successfully read the
     // response data.
     return serde_json::json!({
-        "status": "200",
+        "status": 200,
         "response": {
             "user_name": user.user_name,
             "user_id": user_id,
@@ -78,7 +78,7 @@ pub async fn update_user_data(
     // an invalid request response json
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
-            "status": "400",
+            "status": 400,
             "response": "Invalid request"
         }).to_string()
     }
@@ -87,7 +87,7 @@ pub async fn update_user_data(
     // a new user_name, return an empty json map
     if body.user_name.len() < 1 {
         return serde_json::json!({
-            "status": "400",
+            "status": 400,
             "response": "Invalid request body"
         }).to_string()
     }
@@ -96,11 +96,11 @@ pub async fn update_user_data(
     // was successful or not
     return match db.update_user_name(&bearer, &body.user_name).await {
         true => serde_json::json!({
-            "status": "200",
+            "status": 200,
             "response": "Successfully updated user data"
         }).to_string(),
         false => serde_json::json!({
-            "status": "400",
+            "status": 400,
             "response": "Failed to update user data"
         }).to_string()
     }
@@ -126,7 +126,7 @@ async fn insert_user_data(
     // an invalid request response json
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
-            "status": "400",
+            "status": 400,
             "response": "Invalid request"
         }).to_string()
     }
@@ -136,11 +136,11 @@ async fn insert_user_data(
     // user's email and the time of registration
     return match db.insert_user(&bearer, &body.user_name, &body.email).await {
         true => serde_json::json!({
-            "status": "200",
+            "status": 200,
             "response": "Successfully inserted user data"
         }).to_string(),
         false => serde_json::json!({
-            "status": "400",
+            "status": 400,
             "response": "Failed to insert user data"
         }).to_string()
     }

@@ -15,7 +15,7 @@ async fn insert_class_announcement(
     let class_id: &str = match req.match_info().get("class_id") {
         Some(id) => id,
         None => return serde_json::json!({
-            "status": "400",
+            "status": 400,
             "response": "Invalid request"
         }).to_string()
     };
@@ -23,7 +23,7 @@ async fn insert_class_announcement(
     let announcement_id: &str = match req.match_info().get("announcement_id") {
         Some(id) => id,
         None => return serde_json::json!({
-            "status": "400",
+            "status": 400,
             "response": "Invalid request"
         }).to_string()
     };
@@ -43,11 +43,11 @@ async fn insert_class_announcement(
     // Insert the announcement into the database
     return match db.insert_class_announcement(&bearer, &class_id, &announcement_id, &body).await {
         true => serde_json::json!({
-            "status": "200",
+            "status": 200,
             "response": "Announcement successfully created"
         }).to_string(),
         false => serde_json::json!({
-            "status": "400",
+            "status": 400,
             "response": "Invalid request"
         }).to_string()
     }
@@ -65,7 +65,7 @@ async fn delete_class_announcement(
     let _class_id: &str = match req.match_info().get("class_id") {
         Some(id) => id,
         None => return serde_json::json!({
-            "status": "400",
+            "status": 400,
             "response": "Invalid request"
         }).to_string()
     };
@@ -80,7 +80,7 @@ async fn delete_class_announcement(
     // an invalid request response json
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
-            "status": "400",
+            "status": 400,
             "response": "Invalid request"
         }).to_string()
     }
@@ -88,11 +88,11 @@ async fn delete_class_announcement(
     // Delete the announcement from the database
     return match db.delete_class_announcement(&bearer, &body.announcement_id).await {
         true => serde_json::json!({
-            "status": "200",
+            "status": 200,
             "response": "Announcement succesfully deleted"
         }).to_string(),
         false => serde_json::json!({
-            "status": "400",
+            "status": 400,
             "response": "Failed to delete announcement"
         }).to_string()
     }
