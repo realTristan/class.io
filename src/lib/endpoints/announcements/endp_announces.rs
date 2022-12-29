@@ -27,19 +27,23 @@ pub struct AnnouncementDataBody {
 // for if the user wants to later delete the post.
 #[actix_web::put("/class/{class_id}/announcements/{announcement_id}")]
 async fn insert_class_announcement(
-    req: HttpRequest, 
-    db: web::Data<Database>, 
-    body: web::Json<AnnouncementDataBody>
+    req: HttpRequest, db: web::Data<Database>, body: web::Json<AnnouncementDataBody>
 ) -> impl Responder {
     // Get the class id
     let class_id: &str = match req.match_info().get("class_id") {
         Some(id) => id,
-        None => return "{\"error\": \"invalid request\"}".to_string(),
+        None => return serde_json::json!({
+            "status": "400",
+            "response": "Invalid request"
+        }).to_string()
     };
     // Get the announcement id
     let announcement_id: &str = match req.match_info().get("announcement_id") {
         Some(id) => id,
-        None => return "{\"error\": \"invalid request\"}".to_string(),
+        None => return serde_json::json!({
+            "status": "400",
+            "response": "Invalid request"
+        }).to_string()
     };
 
     // Get the access and authentication tokens from
@@ -58,11 +62,17 @@ async fn insert_class_announcement(
     if !lib::auth::verify(&bearer, &access_token) {
         return "{\"error\": \"invalid request\"}".to_string();
     }
-    let r: u64 = db
-        .insert_class_announcement(&bearer, &class_id, &announcement_id, &body)
-        .await;
-    // Return whether more than 0 rows were affected
-    return format!("{{\"success\": {}}}", r > 0);
+
+    return match db.insert_class_announcement(&bearer, &class_id, &announcement_id, &body).await {
+        true => serde_json::json!({
+            "status": "200",
+            "response": "Announcement successfully created"
+        }).to_string(),
+        false => serde_json::json!({
+            "status": "400",
+            "response": "Invalid request"
+        }).to_string()
+    }
 }
 
 // The delete_class_announcement() endpoint is used
@@ -71,14 +81,15 @@ async fn insert_class_announcement(
 // user making the announcement must be signed in.
 #[actix_web::delete("/class/{class_id}/announcements")]
 async fn delete_class_announcement(
-    req: HttpRequest, 
-    db: web::Data<Database>, 
-    body: web::Json<AnnouncementDataBody>
+    req: HttpRequest, db: web::Data<Database>, body: web::Json<AnnouncementDataBody>
 ) -> impl Responder {
     // Get the class id
     let _class_id: &str = match req.match_info().get("class_id") {
         Some(id) => id,
-        None => return "{\"error\": \"invalid request\"}".to_string(),
+        None => return serde_json::json!({
+            "status": "400",
+            "response": "Invalid request"
+        }).to_string()
     };
 
     // Get the access and authentication tokens from
@@ -95,11 +106,20 @@ async fn delete_class_announcement(
     // token and is trying to abuse the api, return
     // an empty json map
     if !lib::auth::verify(&bearer, &access_token) {
-        return "{\"error\": \"invalid request\"}".to_string();
+        return serde_json::json!({
+            "status": "400",
+            "response": "Invalid request"
+        }).to_string()
     }
-    let r: u64 = db
-        .delete_class_announcement(&bearer, &body.announcement_id)
-        .await;
-    // Return whether more than 0 rows were affected
-    return format!("{{\"success\": {}}}", r > 0);
+
+    return match db.delete_class_announcement(&bearer, &body.announcement_id).await {
+        true => serde_json::json!({
+            "status": "200",
+            "response": "Announcement succesfully deleted"
+        }).to_string(),
+        false => serde_json::json!({
+            "status": "400",
+            "response": "Failed to delete announcement"
+        }).to_string()
+    }
 }

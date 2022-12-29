@@ -19,11 +19,15 @@ pub struct ClassDataBody {
 // whitelist[String Array], announcements, class_name,
 // enable_whitelist[bool], etc.
 #[actix_web::get("/class/{class_id}")]
-async fn get_class_data(req: HttpRequest, db: web::Data<Database>) -> impl Responder {
+async fn get_class_data(req: HttpRequest, db: web::Data<Database>) -> impl Responder 
+{
     // Get the class id
     let class_id: &str = match req.match_info().get("class_id") {
         Some(id) => id,
-        None => return "{\"error\": \"invalid request\"}".to_string(),
+        None => return serde_json::json!({
+            "status": "400",
+            "response": "Invalid request"
+        }).to_string()
     };
 
     // Get the access and authentication tokens from
@@ -40,10 +44,23 @@ async fn get_class_data(req: HttpRequest, db: web::Data<Database>) -> impl Respo
     // token and is trying to abuse the api, return
     // an empty json map
     if !lib::auth::verify(&bearer, &access_token) {
-        return "{\"error\": \"invalid request\"}".to_string();
+        return serde_json::json!({
+            "status": "400",
+            "response": "Invalid request"
+        }).to_string()
     }
+
     // Return the class data
-    return db.get_class_data(&class_id).await;
+    return match db.get_class_data(&class_id).await {
+        Some(data) => serde_json::json!({
+            "status": "200",
+            "response": data
+        }).to_string(),
+        None => serde_json::json!({
+            "status": "400",
+            "response": "Unable to fetch class data"
+        }).to_string()
+    }
 }
 
 // The update_class_data() endpoint is used to
@@ -52,14 +69,15 @@ async fn get_class_data(req: HttpRequest, db: web::Data<Database>) -> impl Respo
 // and requires a special bearer token to work.
 #[actix_web::post("/class/{class_id}")]
 async fn update_class_data(
-    req: HttpRequest, 
-    db: web::Data<Database>, 
-    body: web::Json<ClassDataBody>
+    req: HttpRequest, db: web::Data<Database>, body: web::Json<ClassDataBody>
 ) -> impl Responder {
     // Get the class id
     let class_id: &str = match req.match_info().get("class_id") {
         Some(id) => id,
-        None => return "{\"error\": \"invalid request\"}".to_string(),
+        None => return serde_json::json!({
+            "status": "400",
+            "response": "Invalid request"
+        }).to_string()
     };
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
@@ -75,15 +93,25 @@ async fn update_class_data(
     // token and is trying to abuse the api, return
     // an empty json map
     if !lib::auth::verify(&bearer, &access_token) {
-        return "{\"error\": \"invalid request\"}".to_string();
+        return serde_json::json!({
+            "status": "400",
+            "response": "Invalid request"
+        }).to_string()
     }
 
     // Generate a class update query which is the fastest way
     // for updating multiple values inside the database before
     // executing the database update using the below function
-    let r: u64 = db.update_class_data(&bearer, &class_id, &body).await;
-    // Return whether more than 0 rows were affected
-    return format!("{{\"success\": {}}}", r > 0);
+    return match db.update_class_data(&bearer, &class_id, &body).await {
+        true => serde_json::json!({
+            "status": "200",
+            "response": "Successfully updated class data"
+        }).to_string(),
+        false => serde_json::json!({
+            "status": "400",
+            "response": "Failed to update class data"
+        }).to_string()
+    }
 }
 
 // The insert_class_data() endpoint is used to
@@ -91,14 +119,15 @@ async fn update_class_data(
 // values. A Maximum of 5 classes is allowed.
 #[actix_web::put("/class/{class_id}")]
 async fn insert_class_data(
-    req: HttpRequest, 
-    db: web::Data<Database>, 
-    body: web::Json<ClassDataBody>
+    req: HttpRequest, db: web::Data<Database>, body: web::Json<ClassDataBody>
 ) -> impl Responder {
     // Get the class id
     let class_id: &str = match req.match_info().get("class_id") {
         Some(id) => id,
-        None => return "{\"error\": \"invalid request\"}".to_string(),
+        None => return serde_json::json!({
+            "status": "400",
+            "response": "Invalid request"
+        }).to_string()
     };
 
     // Get the access and authentication tokens from
@@ -115,20 +144,30 @@ async fn insert_class_data(
     // token and is trying to abuse the api, return
     // an empty json map
     if !lib::auth::verify(&bearer, &access_token) {
-        return "{\"error\": \"invalid request\"}".to_string();
+        return serde_json::json!({
+            "status": "400",
+            "response": "Invalid request"
+        }).to_string()
     }
 
     // If the body class_name is invalid,
     // return an empty json map
     if body.class_name.len() < 1 {
-        return "{\"error\": \"invalid request\"}".to_string();
+        return serde_json::json!({
+            "status": "400",
+            "response": "Invalid request"
+        }).to_string()
     }
 
     // Insert the class data into the database
-    let r: u64 = db
-        .insert_class_data(&bearer, &class_id, &body.class_name)
-        .await;
-
-    // Return whether more than 0 rows were affected
-    return format!("{{\"success\": {}}}", r > 0);
+    return match db.insert_class_data(&bearer, &class_id, &body.class_name).await {
+        true => serde_json::json!({
+            "status": "200",
+            "response": "Successfully inserted class data"
+        }).to_string(),
+        false => serde_json::json!({
+            "status": "400",
+            "response": "Failed to insert class data"
+        }).to_string()
+    }
 }

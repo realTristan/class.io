@@ -20,7 +20,8 @@ impl lib::handlers::Database {
     // The insert_test_class() function is used for endpoint
     // debugging as it is required that atleast one class be
     // present in order to properly test.
-    pub async fn insert_test_class(&self) {
+    pub async fn insert_test_class(&self) 
+    {
         println!("Test User Hash: 22f3d5b9c91b570a4f1848c5d147b4709d2fb96");
         println!("Test Class Hash: e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020");
 
@@ -88,40 +89,42 @@ impl lib::handlers::Database {
     // 5 classes is allowed per user. To generate the unique
     // class identifier, format the bearer with the current
     // time in nanoseconds.
-    pub async fn insert_class_data(&self, bearer: &str, class_id: &str, class_name: &str) -> u64 {
+    pub async fn insert_class_data(&self, bearer: &str, class_id: &str, class_name: &str) -> bool
+    {
         // If the class already exists, return the function.
         if self.class_exists(class_id).await {
-            return 0;
+            return false;
         }
 
         // Get the bearer owner id
         let owner_id: String = match self.get_class_owner_id(bearer).await {
             Some(r) => r,
-            None => return 0
+            None => return false
         };
 
         // Query the database
-        let r = sqlx::query!(
+        let query = sqlx::query!(
             "INSERT INTO classes (owner_bearer, owner_id, class_id, class_name, enable_whitelist) VALUES (?, ?, ?, ?, ?)",
             bearer, owner_id, class_id, class_name, 0
         ).execute(&self.conn).await;
 
         // Return query result
-        return match r {
-            Ok(r) => r.rows_affected(),
-            Err(_) => 0
+        return match query {
+            Ok(r) => r.rows_affected() > 0,
+            Err(_) => false
         };
     }
 
     // The get_class_owner_id() function is used to get
     // the user_id of the bearer token owner
-    async fn get_class_owner_id(&self, bearer: &str) -> Option<String> {
+    async fn get_class_owner_id(&self, bearer: &str) -> Option<String> 
+    {
         // Query the database
-        let r = sqlx::query!("SELECT user_id FROM users WHERE bearer=?", bearer)
+        let query = sqlx::query!("SELECT user_id FROM users WHERE bearer=?", bearer)
             .fetch_one(&self.conn).await;
         
         // Return the user_id if not none
-        return match r {
+        return match query {
             Ok(r) => Some(r.user_id),
             Err(_) => None
         };
@@ -130,12 +133,13 @@ impl lib::handlers::Database {
     // The class_exists() function is used to check whether
     // the provided class hash already exists. This function
     // is called in the insert_class_data() function.
-    async fn class_exists(&self, class_id: &str) -> bool {
+    async fn class_exists(&self, class_id: &str) -> bool 
+    {
         // Query the database
-        let r = sqlx::query!("SELECT * FROM classes WHERE class_id=?", class_id)
+        let query = sqlx::query!("SELECT * FROM classes WHERE class_id=?", class_id)
             .fetch_one(&self.conn).await;
         // Return whether valid query data has been obtained
-        return !r.is_err();
+        return !query.is_err();
     }
 
     // The get_class_update_query() function is used
@@ -143,7 +147,8 @@ impl lib::handlers::Database {
     // the class data within the database. This function
     // is required to disperse the query string from any
     // invalid/empty values.
-    fn generate_class_update_query(&self, data: &Json<ClassDataBody>) -> String {
+    fn generate_class_update_query(&self, data: &Json<ClassDataBody>) -> String 
+    {
         let mut res: String = String::new();
         // If the provided data's enable_whitelist integer bool
         // isn't invalid (equal to 2) then append the
@@ -169,42 +174,39 @@ impl lib::handlers::Database {
     // any data for the provided class within the database.
     // The function requires a generated class_update_query
     // which can be generated using the function above.
-    pub async fn update_class_data(
-        &self,
-        bearer: &str,
-        class_id: &str,
-        data: &Json<ClassDataBody>,
-    ) -> u64 {
+    pub async fn update_class_data(&self, bearer: &str, class_id: &str, data: &Json<ClassDataBody>) -> bool 
+    {
         // Generate a new query string. This query string accounts
         // for empty values so that nothing gets corrupted.
-        let q: String = self.generate_class_update_query(data);
+        let query_data: String = self.generate_class_update_query(data);
         
         // Query the database
-        let r = sqlx::query(&format!(
-            "UPDATE classes SET {q} WHERE class_id='{class_id}' AND owner_bearer='{bearer}'"
+        let query = sqlx::query(&format!(
+            "UPDATE classes SET {query_data} WHERE class_id='{class_id}' AND owner_bearer='{bearer}'"
         )).execute(&self.conn).await;
         
         // Return query result
-        return match r {
-            Ok(r) => r.rows_affected(),
-            Err(_) => 0,
+        return match query {
+            Ok(r) => r.rows_affected() > 0,
+            Err(_) => false,
         };
     }
 
     // The get_class_basic_data() function is used to get
     // all the primary class data. All the data names
     // are shown within the below comment.
-    async fn get_class_basic_data(&self, class_id: &str) -> Option<Class> {
+    async fn get_class_basic_data(&self, class_id: &str) -> Option<Class> 
+    {
         // Get the class primary data. This includes the class:
         // class_name, whitelist[bool], rls[bool], and class_id
-        let r = sqlx::query_as!(
+        let query = sqlx::query_as!(
             Class,
             "SELECT class_name, owner_id, enable_whitelist FROM classes WHERE class_id=?",
             class_id
         ).fetch_one(&self.conn).await;
 
         // Return query result
-        return match r {
+        return match query {
             Ok(r) => Some(r),
             Err(_) => None,
         };
@@ -214,13 +216,14 @@ impl lib::handlers::Database {
     // revolving around the provided class_id. This includes
     // the class's primary data (shown below) and the class's
     // units and lessons.
-    pub async fn get_class_data(&self, class_id: &str) -> String {
+    pub async fn get_class_data(&self, class_id: &str) -> Option<serde_json::Value>
+    {
         let class = self.get_class_basic_data(class_id).await;
         // If the class doesn't exist, return an empty
         // json map. This is required before proceeding
         // with anything else to avoid errors
         if class.is_none() {
-            return "{}".to_string();
+            return None
         }
 
         // If the class does exist, get all of it's data
@@ -233,23 +236,14 @@ impl lib::handlers::Database {
         let class: Class = class.unwrap();
 
         // Return a formatted string of all the class data
-        return format!(
-            "{{
-                \"class_id\": \"{}\",
-                \"owner_id\": \"{}\",
-                \"class_name\": \"{}\",
-                \"enable_whitelist\":{},
-                \"units\": [{}],
-                \"whitelist\": [{}],
-                \"announcements\": [{}]
-            }}",
-            class_id,
-            class.owner_id,
-            class.class_name,
-            class.enable_whitelist == 1,
-            self.get_units_json(units).await,
-            self.get_whitelist_json(whitelist),
-            self.get_announcements_json(announcements)
-        );
+        return Some(serde_json::json!({
+            "class_id": class_id,
+            "owner_id": class.owner_id,
+            "class_name": class.class_name,
+            "enable_whitelist": class.enable_whitelist == 1,
+            "units": self.get_units_json(units).await,
+            "whitelist": self.get_whitelist_json(whitelist),
+            "announcements": self.get_announcements_json(announcements)
+        }));
     }
 }

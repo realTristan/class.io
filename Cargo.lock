@@ -353,6 +353,7 @@ dependencies = [
  "actix-web",
  "lazy_static",
  "serde",
+ "serde_json",
  "sha256",
  "sqlx",
 ]

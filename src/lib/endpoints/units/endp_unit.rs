@@ -21,14 +21,15 @@ pub struct UnitDataBody {
 // SHA256(class_id:current_time)
 #[actix_web::put("/class/{class_id}/units/")]
 async fn insert_class_unit(
-    req: HttpRequest,
-    db: web::Data<Database>,
-    body: web::Json<UnitDataBody>
+    req: HttpRequest, db: web::Data<Database>, body: web::Json<UnitDataBody>
 ) -> impl Responder {
     // Get the class id
     let class_id: &str = match req.match_info().get("class_id") {
         Some(id) => id,
-        None => return "{\"error\": \"invalid request\"}".to_string(),
+        None => return serde_json::json!({
+            "status": "400",
+            "response": "Invalid request"
+        }).to_string()
     };
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
@@ -49,23 +50,31 @@ async fn insert_class_unit(
     // token and is trying to abuse the api, return
     // an empty json map
     if !lib::auth::verify(&bearer, &access_token) {
-        return "{\"error\": \"invalid request\"}".to_string();
+        return serde_json::json!({
+            "status": "400",
+            "response": "Invalid request"
+        }).to_string()
     }
+
     // Insert the unit data into the database
-    let r: u64 = db
-        .insert_class_unit(&bearer, &unit_id, &class_id, &body.unit_name)
-        .await;
-    // Return whether more than 0 rows were affected
-    return format!("{{\"success\": {}}}", r > 0);
+    return match db.insert_class_unit(&bearer, &unit_id, &class_id, &body.unit_name).await {
+        true => serde_json::json!({
+            "status": "200",
+            "response": "Unit created successfully",
+            "unit_id": unit_id
+        }).to_string(),
+        false => serde_json::json!({
+            "status": "400",
+            "response": "Failed to create unit"
+        }).to_string()
+    }
 }
 
 // The delete_class_unit() function is used to
 // delete the provided unit from the database.
 #[actix_web::delete("/class/{class_id}/units/{unit_id}")]
 async fn delete_class_unit(
-    req: HttpRequest,
-    db: web::Data<Database>,
-    body: web::Json<UnitDataBody>
+    req: HttpRequest, db: web::Data<Database>, body: web::Json<UnitDataBody>
 ) -> impl Responder {
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
@@ -81,21 +90,30 @@ async fn delete_class_unit(
     // token and is trying to abuse the api, return
     // an empty json map
     if !lib::auth::verify(&bearer, &access_token) {
-        return "{\"error\": \"invalid request\"}".to_string();
+        return serde_json::json!({
+            "status": "400",
+            "response": "Invalid request"
+        }).to_string()
     }
+
     // Insert the unit data into the database
-    let r: u64 = db.delete_class_unit(&bearer, &body.unit_id).await;
-    // Return whether more than 0 rows were affected
-    return format!("{{\"success\": {}}}", r > 0);
+    return match db.delete_class_unit(&bearer, &body.unit_id).await {
+        true => serde_json::json!({
+            "status": "200",
+            "response": "Unit deleted successfully"
+        }).to_string(),
+        false => serde_json::json!({
+            "status": "400",
+            "response": "Failed to delete unit"
+        }).to_string()
+    }
 }
 
 // The update_class_unit() endpoint is used to
 // modify any data within the unit's database row.
 #[actix_web::post("/class/{class_id}/units")]
 async fn update_class_unit(
-    req: HttpRequest,
-    db: web::Data<Database>,
-    body: web::Json<UnitDataBody>
+    req: HttpRequest, db: web::Data<Database>, body: web::Json<UnitDataBody>
 ) -> impl Responder {
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
@@ -111,10 +129,21 @@ async fn update_class_unit(
     // token and is trying to abuse the api, return
     // an empty json map
     if !lib::auth::verify(&bearer, &access_token) {
-        return "{\"error\": \"invalid request\"}".to_string();
+        return serde_json::json!({
+            "status": "400",
+            "response": "Invalid request"
+        }).to_string()
     }
-    // Insert the unit data into the database
-    let r: u64 = db.update_class_unit(&bearer, &body).await;
-    // Return whether more than 0 rows were affected
-    return format!("{{\"success\": {}}}", r > 0);
+
+    // Update the unit data in the database
+    return match db.update_class_unit(&bearer, &body).await {
+        true => serde_json::json!({
+            "status": "200",
+            "response": "Unit updated successfully"
+        }).to_string(),
+        false => serde_json::json!({
+            "status": "400",
+            "response": "Failed to update unit"
+        }).to_string()
+    }
 }

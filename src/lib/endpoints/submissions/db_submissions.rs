@@ -19,26 +19,25 @@ impl lib::handlers::Database {
     // The get_submission_json() function is used to return
     // a string json map with all the submission data
     // that was retrieved from the database.
-    fn get_submission_json(&self, submissions: Vec<Submission>) -> String {
-        // Define the json result string
-        let mut r: String = String::new();
+    fn get_submission_json(&self, submissions: Vec<Submission>) -> Vec<serde_json::Value> 
+    {
+        // Create a new json value array
+        let mut result: Vec<serde_json::Value> = Vec::new();
+
         // Iterate over the provided submissions array and
         // append each of the lesson's data to a formatted
         // string array of maps
         submissions.iter().for_each(|s| {
-            r.push_str(&format!(
-                "{{
-                    \"submitter_bearer\": \"{}\", 
-                    \"submission_id\": \"{}\", 
-                    \"submission_date\": \"{}\", 
-                    \"data\":\"{}\"
-                }},",
-                s.submitter_bearer, s.submission_id, s.submission_date, s.data
-            ))
+            result.push(serde_json::json!({
+                "submitter_bearer": s.submitter_bearer,
+                "submission_id": s.submission_id,
+                "submission_date": s.submission_date,
+                "data": s.data
+            }))
         });
-        // Remove the last comma of the string array
-        // before returning the new json map result
-        return r[..r.len() - 1].to_string();
+
+        // Return the result array
+        return result
     }
 
     // The insert_class_submission() function is used to
@@ -46,75 +45,65 @@ impl lib::handlers::Database {
     // using the provided class hash. The function generates
     // a unique submission hash before inserting the data, which
     // is used within the delete_class_submission() function
-    pub async fn insert_class_submission(
-        &self,
-        class_id: &str,
-        submission_id: &str,
-        submitter_bearer: &str,
-        data: &str,
-    ) -> u64 {
+    pub async fn insert_class_submission(&self, class_id: &str,  submission_id: &str, submitter_bearer: &str, data: &str) -> bool 
+    {
         // If the submission already exists, return
         if self.class_submission_exists(submission_id).await {
-            return 0;
+            return false;
         }
 
         // Get the current date to put into the database
         let date: i64 = global::get_time() as i64;
 
         // Insert the data into the database
-        let r = sqlx::query!(
+        let query = sqlx::query!(
             "INSERT INTO submissions (class_id, submission_id, submitter_bearer, submission_date, data) VALUES (?, ?, ?, ?, ?)", 
             class_id, submission_id, submitter_bearer, date, data
         ).execute(&self.conn).await;
 
         // Return query result
-        return match r {
-            // If an error has occurred, return 0 rows affected
-            Err(_) => 0,
-            // Else, return the actual amount of rows that
-            // have been affected by the insertion
-            Ok(r) => r.rows_affected(),
+        return match query {
+            Ok(r) => r.rows_affected() > 0,
+            Err(_) => false
         };
     }
 
     // The class_submission_exists() function is used to check whether
     // the provided submission hash already exists. This function
     // is called in the insert_class_submission() function.
-    async fn class_submission_exists(&self, submission_id: &str) -> bool {
+    async fn class_submission_exists(&self, submission_id: &str) -> bool 
+    {
         // Query the database
-        let r = sqlx::query!(
+        let query = sqlx::query!(
             "SELECT * FROM submissions WHERE submission_id=?",
             submission_id
         ).fetch_one(&self.conn).await;
 
         // Return whether valid query data has been obtained
-        return !r.is_err();
+        return !query.is_err();
     }
 
     // The delete_class_submission() function is used to
     // delete a submission from the database. This function
     // is called when a student wants to unsubmit a portion
     // of their work.
-    pub async fn delete_class_submission(
-        &self,
-        submitter_bearer: &str,
-        submission_id: &str,
-    ) -> u64 {
+    pub async fn delete_class_submission(&self, submitter_bearer: &str, submission_id: &str) -> bool 
+    {
         // Query the database, deleting all data revolving around
         // the provided submission hash
-        let r = sqlx::query!(
+        let query = sqlx::query!(
             "DELETE FROM submissions WHERE submission_id=? AND submitter_bearer=?",
             submission_id,
             submitter_bearer
         ).execute(&self.conn).await;
 
         // Return query result
-        return match r {
+        return match query {
             // If an error has occurred, return 0 rows affected
-            Err(_) => 0,
+            Err(_) => false,
             // Else, return the actual amount of rows that
             // have been affected by the deletion
-            Ok(r) => r.rows_affected(),
+            Ok(r) => r.rows_affected() > 0,
         };
     }
 
@@ -122,20 +111,19 @@ impl lib::handlers::Database {
     // return all the submissions for the provided class.
     // This function is used in the dashboard of the website
     // where the teachers can mark the students submitted work.
-    pub async fn get_class_submissions(&self, class_id: &str) -> String {
+    pub async fn get_class_submissions(&self, class_id: &str) -> Option<Vec<serde_json::Value>> 
+    {
         // Query the database, selecting the submitter_bearer, submission_date
         // and the submission data from the submissions column
-        let r = sqlx::query_as!(
+        let query = sqlx::query_as!(
             Submission, "SELECT submitter_bearer, submission_id, submission_date, data FROM submissions WHERE class_id=?", 
             class_id
         ).fetch_all(&self.conn).await;
 
         // Return query result
-        return match r {
-            // If an error has occurred, return an empty json map
-            Err(_) => "{}".to_string(),
-            // Else, return the formatted json map of all the submissions
-            Ok(r) => format!("[{}]", self.get_submission_json(r)),
+        return match query {
+            Ok(r) => Some(self.get_submission_json(r)),
+            Err(_) => None
         };
     }
 
@@ -144,10 +132,11 @@ impl lib::handlers::Database {
     // class. This function is used for the students to see
     // what work they have previously submitted. This function is the
     // basis towards students being able to insert and delete submissions.
-    pub async fn get_user_submissions(&self, class_id: &str, bearer: &str) -> String {
+    pub async fn get_user_submissions(&self, class_id: &str, bearer: &str) -> Option<Vec<serde_json::Value>>
+    {
         // Query the database selecting the submitter_bearer, submission_id, submission_date
         // and the submission data from the submissions column.
-        let r = sqlx::query_as!(
+        let query = sqlx::query_as!(
             Submission,
             "SELECT submitter_bearer, submission_id, submission_date, data FROM submissions WHERE class_id=? AND submitter_bearer=?",
             class_id,
@@ -155,11 +144,9 @@ impl lib::handlers::Database {
         ).fetch_all(&self.conn).await;
 
         // Return query result
-        return match r {
-            // If an error has occurred, return an empty json map
-            Err(_) => "{}".to_string(),
-            // Else, return the formatted json map of all the submissions
-            Ok(r) => format!("[{}]", self.get_submission_json(r)),
+        return match query {
+            Ok(r) => Some(self.get_submission_json(r)),
+            Err(_) => None
         };
     }
 }

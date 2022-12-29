@@ -19,11 +19,15 @@ pub struct UserDataBody {
 // dashboard page. To ensure the security of the endpoint,
 //  a valid auth token is required.
 #[actix_web::get("/user/{user_id}")]
-pub async fn get_user_data(req: HttpRequest, db: web::Data<Database>) -> impl Responder {
+pub async fn get_user_data(req: HttpRequest, db: web::Data<Database>) -> impl Responder 
+{
     // Get the class id
     let user_id: &str = match req.match_info().get("user_id") {
         Some(id) => id,
-        None => return "{\"error\": \"invalid request\"}".to_string(),
+        None => return serde_json::json!({
+            "status": "400",
+            "response": "Invalid request"
+        }).to_string()
     };
     // Get the access token from the request headers.
     // This tokens is used to make sure that the incoming
@@ -34,7 +38,10 @@ pub async fn get_user_data(req: HttpRequest, db: web::Data<Database>) -> impl Re
     // token and is trying to abuse the api, return
     // an empty json map
     if !lib::auth::verify(&bearer, &access_token) {
-        return "{\"error\": \"invalid request\"}".to_string();
+        return serde_json::json!({
+            "status": "400",
+            "response": "Invalid request"
+        }).to_string()
     }
 
     // Once the request has been verified, query the
@@ -42,16 +49,23 @@ pub async fn get_user_data(req: HttpRequest, db: web::Data<Database>) -> impl Re
     // return all the data from said user.
     let user = match db.query_user_by_id(&user_id).await {
         Some(v) => v,
-        None => return "{\"error\": \"invalid request\"}".to_string(),
+        None => return serde_json::json!({
+            "status": "400",
+            "response": "Invalid request"
+        }).to_string()
     };
 
     // Return a formatted string as a json map
     // so the frontend can successfully read the
     // response data.
-    return format!(
-        "{{\"authorization\": \"{}\", \"user_id\": \"{}\", \"user_name\": \"{}\", \"classes\": {}}}", 
-            access_token, user_id, user.user_name, "array of the users class_ides (select from classes where user_id = user_id)"
-    );
+    return serde_json::json!({
+        "status": "200",
+        "response": {
+            "user_name": user.user_name,
+            "user_id": user_id,
+            "classes": "array of the users class_ides (select from classes where user_id = user_id)"
+        }
+    }).to_string()
 }
 
 // The POST /user/{bearer} endpoint is used
@@ -61,9 +75,7 @@ pub async fn get_user_data(req: HttpRequest, db: web::Data<Database>) -> impl Re
 // a valid auth token is required.
 #[actix_web::post("/user/")]
 pub async fn update_user_data(
-    req: HttpRequest,
-    db: web::Data<Database>,
-    body: web::Json<UserDataBody>
+    req: HttpRequest, db: web::Data<Database>, body: web::Json<UserDataBody>
 ) -> impl Responder {
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
@@ -79,20 +91,31 @@ pub async fn update_user_data(
     // token and is trying to abuse the api, return
     // an empty json map
     if !lib::auth::verify(&bearer, &access_token) {
-        return "{\"error\": \"invalid request\"}".to_string();
+        return serde_json::json!({
+            "status": "400",
+            "response": "Invalid request"
+        }).to_string()
     }
 
     // If the incoming request doesn't contain
     // a new user_name, return an empty json map
     if body.user_name.len() < 1 {
-        return "{\"error\": \"invalid request\"}".to_string();
+        return serde_json::json!({
+            "status": "400",
+            "response": "Invalid request"
+        }).to_string()
     }
 
-    // Else, update the users 'user_name' in the database
-    let r: u64 = db.update_user_name(&bearer, &body.user_name).await;
-
-    // Return whether more than 0 rows were affected
-    return format!("{{\"success\": {}}}", r > 0);
+    return match db.update_user_name(&bearer, &body.user_name).await {
+        true => serde_json::json!({
+            "status": "200",
+            "response": "Successfully updated user data"
+        }).to_string(),
+        false => serde_json::json!({
+            "status": "400",
+            "response": "Failed to update user data"
+        }).to_string()
+    }
 }
 
 // The insert_user_data() function is used to insert
@@ -103,9 +126,7 @@ pub async fn update_user_data(
 // using firebase google auth.
 #[actix_web::put("/user/")]
 async fn insert_user_data(
-    req: HttpRequest,
-    db: web::Data<Database>,
-    body: web::Json<UserDataBody>
+    req: HttpRequest, db: web::Data<Database>, body: web::Json<UserDataBody>
 ) -> impl Responder {
     // Get the access and authentication tokens from
     // the request headers. These tokens are used to make
@@ -121,7 +142,10 @@ async fn insert_user_data(
     // token and is trying to abuse the api, return
     // an empty json map
     if !lib::auth::verify(&bearer, &access_token) {
-        return "{\"error\": \"invalid request\"}".to_string();
+        return serde_json::json!({
+            "status": "400",
+            "response": "Invalid request"
+        }).to_string()
     }
     
     // Get the current system time. This is used
@@ -132,9 +156,14 @@ async fn insert_user_data(
     // Insert the user into the database
     // Along with this insertion is the bearer, user_name
     // user's email and the time of registration
-    let r: u64 = db
-        .insert_user(&bearer, &body.user_name, &body.email, date)
-        .await;
-    // Return whether more than 0 rows were affected
-    return format!("{{\"success\": {}}}", r > 0);
+    return match db.insert_user(&bearer, &body.user_name, &body.email, date).await {
+        true => serde_json::json!({
+            "status": "200",
+            "response": "Successfully inserted user data"
+        }).to_string(),
+        false => serde_json::json!({
+            "status": "400",
+            "response": "Failed to insert user data"
+        }).to_string()
+    }
 }
