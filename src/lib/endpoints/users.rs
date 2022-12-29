@@ -1,17 +1,7 @@
-use crate::lib;
+use crate::lib::{
+    self, global, handlers::Database, structs::UserDataBody, 
+};
 use actix_web::{web, HttpRequest, Responder};
-use lib::global;
-use lib::handlers::Database;
-
-// The UserDataBody struct is used to read the
-// incoming requests http request body. This is
-// the easiest way for reading what modifications
-// to make within the database
-#[derive(serde::Deserialize)]
-pub struct UserDataBody {
-    user_name: String,
-    email: String,
-}
 
 // The GET /user/<bearer> endpoint is used
 // to get an users dashboard settings through their

@@ -1,89 +1,12 @@
-use super::endp_class::ClassDataBody;
-use crate::lib;
+use crate::lib::{
+    self, structs::{
+        Class, Announcement, ClassDataBody, Whitelist, Lesson, Unit
+    }
+};
 use actix_web::web::Json;
-
-// The Class data struct is used to store
-// the classes owner_bearer, unique class identifier,
-// class name, class whitelist array, class announcements,
-// and the class units.
-pub struct Class {
-    // The Class Name
-    class_name: String,
-    // Unique class owner identifier
-    owner_id: String,
-    // Whether to the use the class whitelist
-    enable_whitelist: i64,
-}
 
 // Database Implementation
 impl lib::handlers::Database {
-    // The insert_test_class() function is used for endpoint
-    // debugging as it is required that atleast one class be
-    // present in order to properly test.
-    pub async fn insert_test_class(&self) 
-    {
-        println!("Test User Hash: 22f3d5b9c91b570a4f1848c5d147b4709d2fb96");
-        println!("Test Class Hash: e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020");
-
-        // Insert into CLASSES column
-        sqlx::query!(
-            "INSERT INTO classes (owner_id, owner_bearer, class_id, class_name, enable_whitelist) VALUES (?, ?, ?, ?, ?)",
-            "owner_id", "822f3d5b9c91b570a4f1848c5d147b4709d2fb96", "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020", "Advanced Functions", 0
-        ).execute(&self.conn).await.unwrap();
-
-        // Insert into ANNOUNCEMENTS column
-        sqlx::query!(
-            "INSERT INTO announcements (class_id, announcement_id, author_name, title, description, attachment, date) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020", "announcement_id", "Tristan Simpson", "Test Announcement", "Hey guys!", "no_attachment", 0
-        ).execute(&self.conn).await.unwrap();
-
-        // Insert into WHITELISTS column
-        sqlx::query!(
-            "INSERT INTO whitelists (class_id, whitelisted_user) VALUES (?, ?)",
-            "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020",
-            "test_whitelisted_user1"
-        ).execute(&self.conn).await.unwrap();
-
-        // Insert into LESSONS column
-        sqlx::query!(
-            "INSERT INTO lessons (unit_id, title, description, video, work, work_solutions) VALUES (?, ?, ?, ?, ?, ?)",
-            "random_unit_id", "test_lesson_title", "test_lesson_desc", "test_lesson_video", "test_lesson_work", "test_lesson_work_solutions"
-        ).execute(&self.conn).await.unwrap();
-
-        // Insert into UNITS column
-        sqlx::query!(
-            "INSERT INTO units (class_id, unit_id, unit_name, locked) VALUES (?, ?, ?, ?)",
-            "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020",
-            "random_unit_id",
-            "Polynomials",
-            0
-        ).execute(&self.conn).await.unwrap();
-
-        // Insert into UNITS column
-        sqlx::query!(
-            "INSERT INTO units (class_id, unit_id, unit_name, locked) VALUES (?, ?, ?, ?)",
-            "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020",
-            "random_unit_id",
-            "Functions",
-            0
-        ).execute(&self.conn).await.unwrap();
-
-        // Insert into UNITS column
-        sqlx::query!(
-            "INSERT INTO units (class_id, unit_id, unit_name, locked) VALUES (?, ?, ?, ?)",
-            "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020",
-            "random_unit_id",
-            "Calculus",
-            0
-        ).execute(&self.conn).await.unwrap();
-
-        // Insert into SUBMISSIONS column
-        sqlx::query!(
-            "INSERT INTO submissions (class_id, submission_id, submitter_bearer, submission_date, data) VALUES (?, ?, ?, ?, ?)",
-            "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020", "submission_id", "822f3d5b9c91b570a4f1848c5d147b4709d2fb96", 0, ""
-        ).execute(&self.conn).await.unwrap();
-    }
-
     // The insert_class_data() function is used to insert
     // a new class into the database. A maximum of
     // 5 classes is allowed per user. To generate the unique
@@ -210,6 +133,114 @@ impl lib::handlers::Database {
             Ok(r) => Some(r),
             Err(_) => None,
         };
+    }
+
+    // The get_announcements_json() function is used to
+    // generate a new json map as a string from the
+    // provided announcements array.
+    pub fn get_announcements_json(&self, announcements: Vec<Announcement>) -> Vec<serde_json::Value> 
+    {
+        let mut result: Vec<serde_json::Value> = Vec::new();
+
+        // Iterate over the provided announcements array and
+        // append each of the announcement's data to a formatted
+        // string array of maps
+        announcements.iter().for_each(|f| {
+            result.push(serde_json::json!({
+                "author_name": f.author_name,
+                "title": f.title,
+                "description": f.description,
+                "attachment": f.attachment
+            }))
+        });
+        
+        // Return the result array
+        return result
+    }
+
+    // The get_whitelist_json() function is used to
+    // geterate a new json map as a string from the
+    // provided whitelist array.
+    pub fn get_whitelist_json(&self, whitelist: Vec<Whitelist>) -> String 
+    {
+        // Define the json result string
+        let mut r: String = String::new();
+        // Iterate over the provided whitelisted users array
+        // and append each of them to a formatted string array
+        whitelist.iter().for_each(|f| {
+            r.push_str(&format!(r#""{}","#, f.whitelisted_user));
+        });
+
+        // Remove the last comma of the string array
+        // before returning the new json map result
+        return r[..r.len() - 1].to_string();
+    }
+
+    // The get_unit_lesson_json() function converts the
+    // array of lessons into a readable json map that
+    // will eventually be returned with the outgoing response body
+    fn get_unit_lesson_json(&self, lessons: Vec<Lesson>) -> Vec<serde_json::Value>
+    {
+        let mut result: Vec<serde_json::Value> = Vec::new();
+
+        // Iterate over the provided lessons array and
+        // append each of the lesson's data to a formatted
+        // string array of maps
+        lessons.iter().for_each(|f| {
+            result.push(serde_json::json!({
+                "title": f.title,
+                "description": f.description,
+                "video": f.video,
+                "work": f.work,
+                "work_solutions": f.work_solutions
+            }))
+        });
+
+        // Return the result array
+        return result
+    }
+
+    // The get_unit_lessons() function is used to get all
+    // the lesson data that comes with the provided unit hash.
+    async fn get_unit_lessons(&self, unit_id: &str) -> Vec<Lesson>
+    {
+        // Query the database
+        let query = sqlx::query_as!(
+            Lesson,
+            "SELECT title, description, video, work, work_solutions FROM lessons WHERE unit_id=?",
+            unit_id
+        ).fetch_all(&self.conn).await;
+
+        // Return query result
+        return match query {
+            Ok(r) => r,
+            Err(_) => Vec::new(),
+        };
+    }
+
+    // The get_units_json() function is used to generate
+    // a new json map as a string from the provided units array.
+    pub async fn get_units_json(&self, units: Vec<Unit>) -> Vec<serde_json::Value>
+    {
+        let mut result: Vec<serde_json::Value> = Vec::new();
+
+        // Iterate over the provided units array and
+        // append each of the units data to a formatted
+        // string array of maps
+        for u in units {
+            // Get the lessons that correspond with the unit
+            let l: Vec<Lesson> = self.get_unit_lessons(&u.unit_id).await;
+
+            // Append the unit json to the result string
+            result.push(serde_json::json!({
+                "unit_name": u.unit_name,
+                "locked": u.locked == 1,
+                "lessons": self.get_unit_lesson_json(l)
+            }));
+        }
+
+        // Return the result array
+        return result
     }
 
     // The get_class_data() function is used to get all data

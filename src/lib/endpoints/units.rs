@@ -1,18 +1,7 @@
-use crate::lib;
+use crate::lib::{
+    self, global, handlers::Database, structs::UnitDataBody
+};
 use actix_web::{web, HttpRequest, Responder};
-use lib::global;
-use lib::handlers::Database;
-
-// The UnitDataBody struct is used to read the
-// incoming requests http request body. This is
-// the easiest way for reading what modifications
-// to make within the database
-#[derive(serde::Deserialize)]
-pub struct UnitDataBody {
-    pub unit_id: String,
-    pub unit_name: String,
-    pub locked: i64,
-}
 
 // The insert_class_unit() endpoint is used to create
 // a new unit for the provided class. Using the

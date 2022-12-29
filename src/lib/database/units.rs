@@ -1,35 +1,7 @@
-use super::endp_unit::UnitDataBody;
-use crate::lib;
+use crate::lib::{
+    self, structs::{Unit, UnitDataBody}
+};
 use actix_web::web::Json;
-
-// The Lesson data struct is used to store
-// the class unit's lesson title, description,
-// video_url, work and work_solutions.
-pub struct Lesson {
-    // The Lesson Title
-    title: String,
-    // The Lesson Description
-    description: String,
-    // The Lesson's Youtube Video URL
-    video: String,
-    // The Lesson Homework that can be
-    // submitted and marked
-    work: String,
-    // The Lesson Homework Solutions
-    work_solutions: String,
-}
-// The Unit data struct is used to store
-// the class unit's unique identifier,
-// unit name, it's locked status and the
-// lessons that come along with the unit.
-pub struct Unit {
-    // The unique unit identifier
-    unit_id: String,
-    // The Unit's Name
-    unit_name: String,
-    // Whether students can access this unit yet
-    locked: i64,
-}
 
 // Database Implementation
 impl lib::handlers::Database {
@@ -146,72 +118,5 @@ impl lib::handlers::Database {
             Ok(r) => r.rows_affected() > 0,
             Err(_) => false,
         };
-    }
-
-    // The get_unit_lessons() function is used to get all
-    // the lesson data that comes with the provided unit hash.
-    async fn get_unit_lessons(&self, unit_id: &str) -> Vec<Lesson>
-    {
-        // Query the database
-        let query = sqlx::query_as!(
-            Lesson,
-            "SELECT title, description, video, work, work_solutions FROM lessons WHERE unit_id=?",
-            unit_id
-        ).fetch_all(&self.conn).await;
-
-        // Return query result
-        return match query {
-            Ok(r) => r,
-            Err(_) => Vec::new(),
-        };
-    }
-    
-    // The get_units_json() function is used to generate
-    // a new json map as a string from the provided units array.
-    pub async fn get_units_json(&self, units: Vec<Unit>) -> Vec<serde_json::Value>
-    {
-        let mut result: Vec<serde_json::Value> = Vec::new();
-
-        // Iterate over the provided units array and
-        // append each of the units data to a formatted
-        // string array of maps
-        for u in units {
-            // Get the lessons that correspond with the unit
-            let l: Vec<Lesson> = self.get_unit_lessons(&u.unit_id).await;
-
-            // Append the unit json to the result string
-            result.push(serde_json::json!({
-                "unit_name": u.unit_name,
-                "locked": u.locked == 1,
-                "lessons": self.get_unit_lesson_json(l)
-            }));
-        }
-
-        // Return the result array
-        return result
-    }
-
-    // The get_unit_lesson_json() function converts the
-    // array of lessons into a readable json map that
-    // will eventually be returned with the outgoing response body
-    fn get_unit_lesson_json(&self, lessons: Vec<Lesson>) -> Vec<serde_json::Value>
-    {
-        let mut result: Vec<serde_json::Value> = Vec::new();
-
-        // Iterate over the provided lessons array and
-        // append each of the lesson's data to a formatted
-        // string array of maps
-        lessons.iter().for_each(|f| {
-            result.push(serde_json::json!({
-                "title": f.title,
-                "description": f.description,
-                "video": f.video,
-                "work": f.work,
-                "work_solutions": f.work_solutions
-            }))
-        });
-
-        // Return the result array
-        return result
     }
 }

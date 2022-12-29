@@ -1,18 +1,4 @@
-use crate::lib::{self, global};
-
-// The Submission data struct is used to store
-// the work: submitter_bearer, submissions_id,
-// submission_date and work data
-struct Submission {
-    // The user who submitted the work's unique identifier
-    submitter_bearer: String,
-    // The unique identifier of the submission
-    submission_id: String,
-    // The date the work was submitted
-    submission_date: i64,
-    // The submission data. (ex: the file, the answers, etc.)
-    data: String,
-}
+use crate::lib::{self, global, structs::Submission};
 
 // Database Implementation
 impl lib::handlers::Database {

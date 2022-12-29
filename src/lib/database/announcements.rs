@@ -1,21 +1,7 @@
-use super::endp_announces::AnnouncementDataBody;
-use crate::lib::{self, global};
+use crate::lib::{
+    self, global, structs::{AnnouncementDataBody, Announcement}
+};
 use actix_web::web::Json;
-
-// The Announcement data struct is used to
-// store the announcement author's unique identifier,
-// the authors name, the announcement title and description,
-// along with any attachments the author has posted with it.
-pub struct Announcement {
-    // The announcement's author name
-    author_name: String,
-    // The announcement title
-    title: String,
-    // The announcements content
-    description: String,
-    // Any images/videos attached with the announcement
-    attachment: String, // Base64 encode images, etc.
-}
 
 // Database Implementation
 impl lib::handlers::Database {
@@ -101,28 +87,5 @@ impl lib::handlers::Database {
             Ok(r) => r,
             Err(_) => Vec::new()
         };
-    }
-
-    // The get_announcements_json() function is used to
-    // generate a new json map as a string from the
-    // provided announcements array.
-    pub fn get_announcements_json(&self, announcements: Vec<Announcement>) -> Vec<serde_json::Value> 
-    {
-        let mut result: Vec<serde_json::Value> = Vec::new();
-
-        // Iterate over the provided announcements array and
-        // append each of the announcement's data to a formatted
-        // string array of maps
-        announcements.iter().for_each(|f| {
-            result.push(serde_json::json!({
-                "author_name": f.author_name,
-                "title": f.title,
-                "description": f.description,
-                "attachment": f.attachment
-            }))
-        });
-        
-        // Return the result array
-        return result
     }
 }

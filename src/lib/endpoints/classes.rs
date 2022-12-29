@@ -1,19 +1,7 @@
-use crate::lib;
+use crate::lib::{
+    self, global, handlers::Database, structs::ClassDataBody
+};
 use actix_web::{web, HttpRequest, Responder};
-use lib::global;
-use lib::handlers::Database;
-
-// The ClassDataBody struct is used to read the
-// incoming requests http request body. This is
-// the easiest way for reading what modifications
-// to make within the database
-#[derive(serde::Deserialize)]
-pub struct ClassDataBody {
-    // Update the class name
-    pub class_name: String,
-    // Update whether to use the class whitelist
-    pub enable_whitelist: i64,
-}
 
 // The get_class_data() endpoint is used to get the class's
 // whitelist[String Array], announcements, class_name,

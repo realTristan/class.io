@@ -1,25 +1,7 @@
-use crate::lib;
+use crate::lib::{
+    self, global, handlers::Database, structs::AnnouncementDataBody
+};
 use actix_web::{web, HttpRequest, Responder};
-use lib::global;
-use lib::handlers::Database;
-
-// The SubmissionDataBody struct is used to read the
-// incoming requests http request body. This is
-// the easiest way for reading what modifications
-// to make within the database
-#[derive(serde::Deserialize)]
-pub struct AnnouncementDataBody {
-    // The announcements unique identifier
-    pub announcement_id: String,
-    // The announcement attachment (image, file, etc.)
-    pub attachment: String,
-    // The announcement content/description
-    pub description: String,
-    // The title of the announcement
-    pub title: String,
-    // The name of the user who posted the announcement
-    pub author_name: String,
-}
 
 // The insert_class_announcement() endpoint is used
 // to insert a new announcement into the database.

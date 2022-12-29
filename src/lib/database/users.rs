@@ -1,22 +1,6 @@
-use crate::lib::{self, global};
-
-// The User data struct is used to store
-// all of the users data from the database
-// into readable values
-pub struct User {
-    // Row Increment ID
-    pub id: i64,
-    // The unique user identifier
-    pub user_id: String,
-    // The user hash (aka: the user id)
-    pub bearer: String,
-    // The users name
-    pub user_name: String,
-    // The users email
-    pub email: String,
-    // The Users registration date (used for bearer token)
-    pub registration_date: i64,
-}
+use crate::lib::{
+    self, global, structs::User
+};
 
 // Database Implemenetation that contains all the
 // functions for manipulating the user db data

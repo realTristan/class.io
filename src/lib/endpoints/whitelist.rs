@@ -1,16 +1,7 @@
-use crate::lib;
+use crate::lib::{
+    self, global, handlers::Database, structs::WhitelistDataBody
+};
 use actix_web::{web, HttpRequest, Responder};
-use lib::global;
-use lib::handlers::Database;
-
-// The WhitelistDataBody struct is used to read the
-// incoming requests http request body. This is
-// the easiest way for reading what modifications
-// to make within the database
-#[derive(serde::Deserialize)]
-pub struct WhitelistDataBody {
-    pub user: String,
-}
 
 // The add_to_class_whitelist() endpoint is used
 // to add an user to the provided class_id's

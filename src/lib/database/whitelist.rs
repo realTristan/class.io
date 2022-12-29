@@ -1,10 +1,6 @@
-use crate::lib;
-
-// The Whitelist data struct is used for querying
-// the whitelisted users for a specific class.
-pub struct Whitelist {
-    pub whitelisted_user: String,
-}
+use crate::lib::{
+    self, structs::Whitelist
+};
 
 // Database Implementation
 impl lib::handlers::Database {
@@ -62,23 +58,5 @@ impl lib::handlers::Database {
             Ok(r) => r.rows_affected() > 0,
             Err(_) => false,
         };
-    }
-
-    // The get_whitelist_json() function is used to
-    // geterate a new json map as a string from the
-    // provided whitelist array.
-    pub fn get_whitelist_json(&self, whitelist: Vec<Whitelist>) -> String 
-    {
-        // Define the json result string
-        let mut r: String = String::new();
-        // Iterate over the provided whitelisted users array
-        // and append each of them to a formatted string array
-        whitelist.iter().for_each(|f| {
-            r.push_str(&format!(r#""{}","#, f.whitelisted_user));
-        });
-
-        // Remove the last comma of the string array
-        // before returning the new json map result
-        return r[..r.len() - 1].to_string();
     }
 }

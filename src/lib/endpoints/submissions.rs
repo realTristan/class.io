@@ -1,17 +1,7 @@
-use crate::lib;
 use actix_web::{web, HttpRequest, Responder};
-use lib::global;
-use lib::handlers::Database;
-
-// The SubmissionDataBody struct is used to read the
-// incoming requests http request body. This is
-// the easiest way for reading what modifications
-// to make within the database
-#[derive(serde::Deserialize)]
-pub struct SubmissionDataBody {
-    pub submission_id: String,
-    pub data: String,
-}
+use crate::lib::{
+    self, global, handlers::Database, structs::SubmissionDataBody,
+};
 
 // The get_class_submissions() endpoint is used to
 // get all the work submissions for the provided class
