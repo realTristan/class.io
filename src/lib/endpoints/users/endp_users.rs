@@ -151,7 +151,7 @@ async fn insert_user_data(
     // Get the current system time. This is used
     // for inserting the users registration date
     // into the database.
-    let date: i64 = global::get_time() as i64;
+    let date: i64 = global::get_time().as_secs() as i64;
 
     // Insert the user into the database
     // Along with this insertion is the bearer, user_name

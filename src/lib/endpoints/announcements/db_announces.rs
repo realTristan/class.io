@@ -34,7 +34,7 @@ impl lib::handlers::Database {
         }
 
         // Get the current date of the announcement post
-        let date: i64 = global::get_time() as i64;
+        let date: i64 = global::get_time().as_secs() as i64;
 
         // Query the database, inserting the new announcement
         // along with all of it's data.

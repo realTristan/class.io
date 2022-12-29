@@ -4,19 +4,18 @@ use actix_web::HttpRequest;
 // any invalid header errors.
 pub fn get_header(req: &HttpRequest, key: &str) -> String {
     return match req.headers().get(key) {
-        Some(v) => v,
+        Some(v) => v.to_str().unwrap().to_string(),
         None => return "".to_string(),
-    }.to_str().unwrap().to_string();
+    };
 }
 
 // The get_time() function is used to quickly
 // and cleanly get the time in seconds since
 // the unix epoch.
-pub fn get_time() -> u64 {
-    let time: std::time::Duration = std::time::SystemTime::now()
+pub fn get_time() -> std::time::Duration {
+    return std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .unwrap();
-    return time.as_secs();
 }
 
 // The generate_new_id() function is used to generate
@@ -25,10 +24,7 @@ pub fn get_time() -> u64 {
 pub fn generate_new_id(identifier: &str) -> String {
     // Get the current time since epoch. This duration is later converted
     // into nanoseconds to ensure that the class hash is 100% unique.
-    let time: std::time::Duration = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap();
-    // Generate a new hash using the provided
-    // class hash, and the current time as nanoseconds.
-    return sha256::digest(format!("{}:{}", identifier, time.as_nanos()));
+    return sha256::digest(format!(
+        "{}:{}", identifier, get_time().as_nanos()
+    ));
 }
