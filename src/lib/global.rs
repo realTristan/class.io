@@ -30,5 +30,5 @@ pub fn generate_new_id(identifier: &str) -> String {
         .unwrap();
     // Generate a new hash using the provided
     // class hash, and the current time as nanoseconds.
-    return format!("{}:{}", identifier, time.as_nanos());
+    return sha256::digest(format!("{}:{}", identifier, time.as_nanos()));
 }
