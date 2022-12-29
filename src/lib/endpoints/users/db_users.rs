@@ -30,8 +30,7 @@ impl lib::handlers::Database {
             .insert_user(
                 "822f3d5b9c91b570a4f1848c5d147b4709d2fb96",
                 "realtristan",
-                "realtristan@gmail.com",
-                0,
+                "realtristan@gmail.com"
             )
             .await;
     }
@@ -40,12 +39,17 @@ impl lib::handlers::Database {
     // new user into the database. Although if the user
     // already exists within the database, the function
     // returns 0 for 0 rows changed.
-    pub async fn insert_user(&self, bearer: &str, user_name: &str, email: &str, date: i64) -> bool
+    pub async fn insert_user(&self, bearer: &str, user_name: &str, email: &str) -> bool
     {
         // If the user already, exists, return 0
         if self.user_exists(bearer).await {
             return false;
         }
+
+        // Get the current system time. This is used
+        // for inserting the users registration date
+        // into the database.
+        let date: i64 = global::get_time().as_secs() as i64;
 
         // Generate a new user id
         let user_id: String = global::generate_new_id(&format!("{email}:{bearer}:{date}"));

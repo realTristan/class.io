@@ -26,9 +26,10 @@ pub async fn get_user_data(req: HttpRequest, db: web::Data<Database>) -> impl Re
         Some(id) => id,
         None => return serde_json::json!({
             "status": "400",
-            "response": "Invalid request"
+            "response": "Invalid user id"
         }).to_string()
     };
+
     // Get the access token from the request headers.
     // This tokens is used to make sure that the incoming
     // request isn't from an abuser.
@@ -36,7 +37,7 @@ pub async fn get_user_data(req: HttpRequest, db: web::Data<Database>) -> impl Re
     let access_token: String = global::get_header(&req, "access_token");
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
-    // an empty json map
+    // an invalid request response json
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
             "status": "400",
@@ -51,7 +52,7 @@ pub async fn get_user_data(req: HttpRequest, db: web::Data<Database>) -> impl Re
         Some(v) => v,
         None => return serde_json::json!({
             "status": "400",
-            "response": "Invalid request"
+            "response": "Failed to fetch user data"
         }).to_string()
     };
 
@@ -77,19 +78,14 @@ pub async fn get_user_data(req: HttpRequest, db: web::Data<Database>) -> impl Re
 pub async fn update_user_data(
     req: HttpRequest, db: web::Data<Database>, body: web::Json<UserDataBody>
 ) -> impl Responder {
-    // Get the access and authentication tokens from
-    // the request headers. These tokens are used to make
-    // sure that the incoming request isn't from an abuser.
+    // Get the access token from the request headers.
+    // This tokens is used to make sure that the incoming
+    // request isn't from an abuser.
     let bearer: String = global::get_header(&req, "authorization");
     let access_token: String = global::get_header(&req, "access_token");
-    // the access token consists of the users sha256 encoded firebase token,
-    // the current time, and a "super secret key".
-    // This also acts as a bearer token from the encoded firebase token
-    // which verifies that the user using this endpoint is the owner.
-
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
-    // an empty json map
+    // an invalid request response json
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
             "status": "400",
@@ -102,10 +98,12 @@ pub async fn update_user_data(
     if body.user_name.len() < 1 {
         return serde_json::json!({
             "status": "400",
-            "response": "Invalid request"
+            "response": "Invalid request body"
         }).to_string()
     }
 
+    // Update the username and return whether the update
+    // was successful or not
     return match db.update_user_name(&bearer, &body.user_name).await {
         true => serde_json::json!({
             "status": "200",
@@ -128,35 +126,25 @@ pub async fn update_user_data(
 async fn insert_user_data(
     req: HttpRequest, db: web::Data<Database>, body: web::Json<UserDataBody>
 ) -> impl Responder {
-    // Get the access and authentication tokens from
-    // the request headers. These tokens are used to make
-    // sure that the incoming request isn't from an abuser.
+    // Get the access token from the request headers.
+    // This tokens is used to make sure that the incoming
+    // request isn't from an abuser.
     let bearer: String = global::get_header(&req, "authorization");
     let access_token: String = global::get_header(&req, "access_token");
-    // the access token consists of the users sha256 encoded firebase token,
-    // the current time, and a "super secret key".
-    // This also acts as a bearer token from the encoded firebase token
-    // which verifies that the user using this endpoint is the owner.
-
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
-    // an empty json map
+    // an invalid request response json
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
             "status": "400",
             "response": "Invalid request"
         }).to_string()
     }
-    
-    // Get the current system time. This is used
-    // for inserting the users registration date
-    // into the database.
-    let date: i64 = global::get_time().as_secs() as i64;
 
     // Insert the user into the database
     // Along with this insertion is the bearer, user_name
     // user's email and the time of registration
-    return match db.insert_user(&bearer, &body.user_name, &body.email, date).await {
+    return match db.insert_user(&bearer, &body.user_name, &body.email).await {
         true => serde_json::json!({
             "status": "200",
             "response": "Successfully inserted user data"

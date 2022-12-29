@@ -30,19 +30,14 @@ async fn get_class_data(req: HttpRequest, db: web::Data<Database>) -> impl Respo
         }).to_string()
     };
 
-    // Get the access and authentication tokens from
-    // the request headers. These tokens are used to make
-    // sure that the incoming request isn't from an abuser.
+    // Get the access token from the request headers.
+    // This tokens is used to make sure that the incoming
+    // request isn't from an abuser.
     let bearer: String = global::get_header(&req, "authorization");
     let access_token: String = global::get_header(&req, "access_token");
-    // the access token consists of the users sha256 encoded firebase token,
-    // the current time, and a "super secret key".
-    // This also acts as a bearer token from the encoded firebase token
-    // which verifies that the user using this endpoint is the owner.
-
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
-    // an empty json map
+    // an invalid request response json
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
             "status": "400",
@@ -79,19 +74,14 @@ async fn update_class_data(
             "response": "Invalid request"
         }).to_string()
     };
-    // Get the access and authentication tokens from
-    // the request headers. These tokens are used to make
-    // sure that the incoming request isn't from an abuser.
+    // Get the access token from the request headers.
+    // This tokens is used to make sure that the incoming
+    // request isn't from an abuser.
     let bearer: String = global::get_header(&req, "authorization");
     let access_token: String = global::get_header(&req, "access_token");
-    // the access token consists of the users sha256 encoded firebase token,
-    // the current time, and a "super secret key".
-    // This also acts as a bearer token from the encoded firebase token
-    // which verifies that the user using this endpoint is the owner.
-
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
-    // an empty json map
+    // an invalid request response json
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
             "status": "400",
@@ -130,19 +120,14 @@ async fn insert_class_data(
         }).to_string()
     };
 
-    // Get the access and authentication tokens from
-    // the request headers. These tokens are used to make
-    // sure that the incoming request isn't from an abuser.
+    // Get the access token from the request headers.
+    // This tokens is used to make sure that the incoming
+    // request isn't from an abuser.
     let bearer: String = global::get_header(&req, "authorization");
     let access_token: String = global::get_header(&req, "access_token");
-    // the access token consists of the users sha256 encoded firebase token,
-    // the current time, and a "super secret key".
-    // This also acts as a bearer token from the encoded firebase token
-    // which verifies that the user using this endpoint is the owner.
-
     // If the user does not provide a valid auth
     // token and is trying to abuse the api, return
-    // an empty json map
+    // an invalid request response json
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
             "status": "400",

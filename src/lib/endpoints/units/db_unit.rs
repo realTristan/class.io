@@ -59,6 +59,7 @@ impl lib::handlers::Database {
     // visit the class through the website, will see this unit appear.
     pub async fn insert_class_unit(&self, bearer: &str, unit_id: &str, class_id: &str, unit_name: &str) -> bool 
     {
+        // If the unit already exists, return false
         if self.unit_exists(unit_id).await {
             return false;
         }

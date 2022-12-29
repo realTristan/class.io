@@ -17,6 +17,18 @@ lazy_static::lazy_static! {
     };
 }
 
+//////////////////////////////////////////////////////////////////////////////////////
+//                                                                                  // 
+//  HOW TOKENS WORK:                                                                //
+//                                                                                  //
+//      bearer = "SHA256 Encrypted Firebase Token"                                  //
+//                                                                                  //
+//      access_token = SHA256("{bearer}:{time_in_seconds}:{SUPER_SECRET_CODE}")     //
+//                                                                                  //
+//                                                                                  //
+//////////////////////////////////////////////////////////////////////////////////////
+
+
 // The verify() function is used to check whether the
 // provided auth token is valid. It does this by
 // checking whether the token has been created within
@@ -65,10 +77,10 @@ pub fn verify(bearer: &str, access_token: &str) -> bool {
     // Check whether the auth token was generated
     // within the past 8 seconds
     for i in 0..8 {
-        let gen: String = format!("{}:{}:{}", bearer, time - i, SUPER_SECRET_CODE);
+        let str_format: String = format!("{}:{}:{}", bearer, time - i, SUPER_SECRET_CODE);
         // If the provided auth token is equal to the
         // generated auth token, return true
-        if access_token == sha256::digest(gen) {
+        if access_token == sha256::digest(str_format) {
             // Append the access token to the TOKEN_STORAGE
             bearer_storage.push(access_token.to_string());
             return true;

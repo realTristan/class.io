@@ -1,11 +1,3 @@
-/*
-
-    Users can visit the home endpoint to create their own website
-    or
-    They can visit the website their teacher provided them
-    ex: site.com/bearer/class_id/<optional: unit_id>
-
-*/
 CREATE TABLE users (
     id INTEGER PRIMARY KEY,
     user_id TEXT NOT NULL,              -- Random id given to the user
@@ -15,6 +7,7 @@ CREATE TABLE users (
     email TEXT NOT NULL,                -- Used for emailing students about their homework
     registration_date INTEGER NOT NULL  -- The time since epoch format of when the user registered
 );
+
 CREATE TABLE announcements (
     id INTEGER PRIMARY KEY,
     owner_bearer TEXT NOT NULL,         -- used to verify bearer
@@ -28,8 +21,6 @@ CREATE TABLE announcements (
     date INTEGER NOT NULL               -- The time since epoch format of when the post was made
 );
 
--- MAX 100 USERS
--- endpoint: get_class_data
 CREATE TABLE whitelists (
     id INTEGER PRIMARY KEY,
     owner_bearer TEXT NOT NULL,         -- used to verify bearer
@@ -38,8 +29,6 @@ CREATE TABLE whitelists (
     whitelisted_user TEXT NOT NULL      -- The user to be whitelisted's email sha256 encrypted
 );
 
--- MAX 10 CLASSES
--- endpoint: get_class_data
 CREATE TABLE classes (
     id INTEGER PRIMARY KEY,
     owner_id TEXT NOT NULL,
@@ -50,8 +39,6 @@ CREATE TABLE classes (
     enable_whitelist INTEGER NOT NULL   -- Whether to use the whitelist for this class
 );
 
--- MAX 12 UNITS                                     
--- endpoint: get_class_data and get_unit_data
 CREATE TABLE units (
     id INTEGER PRIMARY KEY,
     owner_bearer TEXT NOT NULL,         -- used to verify bearer
@@ -62,8 +49,6 @@ CREATE TABLE units (
     locked INTEGER NOT NULL             -- whether the students can access this unit
 );
 
--- MAX (20 * unit_count) LESSONS
--- endpoint: get_unit_lessons
 CREATE TABLE lessons (
     id INTEGER PRIMARY KEY,
     owner_bearer TEXT NOT NULL,         -- used to verify bearer
@@ -75,8 +60,7 @@ CREATE TABLE lessons (
     work TEXT NOT NULL,                 -- Lesson Work
     work_solutions TEXT NOT NULL        -- Lesson Work Solutions
 );
--- Homework Submissions for a specific Unit
--- endpoint: get_unit_submissions
+
 CREATE TABLE submissions (
     id INTEGER PRIMARY KEY,
     class_id TEXT NOT NULL,                 -- class_id:bearer:time.time()
