@@ -43,8 +43,9 @@ impl lib::handlers::Database {
     async fn get_class_owner_id(&self, bearer: &str) -> Option<String> 
     {
         // Query the database
-        let query = sqlx::query!("SELECT user_id FROM users WHERE bearer=?", bearer)
-            .fetch_one(&self.conn).await;
+        let query = sqlx::query!(
+            "SELECT user_id FROM users WHERE bearer=?", bearer
+        ).fetch_one(&self.conn).await;
         
         // Return the user_id if not none
         return match query {
@@ -59,8 +60,10 @@ impl lib::handlers::Database {
     async fn class_exists(&self, class_id: &str) -> bool 
     {
         // Query the database
-        let query = sqlx::query!("SELECT * FROM classes WHERE class_id=?", class_id)
-            .fetch_one(&self.conn).await;
+        let query = sqlx::query!(
+            "SELECT * FROM classes WHERE class_id=?", class_id
+        ).fetch_one(&self.conn).await;
+        
         // Return whether valid query data has been obtained
         return !query.is_err();
     }
@@ -72,25 +75,19 @@ impl lib::handlers::Database {
     // invalid/empty values.
     fn generate_class_update_query(&self, data: &Json<ClassDataBody>) -> String 
     {
-        let mut res: String = String::new();
-        // If the provided data's enable_whitelist integer bool
-        // isn't invalid (equal to 2) then append the
-        // updated value to the result string
+        // Create a new string
+        let mut query_data: String = String::new();
 
-        // FIX THIS FIND A WAY TO CHECK IF
-        // VALUE IS INVALID NOT 2
+        // If provided whitelist change
         if data.enable_whitelist != 2 {
-            // 2 == Invalid
-            res.push_str(&format!("enable_whitelist={},", data.enable_whitelist));
+            query_data.push_str(&format!("enable_whitelist={},", data.enable_whitelist));
         }
-        // If the provided data's class_name length
-        // is valid (greater than 0) then append the
-        // updated value to the result string
+        // If provided class_name
         if data.class_name.len() > 0 {
-            res.push_str(&format!("class_name='{}',", data.class_name));
+            query_data.push_str(&format!("class_name='{}'", data.class_name));
         }
         // Remove the trailing comma at the end of the query
-        return res[..res.len() - 1].to_string();
+        return query_data[..query_data.len() - 1].to_string();
     }
 
     // The update_class_data() function is used to change
@@ -122,8 +119,7 @@ impl lib::handlers::Database {
     {
         // Get the class primary data. This includes the class:
         // class_name, whitelist[bool], rls[bool], and class_id
-        let query = sqlx::query_as!(
-            Class,
+        let query = sqlx::query_as!(Class,
             "SELECT class_name, owner_id, enable_whitelist FROM classes WHERE class_id=?",
             class_id
         ).fetch_one(&self.conn).await;
@@ -140,64 +136,48 @@ impl lib::handlers::Database {
     // provided announcements array.
     pub fn get_announcements_json(&self, announcements: Vec<Announcement>) -> Vec<serde_json::Value> 
     {
-        let mut result: Vec<serde_json::Value> = Vec::new();
-
         // Iterate over the provided announcements array and
         // append each of the announcement's data to a formatted
         // string array of maps
-        announcements.iter().for_each(|f| {
-            result.push(serde_json::json!({
+        return announcements.iter().map(|f| {
+            serde_json::json!({
                 "author_name": f.author_name,
                 "title": f.title,
                 "description": f.description,
                 "attachment": f.attachment
-            }))
-        });
-        
-        // Return the result array
-        return result
+            })
+        }).collect();
     }
 
     // The get_whitelist_json() function is used to
     // geterate a new json map as a string from the
     // provided whitelist array.
-    pub fn get_whitelist_json(&self, whitelist: Vec<Whitelist>) -> String 
+    pub fn get_whitelist_json(&self, whitelist: Vec<Whitelist>) -> Vec<String> 
     {
-        // Define the json result string
-        let mut r: String = String::new();
-        // Iterate over the provided whitelisted users array
-        // and append each of them to a formatted string array
-        whitelist.iter().for_each(|f| {
-            r.push_str(&format!(r#""{}","#, f.whitelisted_user));
-        });
-
-        // Remove the last comma of the string array
-        // before returning the new json map result
-        return r[..r.len() - 1].to_string();
+        // Iterate over the provided whitelist array and
+        // create a new array using the map function
+        return whitelist.iter().map(|f| {
+            f.whitelisted_user.clone()
+        }).collect();
     }
 
     // The get_unit_lesson_json() function converts the
     // array of lessons into a readable json map that
     // will eventually be returned with the outgoing response body
-    fn get_unit_lesson_json(&self, lessons: Vec<Lesson>) -> Vec<serde_json::Value>
+    fn get_unit_lessons_json(&self, lessons: Vec<Lesson>) -> Vec<serde_json::Value>
     {
-        let mut result: Vec<serde_json::Value> = Vec::new();
-
         // Iterate over the provided lessons array and
         // append each of the lesson's data to a formatted
         // string array of maps
-        lessons.iter().for_each(|f| {
-            result.push(serde_json::json!({
+        return lessons.iter().map(|f| {
+            serde_json::json!({
                 "title": f.title,
                 "description": f.description,
                 "video": f.video,
                 "work": f.work,
                 "work_solutions": f.work_solutions
-            }))
-        });
-
-        // Return the result array
-        return result
+            })
+        }).collect();
     }
 
     // The get_unit_lessons() function is used to get all
@@ -205,8 +185,7 @@ impl lib::handlers::Database {
     async fn get_unit_lessons(&self, unit_id: &str) -> Vec<Lesson>
     {
         // Query the database
-        let query = sqlx::query_as!(
-            Lesson,
+        let query = sqlx::query_as!(Lesson,
             "SELECT title, description, video, work, work_solutions FROM lessons WHERE unit_id=?",
             unit_id
         ).fetch_all(&self.conn).await;
@@ -222,25 +201,14 @@ impl lib::handlers::Database {
     // a new json map as a string from the provided units array.
     pub async fn get_units_json(&self, units: Vec<Unit>) -> Vec<serde_json::Value>
     {
-        let mut result: Vec<serde_json::Value> = Vec::new();
-
-        // Iterate over the provided units array and
-        // append each of the units data to a formatted
-        // string array of maps
-        for u in units {
-            // Get the lessons that correspond with the unit
-            let l: Vec<Lesson> = self.get_unit_lessons(&u.unit_id).await;
-
-            // Append the unit json to the result string
-            result.push(serde_json::json!({
+        futures::future::join_all(units.iter().map(|u| async {
+            let lessons: Vec<Lesson> = self.get_unit_lessons(&u.unit_id).await;
+            serde_json::json!({
                 "unit_name": u.unit_name,
                 "locked": u.locked == 1,
-                "lessons": self.get_unit_lesson_json(l)
-            }));
-        }
-
-        // Return the result array
-        return result
+                "lessons": self.get_unit_lessons_json(lessons)
+            })
+        })).await
     }
 
     // The get_class_data() function is used to get all data
@@ -258,9 +226,9 @@ impl lib::handlers::Database {
         }
 
         // If the class does exist, get all of it's data
-        let units = self.get_class_units(class_id).await;
-        let whitelist = self.get_class_whitelist(class_id).await;
-        let announcements = self.get_class_announcements(class_id).await;
+        let units: Vec<Unit> = self.get_class_units(class_id).await;
+        let whitelist: Vec<Whitelist> = self.get_class_whitelist(class_id).await;
+        let announcements: Vec<Announcement> = self.get_class_announcements(class_id).await;
 
         // Else, unwrap the class data so that
         // it can be used in the response json

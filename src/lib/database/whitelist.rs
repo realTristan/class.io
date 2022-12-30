@@ -11,8 +11,8 @@ impl lib::handlers::Database {
     {
         // Fetch all the whitelisted users that have
         // access to the provided class.
-        let query = sqlx::query_as!(
-            Whitelist, "SELECT whitelisted_user FROM whitelists WHERE class_id=?", class_id
+        let query = sqlx::query_as!(Whitelist, 
+            "SELECT whitelisted_user FROM whitelists WHERE class_id=?", class_id
         ).fetch_all(&self.conn).await;
 
         // Return the result of the query

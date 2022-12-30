@@ -13,8 +13,7 @@ impl lib::handlers::Database {
         // Fetch all the units that are in the class.
         // By the end of the function, all the unit data
         // will be neatly categorized.
-        let query = sqlx::query_as!(
-            Unit,
+        let query = sqlx::query_as!(Unit,
             "SELECT unit_id, unit_name, locked FROM units WHERE class_id=?",
             class_id
         ).fetch_all(&self.conn).await;
@@ -86,31 +85,28 @@ impl lib::handlers::Database {
     // being updated, the function first determines which values are null.
     pub async fn update_class_unit(&self, bearer: &str, data: &Json<UnitDataBody>) -> bool 
     {
-        let mut res: String = String::new();
-        // If the provided data's enable_whitelist integer bool
-        // isn't invalid (equal to 2) then append the
-        // updated value to the result string
+        // Create a new string
+        let mut query_data: String = String::new();
+        
+        // If provided unit_name
         if data.unit_name.len() > 0 {
-            res.push_str(&format!("unit_name='{}',", data.unit_name));
+            query_data.push_str(&format!("unit_name='{}',", data.unit_name));
         }
 
-        // If the provided data's locked integer bool
-        // isn't invalid (equal to 2) then append the
-        // updated value to the result string
+        // If provided locked bool
         if data.locked != 2 {
-            // 2 == Invalid
-            res.push_str(&format!("locked={},", data.locked));
+            query_data.push_str(&format!("locked={},", data.locked));
         }
 
         // Remove the trailing comma
-        let res: String = res[..res.len() - 1].to_string();
+        let query_data: String = query_data[..query_data.len() - 1].to_string();
 
         // Query the database, updating all the values
-        // in the above res: String that have the same
+        // in the above query_data: String that have the same
         // unit_id as the one provided
         let query = sqlx::query(&format!(
             "UPDATE units SET {} WHERE unit_id='{}' AND owner_bearer='{}'",
-            res, data.unit_id, bearer
+            query_data, data.unit_id, bearer
         )).execute(&self.conn).await;
 
         // Return query result

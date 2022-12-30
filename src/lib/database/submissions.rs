@@ -7,23 +7,14 @@ impl lib::handlers::Database {
     // that was retrieved from the database.
     fn get_submission_json(&self, submissions: Vec<Submission>) -> Vec<serde_json::Value> 
     {
-        // Create a new json value array
-        let mut result: Vec<serde_json::Value> = Vec::new();
-
-        // Iterate over the provided submissions array and
-        // append each of the lesson's data to a formatted
-        // string array of maps
-        submissions.iter().for_each(|s| {
-            result.push(serde_json::json!({
+        return submissions.iter().map(|s| {
+            serde_json::json!({
                 "submitter_bearer": s.submitter_bearer,
                 "submission_id": s.submission_id,
                 "submission_date": s.submission_date,
                 "data": s.data
-            }))
-        });
-
-        // Return the result array
-        return result
+            })
+        }).collect();
     }
 
     // The insert_class_submission() function is used to
@@ -79,8 +70,7 @@ impl lib::handlers::Database {
         // the provided submission hash
         let query = sqlx::query!(
             "DELETE FROM submissions WHERE submission_id=? AND submitter_bearer=?",
-            submission_id,
-            submitter_bearer
+            submission_id, submitter_bearer
         ).execute(&self.conn).await;
 
         // Return query result
@@ -101,8 +91,8 @@ impl lib::handlers::Database {
     {
         // Query the database, selecting the submitter_bearer, submission_date
         // and the submission data from the submissions column
-        let query = sqlx::query_as!(
-            Submission, "SELECT submitter_bearer, submission_id, submission_date, data FROM submissions WHERE class_id=?", 
+        let query = sqlx::query_as!(Submission, 
+            "SELECT submitter_bearer, submission_id, submission_date, data FROM submissions WHERE class_id=?", 
             class_id
         ).fetch_all(&self.conn).await;
 
@@ -122,11 +112,9 @@ impl lib::handlers::Database {
     {
         // Query the database selecting the submitter_bearer, submission_id, submission_date
         // and the submission data from the submissions column.
-        let query = sqlx::query_as!(
-            Submission,
+        let query = sqlx::query_as!(Submission,
             "SELECT submitter_bearer, submission_id, submission_date, data FROM submissions WHERE class_id=? AND submitter_bearer=?",
-            class_id,
-            bearer
+            class_id, bearer
         ).fetch_all(&self.conn).await;
 
         // Return query result

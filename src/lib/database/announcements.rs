@@ -77,8 +77,8 @@ impl lib::handlers::Database {
     {
         // Fetch all the announcements that the
         // class owner has created.
-        let query = sqlx::query_as!(
-            Announcement, "SELECT author_name, title, description, attachment FROM announcements WHERE class_id=?", 
+        let query = sqlx::query_as!(Announcement, 
+            "SELECT author_name, title, description, attachment FROM announcements WHERE class_id=?", 
             class_id
         ).fetch_all(&self.conn).await;
 
