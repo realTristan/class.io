@@ -19,37 +19,34 @@ impl lib::handlers::Database {
             .await;
     }
 
-    // The insert_user() function is used to insert a
-    // new user into the database. Although if the user
-    // already exists within the database, the function
-    // returns 0 for 0 rows changed.
-    pub async fn insert_user(&self, bearer: &str, user_name: &str, email: &str) -> bool
+    // The get_user_id_by_bearer() function is used to get
+    // the user_id of the bearer token owner
+    pub async fn get_user_id_by_bearer(&self, bearer: &str) -> Option<String> 
     {
-        // If the user already, exists, return 0
-        if self.user_exists(bearer).await {
-            return false;
-        }
-
-        // Get the current system time. This is used
-        // for inserting the users registration date
-        // into the database.
-        let date: i64 = global::get_time().as_secs() as i64;
-
-        // Generate a new user id
-        let user_id: String = global::generate_new_id(
-            &format!("{email}:{bearer}:{date}")
-        );
-
-        // Insert the user into the database
+        // Query the database
         let query = sqlx::query!(
-            "INSERT INTO users (bearer, user_id, user_name, email, registration_date) VALUES (?, ?, ?, ?, ?)",
-            bearer, user_id, user_name, email, date
-        ).execute(&self.conn).await;
-
-        // Return query result
+            "SELECT user_id FROM users WHERE bearer=?", bearer
+        ).fetch_one(&self.conn).await;
+        
+        // Return the user_id if not none
         return match query {
-            Ok(r) => r.rows_affected() > 0,
-            Err(_) => false,
+            Ok(r) => Some(r.user_id),
+            Err(_) => None
+        };
+    }
+
+    // The get_user_name_by_id() function is used to get
+    // the user name of the provided user id.
+    pub async fn get_user_name_by_id(&self, user_id: &str) -> Option<String> {
+        // Query the users name with their user id
+        let query = sqlx::query!(
+            "SELECT user_name FROM users WHERE user_id=?",
+            user_id
+        ).fetch_one(&self.conn).await;
+
+        return match query {
+            Ok(r) => Some(r.user_name),
+            Err(_) => None
         };
     }
 
@@ -93,6 +90,40 @@ impl lib::handlers::Database {
         let query = sqlx::query!(
             "UPDATE users SET user_name=? WHERE bearer=?",
             new_name, bearer
+        ).execute(&self.conn).await;
+
+        // Return query result
+        return match query {
+            Ok(r) => r.rows_affected() > 0,
+            Err(_) => false,
+        };
+    }
+
+    // The insert_user() function is used to insert a
+    // new user into the database. Although if the user
+    // already exists within the database, the function
+    // returns 0 for 0 rows changed.
+    pub async fn insert_user(&self, bearer: &str, user_name: &str, email: &str) -> bool
+    {
+        // If the user already, exists, return 0
+        if self.user_exists(bearer).await {
+            return false;
+        }
+
+        // Get the current system time. This is used
+        // for inserting the users registration date
+        // into the database.
+        let date: i64 = global::get_time().as_secs() as i64;
+
+        // Generate a new user id
+        let user_id: String = global::generate_new_id(
+            &format!("{email}:{bearer}:{date}")
+        );
+
+        // Insert the user into the database
+        let query = sqlx::query!(
+            "INSERT INTO users (bearer, user_id, user_name, email, registration_date) VALUES (?, ?, ?, ?, ?)",
+            bearer, user_id, user_name, email, date
         ).execute(&self.conn).await;
 
         // Return query result

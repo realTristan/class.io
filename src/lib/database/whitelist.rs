@@ -20,21 +20,6 @@ impl lib::handlers::Database {
         };
     }
 
-    // The get_user_name_by_id() function is used to get
-    // the user name of the provided user id.
-    async fn get_user_name_by_id(&self, user_id: &str) -> Option<String> {
-        // Query the users name with their user id
-        let query = sqlx::query!(
-            "SELECT user_name FROM users WHERE user_id=?",
-            user_id
-        ).fetch_one(&self.conn).await;
-
-        return match query {
-            Ok(r) => Some(r.user_name),
-            Err(_) => None
-        };
-    }
-
     // The insert_class_whitelist() function is used to add an
     // user into the provided class's whitelist. Users in this
     // whitelist can access the class info. The whitelist only

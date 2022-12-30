@@ -17,7 +17,6 @@ impl lib::handlers::Database {
         return !query.is_err();
     }
 
-
     // The insert_class_submission() function is used to
     // insert a new work submission into the database
     // using the provided class hash. The function generates
@@ -46,7 +45,6 @@ impl lib::handlers::Database {
         };
     }
 
-
     // The delete_class_submission() function is used to
     // delete a submission from the database. This function
     // is called when a student wants to unsubmit a portion
@@ -70,6 +68,7 @@ impl lib::handlers::Database {
             Ok(r) => r.rows_affected() > 0,
         };
     }
+
     
     // The get_submission_json() function is used to return
     // a string json map with all the submission data
@@ -85,7 +84,6 @@ impl lib::handlers::Database {
             })
         }).collect();
     }
-
 
     // The get_class_submissions() function is used to
     // return all the submissions for the provided class.

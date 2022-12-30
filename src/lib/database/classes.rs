@@ -7,22 +7,6 @@ use actix_web::web::Json;
 
 // Database Implementation
 impl lib::handlers::Database {
-    // The get_class_owner_id() function is used to get
-    // the user_id of the bearer token owner
-    async fn get_class_owner_id(&self, bearer: &str) -> Option<String> 
-    {
-        // Query the database
-        let query = sqlx::query!(
-            "SELECT user_id FROM users WHERE bearer=?", bearer
-        ).fetch_one(&self.conn).await;
-        
-        // Return the user_id if not none
-        return match query {
-            Ok(r) => Some(r.user_id),
-            Err(_) => None
-        };
-    }
-
     // The class_exists() function is used to check whether
     // the provided class hash already exists. This function
     // is called in the insert_class_data() function.
@@ -52,7 +36,7 @@ impl lib::handlers::Database {
         }
 
         // Get the bearer owner id
-        let owner_id: String = match self.get_class_owner_id(bearer).await {
+        let owner_id: String = match self.get_user_id_by_bearer(bearer).await {
             Some(r) => r,
             None => return false
         };
