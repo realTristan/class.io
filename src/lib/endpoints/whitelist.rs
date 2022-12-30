@@ -9,7 +9,7 @@ use actix_web::{web, HttpRequest, Responder};
 // access the provided class_id. The whitelist
 // feature only works if the user has enabled the
 // class whitelist setting.
-#[actix_web::put("/class/{class_id}/whitelist/")]
+#[actix_web::put("/class/{class_id}/whitelist")]
 async fn add_user_to_whitelist(
     req: HttpRequest, db: web::Data<Database>, body: web::Bytes
 ) -> impl Responder {
@@ -71,7 +71,7 @@ async fn add_user_to_whitelist(
 // to delete the provided user from the provided
 // class_id's whitelist. Anyone within this whitelist
 // can access the given class_id.
-#[actix_web::delete("/class/{class_id}/whitelist/{user_id}/")]
+#[actix_web::delete("/class/{class_id}/whitelist/{user_id}")]
 async fn remove_user_from_whitelist(req: HttpRequest, db: web::Data<Database>) -> impl Responder 
 {
     // Get the class id

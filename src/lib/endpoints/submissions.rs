@@ -8,7 +8,7 @@ use crate::lib::{
 // hash. This endpoint is used in the website dashboard
 // so that teachers can see all the work their students
 // have submitted.
-#[actix_web::get("/class/{class_id}/submissions/")]
+#[actix_web::get("/class/{class_id}/submissions")]
 async fn get_class_submissions(req: HttpRequest,  db: web::Data<Database>) -> impl Responder 
 {
     // Get the class id
@@ -50,7 +50,7 @@ async fn get_class_submissions(req: HttpRequest,  db: web::Data<Database>) -> im
 // user hash from within the database. This endpoint
 // is called for the student to see all of their
 // previous work submissions.
-#[actix_web::get("/class/{class_id}/student/submissions/")]
+#[actix_web::get("/class/{class_id}/student/submissions")]
 async fn get_user_submissions(req: HttpRequest, db: web::Data<Database>) -> impl Responder 
 {
     // Get the class id
@@ -91,7 +91,7 @@ async fn get_user_submissions(req: HttpRequest, db: web::Data<Database>) -> impl
 // to insert a new submission into the database.
 // This endpoint requires a bearer token, therefore
 // the student submitting their work must be signed in.
-#[actix_web::put("/class/{class_id}/submissions/")]
+#[actix_web::put("/class/{class_id}/submissions")]
 async fn insert_class_submission(
     req: HttpRequest, db: web::Data<Database>, body: web::Bytes
 ) -> impl Responder 
@@ -156,7 +156,7 @@ async fn insert_class_submission(
 // delete a submission from the database. This endpoint
 // is called when the signed in student wants to undo
 // their work submission.
-#[actix_web::delete("/class/{class_id}/submissions/{submission_id}/")]
+#[actix_web::delete("/class/{class_id}/submissions/{submission_id}")]
 async fn delete_class_submission(req: HttpRequest, db: web::Data<Database>) -> impl Responder 
 {
     // Get the class id

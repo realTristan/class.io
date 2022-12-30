@@ -6,7 +6,7 @@ use actix_web::{web, HttpRequest, Responder};
 // The get_class_data() endpoint is used to get the class's
 // whitelist[String Array], announcements, class_name,
 // enable_whitelist[bool], etc.
-#[actix_web::get("/class/{class_id}/")]
+#[actix_web::get("/class/{class_id}")]
 async fn get_class_data(req: HttpRequest, db: web::Data<Database>) -> impl Responder 
 {
     // Get the class id
@@ -47,7 +47,7 @@ async fn get_class_data(req: HttpRequest, db: web::Data<Database>) -> impl Respo
 // modify any one of the Class struct's data.
 // This endpoint is utilized within the class dashboard
 // and requires a special bearer token to work.
-#[actix_web::post("/class/{class_id}/")]
+#[actix_web::post("/class/{class_id}")]
 async fn update_class_data(
     req: HttpRequest, db: web::Data<Database>, body: web::Bytes
 ) -> impl Responder {
@@ -100,7 +100,7 @@ async fn update_class_data(
 // The insert_class_data() endpoint is used to
 // create a new class that contains all the default
 // values. A Maximum of 5 classes is allowed.
-#[actix_web::put("/class/")]
+#[actix_web::put("/class")]
 async fn insert_class_data(
     req: HttpRequest, db: web::Data<Database>, body: web::Bytes
 ) -> impl Responder {
@@ -121,7 +121,6 @@ async fn insert_class_data(
             "response": "Invalid class_name"
         }).to_string()
     };
-
 
     // Get the bearer and access token from the request headers.
     let bearer: String = global::get_header(&req, "authorization");

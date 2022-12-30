@@ -61,7 +61,7 @@ pub async fn get_user_data(req: HttpRequest, db: web::Data<Database>) -> impl Re
 // bearer. This function is necessary for the frontend
 // dashboard page. To ensure the security of the endpoint,
 // a valid auth token is required.
-#[actix_web::post("/user/")]
+#[actix_web::post("/user")]
 pub async fn update_user_data(
     req: HttpRequest, db: web::Data<Database>, body: web::Bytes
 ) -> impl Responder {
@@ -125,7 +125,7 @@ pub async fn update_user_data(
 // provided email and the current date as the registration time.
 // This endpoint is called whenever an user logs into the website
 // using firebase google auth.
-#[actix_web::put("/user/")]
+#[actix_web::put("/user")]
 async fn insert_user_data(
     req: HttpRequest, db: web::Data<Database>, body: web::Bytes
 ) -> impl Responder {
@@ -147,7 +147,7 @@ async fn insert_user_data(
             "response": "Invalid user_name"
         }).to_string()
     };
-    
+
     // Get the user email from the request body
     let email = match body.get("email") {
         Some(email) => email.to_string(),

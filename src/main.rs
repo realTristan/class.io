@@ -43,6 +43,8 @@ async fn main() -> std::io::Result<()> {
             // Class Announcements
             .service(endpoints::announcements::insert_class_announcement)
             .service(endpoints::announcements::delete_class_announcement)
+            // Trim path trailing slashes
+            .wrap(actix_web::middleware::NormalizePath::trim())
     })
     .bind(("127.0.0.1", 8080))?
     .run()

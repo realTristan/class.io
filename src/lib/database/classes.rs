@@ -61,30 +61,22 @@ impl lib::handlers::Database {
     // invalid/empty values.
     fn generate_class_update_query(&self, data: serde_json::Value) -> String 
     {
+        // Create a new string
+        let mut query: String = String::new();
+
         // Get the enable whitelist bool from the request body
-        let enable_whitelist: i8 = match data["enable_whitelist"].as_bool() {
-            Some(r) => if r { 1 } else { 0 },
-            None => 2
+        match data["enable_whitelist"].as_bool() {
+            Some(r) => query.push_str(&format!("enable_whitelist={},", r as i8)),
+            None => ()
         };
         // Get the class name from the request body
-        let class_name: String = match data["class_name"].as_str() {
-            Some(r) => r.to_string(),
-            None => String::new()
+        match data["class_name"].as_str() {
+            Some(name) => query.push_str(&format!("class_name='{}',", name)),
+            None => ()
         };
 
-        // Create a new string
-        let mut query_data: String = String::new();
-
-        // If provided whitelist change
-        if enable_whitelist != 2 {
-            query_data.push_str(&format!("enable_whitelist={},", enable_whitelist));
-        }
-        // If provided class_name
-        if class_name.len() > 0 {
-            query_data.push_str(&format!("class_name='{}',", class_name));
-        }
         // Remove the trailing comma at the end of the query
-        return query_data[..query_data.len() - 1].to_string();
+        return query[..query.len() - 1].to_string();
     }
 
     // The update_class_data() function is used to change

@@ -7,7 +7,7 @@ use actix_web::{web, HttpRequest, Responder};
 // to insert a new announcement into the database.
 // A unique announcement identifier is created
 // for if the user wants to later delete the post.
-#[actix_web::put("/class/{class_id}/announcements/")]
+#[actix_web::put("/class/{class_id}/announcements")]
 async fn insert_class_announcement(
     req: HttpRequest, db: web::Data<Database>, body: web::Bytes
 ) -> impl Responder {
