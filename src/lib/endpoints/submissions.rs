@@ -1,6 +1,6 @@
 use actix_web::{web, HttpRequest, Responder};
 use crate::lib::{
-    self, global, handlers::Database, structs::SubmissionDataBody,
+    self, global, handlers::Database
 };
 
 // The get_class_submissions() endpoint is used to
@@ -93,9 +93,27 @@ async fn get_user_submissions(req: HttpRequest, db: web::Data<Database>) -> impl
 // the student submitting their work must be signed in.
 #[actix_web::put("/class/{class_id}/submissions/")]
 async fn insert_class_submission(
-    req: HttpRequest, db: web::Data<Database>, body: web::Json<SubmissionDataBody>
+    req: HttpRequest, db: web::Data<Database>, body: web::Bytes
 ) -> impl Responder 
 {
+    // Get the request body
+    let body: serde_json::Value = match global::get_body(&body) {
+        Ok(body) => body,
+        Err(_) => return serde_json::json!({
+            "status": 400,
+            "response": "Invalid request body"
+        }).to_string()
+    };
+
+    // Get the submission data from the request body
+    let data: String = match body.get("data") {
+        Some(data) => data.to_string(),
+        None => return serde_json::json!({
+            "status": 400,
+            "response": "Invalid data"
+        }).to_string()
+    };
+
     // Get the class id
     let class_id: &str = match req.match_info().get("class_id") {
         Some(id) => id,
@@ -121,7 +139,7 @@ async fn insert_class_submission(
     let submission_id: String = global::generate_new_id(&bearer);
 
     // Insert the submission data into the database
-    return match db.insert_class_submission(&class_id, &submission_id, &bearer, &body.data).await {
+    return match db.insert_class_submission(&class_id, &submission_id, &bearer, &data).await {
         true => serde_json::json!({
             "status": 200,
             "response": "Submission successfully inserted",

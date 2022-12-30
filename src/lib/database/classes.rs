@@ -1,9 +1,8 @@
 use crate::lib::{
     self, structs::{
-        Class, Announcement, ClassDataBody, Whitelist, Unit, Lesson
+        Class, Announcement, Whitelist, Unit, Lesson
     }
 };
-use actix_web::web::Json;
 
 // Database Implementation
 impl lib::handlers::Database {
@@ -60,18 +59,29 @@ impl lib::handlers::Database {
     // the class data within the database. This function
     // is required to disperse the query string from any
     // invalid/empty values.
-    fn generate_class_update_query(&self, data: &Json<ClassDataBody>) -> String 
+    fn generate_class_update_query(&self, data: serde_json::Value) -> String 
     {
+        // Get the enable whitelist bool from the request body
+        let enable_whitelist: i8 = match data["enable_whitelist"].as_bool() {
+            Some(r) => if r { 1 } else { 0 },
+            None => 2
+        };
+        // Get the class name from the request body
+        let class_name: String = match data["class_name"].as_str() {
+            Some(r) => r.to_string(),
+            None => String::new()
+        };
+
         // Create a new string
         let mut query_data: String = String::new();
 
         // If provided whitelist change
-        if data.enable_whitelist != 2 {
-            query_data.push_str(&format!("enable_whitelist={},", data.enable_whitelist));
+        if enable_whitelist != 2 {
+            query_data.push_str(&format!("enable_whitelist={},", enable_whitelist));
         }
         // If provided class_name
-        if data.class_name.len() > 0 {
-            query_data.push_str(&format!("class_name='{}',", data.class_name));
+        if class_name.len() > 0 {
+            query_data.push_str(&format!("class_name='{}',", class_name));
         }
         // Remove the trailing comma at the end of the query
         return query_data[..query_data.len() - 1].to_string();
@@ -82,7 +92,7 @@ impl lib::handlers::Database {
     // The function requires a generated class_update_query
     // which can be generated using the function above.
     pub async fn update_class_data(
-        &self, bearer: &str, class_id: &str, data: &Json<ClassDataBody>
+        &self, bearer: &str, class_id: &str, data: serde_json::Value
     ) -> bool {
 
         // Generate a new query string. This query string accounts

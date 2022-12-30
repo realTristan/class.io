@@ -1,5 +1,5 @@
 use crate::lib::{
-    self, global, handlers::Database, structs::UserDataBody, 
+    self, global, handlers::Database
 };
 use actix_web::{web, HttpRequest, Responder};
 
@@ -51,7 +51,7 @@ pub async fn get_user_data(req: HttpRequest, db: web::Data<Database>) -> impl Re
         "response": {
             "user_name": user.user_name,
             "user_id": user_id,
-            "classes": "array of the users class_ides (select from classes where user_id = user_id)"
+            "classes": "array of the users class_ids (select from classes where user_id = user_id)"
         }
     }).to_string()
 }
@@ -63,8 +63,26 @@ pub async fn get_user_data(req: HttpRequest, db: web::Data<Database>) -> impl Re
 // a valid auth token is required.
 #[actix_web::post("/user/")]
 pub async fn update_user_data(
-    req: HttpRequest, db: web::Data<Database>, body: web::Json<UserDataBody>
+    req: HttpRequest, db: web::Data<Database>, body: web::Bytes
 ) -> impl Responder {
+    // Get the request body
+    let body: serde_json::Value = match global::get_body(&body) {
+        Ok(body) => body,
+        Err(_) => return serde_json::json!({
+            "status": 400,
+            "response": "Invalid request body"
+        }).to_string()
+    };
+
+    // Get the user name from the request body
+    let user_name: String = match body.get("user_name") {
+        Some(name) => name.to_string(),
+        None => return serde_json::json!({
+            "status": 400,
+            "response": "Invalid user_name"
+        }).to_string()
+    };
+    
 
     // Get the bearer and access token from the request headers.
     let bearer: String = global::get_header(&req, "authorization");
@@ -80,7 +98,7 @@ pub async fn update_user_data(
 
     // If the incoming request doesn't contain
     // a new user_name, return an empty json map
-    if body.user_name.len() < 1 {
+    if user_name.len() < 1 {
         return serde_json::json!({
             "status": 400,
             "response": "Invalid request body"
@@ -89,7 +107,7 @@ pub async fn update_user_data(
 
     // Update the username and return whether the update
     // was successful or not
-    return match db.update_user_name(&bearer, &body.user_name).await {
+    return match db.update_user_name(&bearer, &user_name).await {
         true => serde_json::json!({
             "status": 200,
             "response": "Successfully updated user data"
@@ -109,8 +127,36 @@ pub async fn update_user_data(
 // using firebase google auth.
 #[actix_web::put("/user/")]
 async fn insert_user_data(
-    req: HttpRequest, db: web::Data<Database>, body: web::Json<UserDataBody>
+    req: HttpRequest, db: web::Data<Database>, body: web::Bytes
 ) -> impl Responder {
+
+    // Get the request body
+    let body: serde_json::Value = match global::get_body(&body) {
+        Ok(body) => body,
+        Err(_) => return serde_json::json!({
+            "status": 400,
+            "response": "Invalid request body"
+        }).to_string()
+    };
+
+    // Get the user name from the request body
+    let user_name: String = match body.get("user_name") {
+        Some(name) => name.to_string(),
+        None => return serde_json::json!({
+            "status": 400,
+            "response": "Invalid user_name"
+        }).to_string()
+    };
+    
+    // Get the user email from the request body
+    let email = match body.get("email") {
+        Some(email) => email.to_string(),
+        None => return serde_json::json!({
+            "status": 400,
+            "response": "Invalid email"
+        }).to_string()
+    };
+
     // Get the bearer and access token from the request headers.
     let bearer: String = global::get_header(&req, "authorization");
     let access_token: String = global::get_header(&req, "access_token");
@@ -126,7 +172,7 @@ async fn insert_user_data(
     // Insert the user into the database
     // Along with this insertion is the bearer, user_name
     // user's email and the time of registration
-    return match db.insert_user(&bearer, &body.user_name, &body.email).await {
+    return match db.insert_user(&bearer, &user_name, &email).await {
         true => serde_json::json!({
             "status": 200,
             "response": "Successfully inserted user data"

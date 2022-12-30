@@ -1,5 +1,5 @@
 use crate::lib::{
-    self, global, handlers::Database, structs::WhitelistDataBody
+    self, global, handlers::Database
 };
 use actix_web::{web, HttpRequest, Responder};
 
@@ -11,8 +11,26 @@ use actix_web::{web, HttpRequest, Responder};
 // class whitelist setting.
 #[actix_web::put("/class/{class_id}/whitelist/")]
 async fn add_user_to_whitelist(
-    req: HttpRequest, db: web::Data<Database>, body: web::Json<WhitelistDataBody>
+    req: HttpRequest, db: web::Data<Database>, body: web::Bytes
 ) -> impl Responder {
+
+    // Get the request body
+    let body: serde_json::Value = match global::get_body(&body) {
+        Ok(body) => body,
+        Err(_) => return serde_json::json!({
+            "status": 400,
+            "response": "Invalid request body"
+        }).to_string()
+    };
+
+    // Get the request body variables
+    let user_id: &str = match body["user_id"].as_str() {
+        Some(id) => id,
+        None => return serde_json::json!({
+            "status": 400,
+            "response": "Invalid user_id"
+        }).to_string()
+    };
 
     // Get the class id
     let class_id: &str = match req.match_info().get("class_id") {
@@ -36,7 +54,7 @@ async fn add_user_to_whitelist(
     }
     
     // Insert the whitelist data into the database
-    return match db.insert_class_whitelist(&bearer, &class_id, &body.user_id).await {
+    return match db.insert_class_whitelist(&bearer, &class_id, user_id).await {
         true => serde_json::json!({
             "status": 200,
             "response": "Success"

@@ -1,7 +1,4 @@
-use crate::lib::{
-    self, structs::UnitDataBody
-};
-use actix_web::web::Json;
+use crate::lib;
 
 // Database Implementation
 impl lib::handlers::Database {
@@ -68,20 +65,31 @@ impl lib::handlers::Database {
     // Json<UnitDataBody> values. In order to prevent null values
     // being updated, the function first determines which values are null.
     pub async fn update_class_unit(
-        &self, bearer: &str, class_id: &str, unit_id: &str, data: &Json<UnitDataBody>
+        &self, bearer: &str, class_id: &str, unit_id: &str, data: serde_json::Value
     ) -> bool {
+
+        // Get the unit name from the request body
+        let unit_name: String = match data.get("user_name") {
+            Some(name) => name.to_string(),
+            None => String::new()
+        };
+        // Get the locked bool from the request body
+        let locked: u8 = match data.get("locked") {
+            Some(locked) => locked.as_u64().unwrap() as u8,
+            None => 2
+        };
 
         // Create a new string
         let mut query_data: String = String::new();
         
         // If provided unit_name
-        if data.unit_name.len() > 0 {
-            query_data.push_str(&format!("unit_name='{}',", data.unit_name));
+        if unit_name.len() > 0 {
+            query_data.push_str(&format!("unit_name='{}',", unit_name));
         }
 
         // If provided locked bool
-        if data.locked != 2 {
-            query_data.push_str(&format!("locked={},", data.locked));
+        if locked != 2 {
+            query_data.push_str(&format!("locked={},", locked));
         }
 
         // Remove the trailing comma

@@ -1,5 +1,5 @@
 use crate::lib::{
-    self, global, handlers::Database, structs::ClassDataBody
+    self, global, handlers::Database
 };
 use actix_web::{web, HttpRequest, Responder};
 
@@ -49,8 +49,17 @@ async fn get_class_data(req: HttpRequest, db: web::Data<Database>) -> impl Respo
 // and requires a special bearer token to work.
 #[actix_web::post("/class/{class_id}/")]
 async fn update_class_data(
-    req: HttpRequest, db: web::Data<Database>, body: web::Json<ClassDataBody>
+    req: HttpRequest, db: web::Data<Database>, body: web::Bytes
 ) -> impl Responder {
+
+    // Get the request body
+    let body: serde_json::Value = match global::get_body(&body) {
+        Ok(body) => body,
+        Err(_) => return serde_json::json!({
+            "status": 400,
+            "response": "Invalid request body"
+        }).to_string()
+    };
 
     // Get the class id
     let class_id: &str = match req.match_info().get("class_id") {
@@ -76,7 +85,7 @@ async fn update_class_data(
     // Generate a class update query which is the fastest way
     // for updating multiple values inside the database before
     // executing the database update using the below function
-    return match db.update_class_data(&bearer, class_id, &body).await {
+    return match db.update_class_data(&bearer, class_id, body).await {
         true => serde_json::json!({
             "status": 200,
             "response": "Successfully updated class data"
@@ -93,8 +102,26 @@ async fn update_class_data(
 // values. A Maximum of 5 classes is allowed.
 #[actix_web::put("/class/")]
 async fn insert_class_data(
-    req: HttpRequest, db: web::Data<Database>, body: web::Json<ClassDataBody>
+    req: HttpRequest, db: web::Data<Database>, body: web::Bytes
 ) -> impl Responder {
+
+    // Get the request body
+    let body: serde_json::Value = match global::get_body(&body) {
+        Ok(body) => body,
+        Err(_) => return serde_json::json!({
+            "status": 400,
+            "response": "Invalid request body"
+        }).to_string()
+    };
+    // Get the class name from the request body
+    let class_name: String = match body.get("class_name") {
+        Some(name) => name.to_string(),
+        None => return serde_json::json!({
+            "status": 400,
+            "response": "Invalid class_name"
+        }).to_string()
+    };
+
 
     // Get the bearer and access token from the request headers.
     let bearer: String = global::get_header(&req, "authorization");
@@ -112,7 +139,7 @@ async fn insert_class_data(
     let class_id: String = global::generate_new_id(&bearer);
 
     // Insert the class data into the database
-    return match db.insert_class_data(&bearer, &class_id, &body.class_name).await {
+    return match db.insert_class_data(&bearer, &class_id, &class_name).await {
         true => serde_json::json!({
             "status": 200,
             "response": "Successfully inserted class data"

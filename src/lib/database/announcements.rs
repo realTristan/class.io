@@ -1,7 +1,6 @@
 use crate::lib::{
-    self, global, structs::AnnouncementDataBody
+    self, global
 };
-use actix_web::web::Json;
 
 // Database Implementation
 impl lib::handlers::Database {
@@ -12,12 +11,31 @@ impl lib::handlers::Database {
     // their announcement, they can. Along with this, a post
     // date is also inserted into the database.
     pub async fn insert_class_announcement(
-        &self, bearer: &str, class_id: &str, announcement_id: &str, data: &Json<AnnouncementDataBody>
+        &self, bearer: &str, class_id: &str, announcement_id: &str, data: &serde_json::Value
     ) -> bool {
         // If the announcement hash already exists, return the function
         if self.class_announcement_exists(announcement_id).await {
             return false;
         }
+
+        // Get the request body variables
+        let author_name: String = match data.get("author_name") {
+            Some(name) => name.to_string(),
+            None => return false
+        };
+        let title = match data.get("title") {
+            Some(title) => title.to_string(),
+            None => return false
+        };
+        let description = match data.get("description") {
+            Some(description) => description.to_string(),
+            None => return false
+        };
+        let attachment = match data.get("attachment") {
+            Some(attachment) => attachment.to_string(),
+            None => return false
+        };
+
 
         // Get the current date of the announcement post
         let date: i64 = global::get_time().as_secs() as i64;
@@ -26,7 +44,7 @@ impl lib::handlers::Database {
         // along with all of it's data.
         let query = sqlx::query!(
             "INSERT INTO announcements (owner_bearer, class_id, announcement_id, author_name, title, description, attachment, date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
-            bearer, class_id, announcement_id, data.author_name, data.title, data.description, data.attachment, date
+            bearer, class_id, announcement_id, author_name, title, description, attachment, date
         ).execute(&self.conn).await;
 
         // Return query result
