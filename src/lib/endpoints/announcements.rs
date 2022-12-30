@@ -7,10 +7,11 @@ use actix_web::{web, HttpRequest, Responder};
 // to insert a new announcement into the database.
 // A unique announcement identifier is created
 // for if the user wants to later delete the post.
-#[actix_web::put("/class/{class_id}/announcements/{announcement_id}")]
+#[actix_web::put("/class/{class_id}/announcements/")]
 async fn insert_class_announcement(
     req: HttpRequest, db: web::Data<Database>, body: web::Json<AnnouncementDataBody>
 ) -> impl Responder {
+
     // Get the class id
     let class_id: &str = match req.match_info().get("class_id") {
         Some(id) => id,
@@ -19,32 +20,28 @@ async fn insert_class_announcement(
             "response": "Invalid request"
         }).to_string()
     };
-    // Get the announcement id
-    let announcement_id: &str = match req.match_info().get("announcement_id") {
-        Some(id) => id,
-        None => return serde_json::json!({
+
+    // Get the bearer and access token from the request headers.
+    let bearer: String = global::get_header(&req, "authorization");
+    let access_token: String = global::get_header(&req, "access_token");
+
+    // Verify the provided authorization tokens
+    if !lib::auth::verify(&bearer, &access_token) {
+        return serde_json::json!({
             "status": 400,
             "response": "Invalid request"
         }).to_string()
-    };
-
-    // Get the access token from the request headers.
-    // This tokens is used to make sure that the incoming
-    // request isn't from an abuser.
-    let bearer: String = global::get_header(&req, "authorization");
-    let access_token: String = global::get_header(&req, "access_token");
-    // If the user does not provide a valid auth
-    // token and is trying to abuse the api, return
-    // an invalid request response json
-    if !lib::auth::verify(&bearer, &access_token) {
-        return "{\"error\": \"invalid request\"}".to_string();
     }
+
+    // Generate a new announcement id
+    let announcement_id: String = global::generate_new_id(&class_id);
 
     // Insert the announcement into the database
     return match db.insert_class_announcement(&bearer, &class_id, &announcement_id, &body).await {
         true => serde_json::json!({
             "status": 200,
-            "response": "Announcement successfully created"
+            "response": "Announcement successfully created",
+            "announcement_id": announcement_id
         }).to_string(),
         false => serde_json::json!({
             "status": 400,
@@ -57,12 +54,11 @@ async fn insert_class_announcement(
 // to delete an announcement from the database. This
 // function requires a bearer token which means the
 // user making the announcement must be signed in.
-#[actix_web::delete("/class/{class_id}/announcements")]
-async fn delete_class_announcement(
-    req: HttpRequest, db: web::Data<Database>, body: web::Json<AnnouncementDataBody>
-) -> impl Responder {
+#[actix_web::delete("/class/{class_id}/announcements{announcement_id}")]
+async fn delete_class_announcement(req: HttpRequest, db: web::Data<Database>) -> impl Responder 
+{
     // Get the class id
-    let _class_id: &str = match req.match_info().get("class_id") {
+    let class_id: &str = match req.match_info().get("class_id") {
         Some(id) => id,
         None => return serde_json::json!({
             "status": 400,
@@ -70,14 +66,20 @@ async fn delete_class_announcement(
         }).to_string()
     };
 
-    // Get the access token from the request headers.
-    // This tokens is used to make sure that the incoming
-    // request isn't from an abuser.
+    // Get the announcement id
+    let announcement_id: &str = match req.match_info().get("announcement_id") {
+        Some(id) => id,
+        None => return serde_json::json!({
+            "status": 400,
+            "response": "Invalid request"
+        }).to_string()
+    };
+
+    // Get the bearer and access token from the request headers.
     let bearer: String = global::get_header(&req, "authorization");
     let access_token: String = global::get_header(&req, "access_token");
-    // If the user does not provide a valid auth
-    // token and is trying to abuse the api, return
-    // an invalid request response json
+
+    // Verify the provided authorization tokens
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
             "status": 400,
@@ -86,7 +88,7 @@ async fn delete_class_announcement(
     }
 
     // Delete the announcement from the database
-    return match db.delete_class_announcement(&bearer, &body.announcement_id).await {
+    return match db.delete_class_announcement(&bearer, class_id, announcement_id).await {
         true => serde_json::json!({
             "status": 200,
             "response": "Announcement succesfully deleted"

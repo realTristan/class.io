@@ -1,5 +1,5 @@
 use crate::lib::{
-    self, global, structs::{AnnouncementDataBody, Announcement}
+    self, global, structs::AnnouncementDataBody
 };
 use actix_web::web::Json;
 
@@ -54,38 +54,21 @@ impl lib::handlers::Database {
     // The delete_class_announcement() function is used
     // to delete a specific announcement post using
     // the provided announcement_id.
-    pub async fn delete_class_announcement(&self, bearer: &str, announcement_id: &str) -> bool 
+    pub async fn delete_class_announcement(
+        &self, bearer: &str, class_id: &str, announcement_id: &str
+    ) -> bool 
     {
         // Query the database, deleting the announcement with
         // the incoming requests data.announcement_id
         let query = sqlx::query!(
-            "DELETE FROM announcements WHERE announcement_id=? AND owner_bearer=?",
-            announcement_id, bearer
+            "DELETE FROM announcements WHERE announcement_id=? AND owner_bearer=? AND class_id=?",
+            announcement_id, bearer, class_id
         ).execute(&self.conn).await;
 
         // Return query result
         return match query {
             Ok(r) => r.rows_affected() > 0,
             Err(_) => false
-        };
-    }
-
-    // The get_class_announcements() function is used
-    // to get all the announcements a teacher has
-    // made within provided class_id.
-    pub async fn get_class_announcements(&self, class_id: &str) -> Vec<Announcement> 
-    {
-        // Fetch all the announcements that the
-        // class owner has created.
-        let query = sqlx::query_as!(Announcement, 
-            "SELECT author_name, title, description, attachment FROM announcements WHERE class_id=?", 
-            class_id
-        ).fetch_all(&self.conn).await;
-
-        // Return query result
-        return match query {
-            Ok(r) => r,
-            Err(_) => Vec::new()
         };
     }
 }

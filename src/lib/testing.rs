@@ -21,13 +21,6 @@ impl handlers::Database {
             "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020", "announcement_id", "Tristan Simpson", "Test Announcement", "Hey guys!", "no_attachment", 0
         ).execute(&self.conn).await.unwrap();
 
-        // Insert into WHITELISTS column
-        sqlx::query!(
-            "INSERT INTO whitelists (class_id, whitelisted_user) VALUES (?, ?)",
-            "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020",
-            "test_whitelisted_user1"
-        ).execute(&self.conn).await.unwrap();
-
         // Insert into LESSONS column
         sqlx::query!(
             "INSERT INTO lessons (unit_id, title, description, video, work, work_solutions) VALUES (?, ?, ?, ?, ?, ?)",

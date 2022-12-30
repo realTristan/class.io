@@ -3,14 +3,14 @@ use crate::lib::{
 };
 use actix_web::{web, HttpRequest, Responder};
 
-// The add_to_class_whitelist() endpoint is used
+// The add_user_to_whitelist() endpoint is used
 // to add an user to the provided class_id's
 // whitelist. Anyone within this whitelist can
 // access the provided class_id. The whitelist
 // feature only works if the user has enabled the
 // class whitelist setting.
-#[actix_web::put("/class/{class_id}/whitelist")]
-async fn add_to_class_whitelist(
+#[actix_web::put("/class/{class_id}/whitelist/")]
+async fn add_user_to_whitelist(
     req: HttpRequest, db: web::Data<Database>, body: web::Json<WhitelistDataBody>
 ) -> impl Responder {
 
@@ -23,14 +23,11 @@ async fn add_to_class_whitelist(
         }).to_string()
     };
     
-    // Get the access token from the request headers.
-    // This tokens is used to make sure that the incoming
-    // request isn't from an abuser.
+    // Get the bearer and access token from the request headers.
     let bearer: String = global::get_header(&req, "authorization");
     let access_token: String = global::get_header(&req, "access_token");
-    // If the user does not provide a valid auth
-    // token and is trying to abuse the api, return
-    // an invalid request response json
+
+    // Verify the provided authorization tokens
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
             "status": 400,
@@ -39,7 +36,7 @@ async fn add_to_class_whitelist(
     }
     
     // Insert the whitelist data into the database
-    return match db.insert_class_whitelist(&bearer, &class_id, &body.user).await {
+    return match db.insert_class_whitelist(&bearer, &class_id, &body.user_id).await {
         true => serde_json::json!({
             "status": 200,
             "response": "Success"
@@ -51,10 +48,14 @@ async fn add_to_class_whitelist(
     };
 }
 
-#[actix_web::delete("/class/{class_id}/whitelist")]
-async fn delete_from_class_whitelist(
-    req: HttpRequest, db: web::Data<Database>, body: web::Json<WhitelistDataBody>
-) -> impl Responder {
+
+// The remove_user_from_whitelist() endpoint is used
+// to delete the provided user from the provided
+// class_id's whitelist. Anyone within this whitelist
+// can access the given class_id.
+#[actix_web::delete("/class/{class_id}/whitelist/{user_id}/")]
+async fn remove_user_from_whitelist(req: HttpRequest, db: web::Data<Database>) -> impl Responder 
+{
     // Get the class id
     let class_id: &str = match req.match_info().get("class_id") {
         Some(id) => id,
@@ -64,14 +65,20 @@ async fn delete_from_class_whitelist(
         }).to_string()
     };
 
-    // Get the access token from the request headers.
-    // This tokens is used to make sure that the incoming
-    // request isn't from an abuser.
+    // Get the user id
+    let user_id: &str = match req.match_info().get("user_id") {
+        Some(id) => id,
+        None => return serde_json::json!({
+            "status": 400,
+            "response": "Invalid request"
+        }).to_string()
+    };
+
+    // Get the bearer and access token from the request headers.
     let bearer: String = global::get_header(&req, "authorization");
     let access_token: String = global::get_header(&req, "access_token");
-    // If the user does not provide a valid auth
-    // token and is trying to abuse the api, return
-    // an invalid request response json
+
+    // Verify the provided authorization tokens
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
             "status": 400,
@@ -80,7 +87,7 @@ async fn delete_from_class_whitelist(
     }
 
     // Delete the whitelist data into the database
-    return match db.delete_from_class_whitelist(&bearer, &class_id, &body.user).await {
+    return match db.remove_user_from_whitelist(&bearer, &class_id, user_id).await {
         true => serde_json::json!({
             "status": 200,
             "response": "Success"

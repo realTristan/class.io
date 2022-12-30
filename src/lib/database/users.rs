@@ -36,7 +36,9 @@ impl lib::handlers::Database {
         let date: i64 = global::get_time().as_secs() as i64;
 
         // Generate a new user id
-        let user_id: String = global::generate_new_id(&format!("{email}:{bearer}:{date}"));
+        let user_id: String = global::generate_new_id(
+            &format!("{email}:{bearer}:{date}")
+        );
 
         // Insert the user into the database
         let query = sqlx::query!(
@@ -72,8 +74,8 @@ impl lib::handlers::Database {
     pub async fn query_user_by_id(&self, user_id: &str) -> Option<User> 
     {
         // Query the database
-        let query = sqlx::query_as!(
-            User, "SELECT * FROM users WHERE user_id=?", user_id
+        let query = sqlx::query_as!(User, 
+            "SELECT * FROM users WHERE user_id=?", user_id
         ).fetch_one(&self.conn).await;
 
         // Return query result
@@ -87,6 +89,7 @@ impl lib::handlers::Database {
     // modify the incoming users profile name.
     pub async fn update_user_name(&self, bearer: &str, new_name: &str) -> bool 
     {
+        // Query the database
         let query = sqlx::query!(
             "UPDATE users SET user_name=? WHERE bearer=?",
             new_name, bearer

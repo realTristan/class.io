@@ -1,36 +1,16 @@
-use crate::lib::{
-    self, structs::Whitelist
-};
+use crate::lib;
 
 // Database Implementation
 impl lib::handlers::Database {
-    // The get_class_whitelist() function is used to return
-    // an array containing all the users that are allowed to
-    // see the content within the provided class_id
-    pub async fn get_class_whitelist(&self, class_id: &str) -> Vec<Whitelist> 
-    {
-        // Fetch all the whitelisted users that have
-        // access to the provided class.
-        let query = sqlx::query_as!(Whitelist, 
-            "SELECT whitelisted_user FROM whitelists WHERE class_id=?", class_id
-        ).fetch_all(&self.conn).await;
-
-        // Return the result of the query
-        return match query {
-            Ok(r) => r,
-            Err(_) => Vec::new(),
-        }
-    }
-
-    // The delete_from_class_whitelist() function deletes
+    // The remove_user_from_whitelist() function deletes
     // an user from the provided class's whitelist. This
     // user can no longer access the provided class.
-    pub async fn delete_from_class_whitelist(&self, bearer: &str, class_id: &str, user: &str) -> bool 
+    pub async fn remove_user_from_whitelist(&self, bearer: &str, class_id: &str, user_id: &str) -> bool 
     {
         // Query the database
         let query = sqlx::query!(
-            "DELETE FROM whitelists WHERE owner_bearer=? AND class_id=? AND whitelisted_user=?",
-            bearer, class_id, user
+            "DELETE FROM whitelists WHERE owner_bearer=? AND class_id=? AND whitelisted_user_id=?",
+            bearer, class_id, user_id
         ).execute(&self.conn).await;
 
         // Return the result of the query
@@ -40,17 +20,40 @@ impl lib::handlers::Database {
         };
     }
 
+    // The get_user_name_by_id() function is used to get
+    // the user name of the provided user id.
+    async fn get_user_name_by_id(&self, user_id: &str) -> Option<String> {
+        // Query the users name with their user id
+        let query = sqlx::query!(
+            "SELECT user_name FROM users WHERE user_id=?",
+            user_id
+        ).fetch_one(&self.conn).await;
+
+        return match query {
+            Ok(r) => Some(r.user_name),
+            Err(_) => None
+        };
+    }
+
     // The insert_class_whitelist() function is used to add an
     // user into the provided class's whitelist. Users in this
     // whitelist can access the class info. The whitelist only
     // works if the teacher has enabled the class whitelist setting
-    pub async fn insert_class_whitelist(&self, bearer: &str, class_id: &str, user: &str) -> bool
-    {
-        // Query the database
+    pub async fn insert_class_whitelist(
+        &self, bearer: &str, class_id: &str, user_id: &str
+    ) -> bool {
+
+        // Get the user name from the user id
+        let user_name: String = match self.get_user_name_by_id(user_id).await {
+            Some(r) => r,
+            None => return false
+        };
+
+        // Insert the user into the database
         let query =
             sqlx::query!(
-            "INSERT INTO whitelists (owner_bearer, class_id, whitelisted_user) VALUES (?, ?, ?)", 
-            bearer, class_id, user
+            "INSERT INTO whitelists (owner_bearer, class_id, whitelisted_user_name, whitelisted_user_id) VALUES (?, ?, ?, ?)", 
+            bearer, class_id, user_name, user_id
         ).execute(&self.conn).await;
 
         // Return query result

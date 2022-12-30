@@ -18,14 +18,11 @@ async fn get_class_data(req: HttpRequest, db: web::Data<Database>) -> impl Respo
         }).to_string()
     };
 
-    // Get the access token from the request headers.
-    // This tokens is used to make sure that the incoming
-    // request isn't from an abuser.
+    // Get the bearer and access token from the request headers.
     let bearer: String = global::get_header(&req, "authorization");
     let access_token: String = global::get_header(&req, "access_token");
-    // If the user does not provide a valid auth
-    // token and is trying to abuse the api, return
-    // an invalid request response json
+
+    // Verify the provided authorization tokens
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
             "status": 400,
@@ -54,6 +51,7 @@ async fn get_class_data(req: HttpRequest, db: web::Data<Database>) -> impl Respo
 async fn update_class_data(
     req: HttpRequest, db: web::Data<Database>, body: web::Json<ClassDataBody>
 ) -> impl Responder {
+
     // Get the class id
     let class_id: &str = match req.match_info().get("class_id") {
         Some(id) => id,
@@ -62,14 +60,12 @@ async fn update_class_data(
             "response": "Invalid request"
         }).to_string()
     };
-    // Get the access token from the request headers.
-    // This tokens is used to make sure that the incoming
-    // request isn't from an abuser.
+    
+    // Get the bearer and access token from the request headers.
     let bearer: String = global::get_header(&req, "authorization");
     let access_token: String = global::get_header(&req, "access_token");
-    // If the user does not provide a valid auth
-    // token and is trying to abuse the api, return
-    // an invalid request response json
+
+    // Verify the provided authorization tokens
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
             "status": 400,
@@ -80,7 +76,7 @@ async fn update_class_data(
     // Generate a class update query which is the fastest way
     // for updating multiple values inside the database before
     // executing the database update using the below function
-    return match db.update_class_data(&bearer, &class_id, &body).await {
+    return match db.update_class_data(&bearer, class_id, &body).await {
         true => serde_json::json!({
             "status": 200,
             "response": "Successfully updated class data"
@@ -95,27 +91,16 @@ async fn update_class_data(
 // The insert_class_data() endpoint is used to
 // create a new class that contains all the default
 // values. A Maximum of 5 classes is allowed.
-#[actix_web::put("/class/{class_id}")]
+#[actix_web::put("/class/")]
 async fn insert_class_data(
     req: HttpRequest, db: web::Data<Database>, body: web::Json<ClassDataBody>
 ) -> impl Responder {
-    // Get the class id
-    let class_id: &str = match req.match_info().get("class_id") {
-        Some(id) => id,
-        None => return serde_json::json!({
-            "status": 400,
-            "response": "Invalid request"
-        }).to_string()
-    };
 
-    // Get the access token from the request headers.
-    // This tokens is used to make sure that the incoming
-    // request isn't from an abuser.
+    // Get the bearer and access token from the request headers.
     let bearer: String = global::get_header(&req, "authorization");
     let access_token: String = global::get_header(&req, "access_token");
-    // If the user does not provide a valid auth
-    // token and is trying to abuse the api, return
-    // an invalid request response json
+
+    // Verify the provided authorization tokens
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
             "status": 400,
@@ -123,14 +108,8 @@ async fn insert_class_data(
         }).to_string()
     }
 
-    // If the body class_name is invalid,
-    // return an empty json map
-    if body.class_name.len() < 1 {
-        return serde_json::json!({
-            "status": 400,
-            "response": "Invalid request"
-        }).to_string()
-    }
+    // Generate a new class id
+    let class_id: String = global::generate_new_id(&bearer);
 
     // Insert the class data into the database
     return match db.insert_class_data(&bearer, &class_id, &body.class_name).await {

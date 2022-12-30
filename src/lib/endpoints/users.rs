@@ -20,14 +20,11 @@ pub async fn get_user_data(req: HttpRequest, db: web::Data<Database>) -> impl Re
         }).to_string()
     };
 
-    // Get the access token from the request headers.
-    // This tokens is used to make sure that the incoming
-    // request isn't from an abuser.
+    // Get the bearer and access token from the request headers.
     let bearer: String = global::get_header(&req, "authorization");
     let access_token: String = global::get_header(&req, "access_token");
-    // If the user does not provide a valid auth
-    // token and is trying to abuse the api, return
-    // an invalid request response json
+
+    // Verify the provided authorization tokens
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
             "status": 400,
@@ -68,14 +65,12 @@ pub async fn get_user_data(req: HttpRequest, db: web::Data<Database>) -> impl Re
 pub async fn update_user_data(
     req: HttpRequest, db: web::Data<Database>, body: web::Json<UserDataBody>
 ) -> impl Responder {
-    // Get the access token from the request headers.
-    // This tokens is used to make sure that the incoming
-    // request isn't from an abuser.
+
+    // Get the bearer and access token from the request headers.
     let bearer: String = global::get_header(&req, "authorization");
     let access_token: String = global::get_header(&req, "access_token");
-    // If the user does not provide a valid auth
-    // token and is trying to abuse the api, return
-    // an invalid request response json
+
+    // Verify the provided authorization tokens
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
             "status": 400,
@@ -116,14 +111,11 @@ pub async fn update_user_data(
 async fn insert_user_data(
     req: HttpRequest, db: web::Data<Database>, body: web::Json<UserDataBody>
 ) -> impl Responder {
-    // Get the access token from the request headers.
-    // This tokens is used to make sure that the incoming
-    // request isn't from an abuser.
+    // Get the bearer and access token from the request headers.
     let bearer: String = global::get_header(&req, "authorization");
     let access_token: String = global::get_header(&req, "access_token");
-    // If the user does not provide a valid auth
-    // token and is trying to abuse the api, return
-    // an invalid request response json
+
+    // Verify the provided authorization tokens
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
             "status": 400,

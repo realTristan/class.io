@@ -14,7 +14,7 @@ pub struct User {
     // The users email
     pub email: String,
     // The Users registration date (used for bearer token)
-    pub registration_date: i64,
+    pub registration_date: i64
 }
 
 // The Class data struct is used to store
@@ -27,7 +27,7 @@ pub struct Class {
     // Unique class owner identifier
     pub owner_id: String,
     // Whether to the use the class whitelist
-    pub enable_whitelist: i64,
+    pub enable_whitelist: i64
 }
 
 // The Announcement data struct is used to
@@ -42,7 +42,7 @@ pub struct Announcement {
     // The announcements content
     pub description: String,
     // Any images/videos attached with the announcement
-    pub attachment: String, // Base64 encode images, etc.
+    pub attachment: String // Base64 encode images, etc.
 }
 
 // The Lesson data struct is used to store
@@ -59,7 +59,7 @@ pub struct Lesson {
     // submitted and marked
     pub work: String,
     // The Lesson Homework Solutions
-    pub work_solutions: String,
+    pub work_solutions: String
 }
 
 // The Unit data struct is used to store
@@ -72,13 +72,16 @@ pub struct Unit {
     // The Unit's Name
     pub unit_name: String,
     // Whether students can access this unit yet
-    pub locked: i64,
+    pub locked: i64
 }
 
 // The Whitelist data struct is used for querying
 // the whitelisted users for a specific class.
 pub struct Whitelist {
-    pub whitelisted_user: String,
+    // The whitelisted user name
+    pub whitelisted_user_name: String,
+    // The whitelisted user id
+    pub whitelisted_user_id: String
 }
 
 // The Submission data struct is used to store
@@ -92,7 +95,7 @@ pub struct Submission {
     // The date the work was submitted
     pub submission_date: i64,
     // The submission data. (ex: the file, the answers, etc.)
-    pub data: String,
+    pub data: String
 }
 
 // The UserDataBody struct is used to read the
@@ -101,8 +104,10 @@ pub struct Submission {
 // to make within the database
 #[derive(serde::Deserialize)]
 pub struct UserDataBody {
+    // The users name
     pub user_name: String,
-    pub email: String,
+    // The users email
+    pub email: String
 }
 
 // The WhitelistDataBody struct is used to read the
@@ -111,7 +116,8 @@ pub struct UserDataBody {
 // to make within the database
 #[derive(serde::Deserialize)]
 pub struct WhitelistDataBody {
-    pub user: String,
+    // The user to add to the whitelist
+    pub user_id: String
 }
 
 // The SubmissionDataBody struct is used to read the
@@ -120,8 +126,6 @@ pub struct WhitelistDataBody {
 // to make within the database
 #[derive(serde::Deserialize)]
 pub struct AnnouncementDataBody {
-    // The announcements unique identifier
-    pub announcement_id: String,
     // The announcement attachment (image, file, etc.)
     pub attachment: String,
     // The announcement content/description
@@ -129,7 +133,7 @@ pub struct AnnouncementDataBody {
     // The title of the announcement
     pub title: String,
     // The name of the user who posted the announcement
-    pub author_name: String,
+    pub author_name: String
 }
 
 // The ClassDataBody struct is used to read the
@@ -141,7 +145,7 @@ pub struct ClassDataBody {
     // Update the class name
     pub class_name: String,
     // Update whether to use the class whitelist
-    pub enable_whitelist: i64,
+    pub enable_whitelist: i64
 }
 
 // The UnitDataBody struct is used to read the
@@ -150,9 +154,10 @@ pub struct ClassDataBody {
 // to make within the database
 #[derive(serde::Deserialize)]
 pub struct UnitDataBody {
-    pub unit_id: String,
+    // The new unit name
     pub unit_name: String,
-    pub locked: i64,
+    // Whether the unit is locked
+    pub locked: i64
 }
 
 // The SubmissionDataBody struct is used to read the
@@ -161,6 +166,6 @@ pub struct UnitDataBody {
 // to make within the database
 #[derive(serde::Deserialize)]
 pub struct SubmissionDataBody {
-    pub submission_id: String,
-    pub data: String,
+    // The submission data
+    pub data: String
 }

@@ -20,14 +20,11 @@ async fn get_class_submissions(req: HttpRequest,  db: web::Data<Database>) -> im
         }).to_string()
     };
 
-    // Get the access token from the request headers.
-    // This tokens is used to make sure that the incoming
-    // request isn't from an abuser.
+    // Get the bearer and access token from the request headers.
     let bearer: String = global::get_header(&req, "authorization");
     let access_token: String = global::get_header(&req, "access_token");
-    // If the user does not provide a valid auth
-    // token and is trying to abuse the api, return
-    // an invalid request response json
+
+    // Verify the provided authorization tokens
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
             "status": 400,
@@ -53,7 +50,7 @@ async fn get_class_submissions(req: HttpRequest,  db: web::Data<Database>) -> im
 // user hash from within the database. This endpoint
 // is called for the student to see all of their
 // previous work submissions.
-#[actix_web::get("/class/{class_id}/user/submissions/")]
+#[actix_web::get("/class/{class_id}/student/submissions/")]
 async fn get_user_submissions(req: HttpRequest, db: web::Data<Database>) -> impl Responder 
 {
     // Get the class id
@@ -65,14 +62,11 @@ async fn get_user_submissions(req: HttpRequest, db: web::Data<Database>) -> impl
         }).to_string()
     };
 
-    // Get the access token from the request headers.
-    // This tokens is used to make sure that the incoming
-    // request isn't from an abuser.
+    // Get the bearer and access token from the request headers.
     let bearer: String = global::get_header(&req, "authorization");
     let access_token: String = global::get_header(&req, "access_token");
-    // If the user does not provide a valid auth
-    // token and is trying to abuse the api, return
-    // an invalid request response json
+
+    // Verify the provided authorization tokens
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
             "status": 400,
@@ -111,14 +105,11 @@ async fn insert_class_submission(
         }).to_string()
     };
 
-    // Get the access token from the request headers.
-    // This tokens is used to make sure that the incoming
-    // request isn't from an abuser.
+    // Get the bearer and access token from the request headers.
     let bearer: String = global::get_header(&req, "authorization");
     let access_token: String = global::get_header(&req, "access_token");
-    // If the user does not provide a valid auth
-    // token and is trying to abuse the api, return
-    // an invalid request response json
+
+    // Verify the provided authorization tokens
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
             "status": 400,
@@ -151,7 +142,7 @@ async fn insert_class_submission(
 async fn delete_class_submission(req: HttpRequest, db: web::Data<Database>) -> impl Responder 
 {
     // Get the class id
-    let _class_id: &str = match req.match_info().get("class_id") {
+    let class_id: &str = match req.match_info().get("class_id") {
         Some(id) => id,
         None => return serde_json::json!({
             "status": 400,
@@ -168,14 +159,11 @@ async fn delete_class_submission(req: HttpRequest, db: web::Data<Database>) -> i
         }).to_string()
     };
 
-    // Get the access token from the request headers.
-    // This tokens is used to make sure that the incoming
-    // request isn't from an abuser.
+    // Get the bearer and access token from the request headers.
     let bearer: String = global::get_header(&req, "authorization");
     let access_token: String = global::get_header(&req, "access_token");
-    // If the user does not provide a valid auth
-    // token and is trying to abuse the api, return
-    // an invalid request response json
+
+    // Verify the provided authorization tokens
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
             "status": 400,
@@ -184,7 +172,7 @@ async fn delete_class_submission(req: HttpRequest, db: web::Data<Database>) -> i
     }
 
     // Delete the submission data from the database
-    return match db.delete_class_submission(&bearer, &submission_id).await {
+    return match db.delete_class_submission(&bearer, &class_id, &submission_id).await {
         true => serde_json::json!({
             "status": 200,
             "response": "Submission successfully deleted"

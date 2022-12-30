@@ -33,8 +33,8 @@ async fn main() -> std::io::Result<()> {
             .service(endpoints::units::delete_class_unit)
             .service(endpoints::units::update_class_unit)
             // Class Whitelist
-            .service(endpoints::whitelist::delete_from_class_whitelist)
-            .service(endpoints::whitelist::add_to_class_whitelist)
+            .service(endpoints::whitelist::remove_user_from_whitelist)
+            .service(endpoints::whitelist::add_user_to_whitelist)
             // Class Submissions
             .service(endpoints::submissions::delete_class_submission)
             .service(endpoints::submissions::insert_class_submission)

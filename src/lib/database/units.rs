@@ -1,29 +1,10 @@
 use crate::lib::{
-    self, structs::{Unit, UnitDataBody}
+    self, structs::UnitDataBody
 };
 use actix_web::web::Json;
 
 // Database Implementation
 impl lib::handlers::Database {
-    // The get_class_units() function is used to
-    // easily get all the units corresponding with
-    // the provided class_id.
-    pub async fn get_class_units(&self, class_id: &str) -> Vec<Unit> 
-    {
-        // Fetch all the units that are in the class.
-        // By the end of the function, all the unit data
-        // will be neatly categorized.
-        let query = sqlx::query_as!(Unit,
-            "SELECT unit_id, unit_name, locked FROM units WHERE class_id=?",
-            class_id
-        ).fetch_all(&self.conn).await;
-
-        // Return the result of the query
-        return match query {
-            Ok(r) => r,
-            Err(_) => Vec::new(),
-        }
-    }
 
     // The insert_class_unit() function is used to insert a new
     // unit into the database for the provided class. Students who
@@ -65,11 +46,14 @@ impl lib::handlers::Database {
     // The delete_class_unit() function is used to delete a unit
     // from the units column wherever the provided unit_id
     // is present. A maximum of 12 units is allowed per class.
-    pub async fn delete_class_unit(&self, bearer: &str, unit_id: &str) -> bool 
-    {
+    pub async fn delete_class_unit(
+        &self, bearer: &str, class_id: &str, unit_id: &str
+    ) -> bool {
+
+        // Query the database
         let query = sqlx::query!(
-            "DELETE FROM units WHERE unit_id=? AND owner_bearer=?",
-            unit_id, bearer
+            "DELETE FROM units WHERE unit_id=? AND owner_bearer=? AND class_id=?",
+            unit_id, bearer, class_id
         ).execute(&self.conn).await;
 
         // Return query result
@@ -83,8 +67,10 @@ impl lib::handlers::Database {
     // unit data replacing the current data, with that of the provided
     // Json<UnitDataBody> values. In order to prevent null values
     // being updated, the function first determines which values are null.
-    pub async fn update_class_unit(&self, bearer: &str, data: &Json<UnitDataBody>) -> bool 
-    {
+    pub async fn update_class_unit(
+        &self, bearer: &str, class_id: &str, unit_id: &str, data: &Json<UnitDataBody>
+    ) -> bool {
+
         // Create a new string
         let mut query_data: String = String::new();
         
@@ -105,8 +91,8 @@ impl lib::handlers::Database {
         // in the above query_data: String that have the same
         // unit_id as the one provided
         let query = sqlx::query(&format!(
-            "UPDATE units SET {} WHERE unit_id='{}' AND owner_bearer='{}'",
-            query_data, data.unit_id, bearer
+            "UPDATE units SET {} WHERE unit_id='{}' AND owner_bearer='{}' AND class_id='{}'",
+            query_data, unit_id, bearer, class_id
         )).execute(&self.conn).await;
 
         // Return query result
