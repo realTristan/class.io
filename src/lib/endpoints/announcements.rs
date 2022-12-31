@@ -20,7 +20,7 @@ async fn insert_class_announcement(
         }).to_string()
     };
 
-    // Get the class id
+    // Get the class id from the request parameters
     let class_id: &str = match req.match_info().get("class_id") {
         Some(id) => id,
         None => return serde_json::json!({
