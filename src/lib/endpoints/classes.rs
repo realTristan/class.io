@@ -13,7 +13,7 @@ async fn get_class_data(req: HttpRequest, db: web::Data<Database>) -> impl Respo
     let class_id: &str = match req.match_info().get("class_id") {
         Some(id) => id,
         None => return serde_json::json!({
-            "status": 400,
+            "status": "400",
             "response": "Invalid request"
         }).to_string()
     };
@@ -25,7 +25,7 @@ async fn get_class_data(req: HttpRequest, db: web::Data<Database>) -> impl Respo
     // Verify the provided authorization tokens
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
-            "status": 400,
+            "status": "400",
             "response": "Invalid request"
         }).to_string()
     }
@@ -33,11 +33,11 @@ async fn get_class_data(req: HttpRequest, db: web::Data<Database>) -> impl Respo
     // Return the class data
     return match db.get_class_data(&class_id).await {
         Some(data) => serde_json::json!({
-            "status": 200,
+            "status": "200",
             "response": data
         }).to_string(),
         None => serde_json::json!({
-            "status": 400,
+            "status": "400",
             "response": "Unable to fetch class data"
         }).to_string()
     }
@@ -56,7 +56,7 @@ async fn update_class_data(
     let body: serde_json::Value = match global::get_body(&body) {
         Ok(body) => body,
         Err(_) => return serde_json::json!({
-            "status": 400,
+            "status": "400",
             "response": "Invalid request body"
         }).to_string()
     };
@@ -65,7 +65,7 @@ async fn update_class_data(
     let class_id: &str = match req.match_info().get("class_id") {
         Some(id) => id,
         None => return serde_json::json!({
-            "status": 400,
+            "status": "400",
             "response": "Invalid request"
         }).to_string()
     };
@@ -77,7 +77,7 @@ async fn update_class_data(
     // Verify the provided authorization tokens
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
-            "status": 400,
+            "status": "400",
             "response": "Invalid request"
         }).to_string()
     }
@@ -87,11 +87,11 @@ async fn update_class_data(
     // executing the database update using the below function
     return match db.update_class_data(&bearer, class_id, body).await {
         true => serde_json::json!({
-            "status": 200,
+            "status": "200",
             "response": "Successfully updated class data"
         }).to_string(),
         false => serde_json::json!({
-            "status": 400,
+            "status": "400",
             "response": "Failed to update class data"
         }).to_string()
     }
@@ -109,7 +109,7 @@ async fn insert_class_data(
     let body: serde_json::Value = match global::get_body(&body) {
         Ok(body) => body,
         Err(_) => return serde_json::json!({
-            "status": 400,
+            "status": "400",
             "response": "Invalid request body"
         }).to_string()
     };
@@ -117,7 +117,7 @@ async fn insert_class_data(
     let class_name: String = match body.get("class_name") {
         Some(name) => name.to_string(),
         None => return serde_json::json!({
-            "status": 400,
+            "status": "400",
             "response": "Invalid class_name"
         }).to_string()
     };
@@ -129,7 +129,7 @@ async fn insert_class_data(
     // Verify the provided authorization tokens
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
-            "status": 400,
+            "status": "400",
             "response": "Invalid request"
         }).to_string()
     }
@@ -140,11 +140,11 @@ async fn insert_class_data(
     // Insert the class data into the database
     return match db.insert_class_data(&bearer, &class_id, &class_name).await {
         true => serde_json::json!({
-            "status": 200,
+            "status": "200",
             "response": "Successfully inserted class data"
         }).to_string(),
         false => serde_json::json!({
-            "status": 400,
+            "status": "400",
             "response": "Failed to insert class data"
         }).to_string()
     }

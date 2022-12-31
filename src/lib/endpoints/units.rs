@@ -16,7 +16,7 @@ async fn insert_class_unit(
     let body: serde_json::Value = match global::get_body(&body) {
         Ok(body) => body,
         Err(_) => return serde_json::json!({
-            "status": 400,
+            "status": "400",
             "response": "Invalid request body"
         }).to_string()
     };
@@ -25,7 +25,7 @@ async fn insert_class_unit(
     let unit_name: String = match body.get("unit_name") {
         Some(name) => name.to_string(),
         None => return serde_json::json!({
-            "status": 400,
+            "status": "400",
             "response": "Invalid unit_name"
         }).to_string()
     };
@@ -34,7 +34,7 @@ async fn insert_class_unit(
     let class_id: &str = match req.match_info().get("class_id") {
         Some(id) => id,
         None => return serde_json::json!({
-            "status": 400,
+            "status": "400",
             "response": "Invalid request"
         }).to_string()
     };
@@ -46,7 +46,7 @@ async fn insert_class_unit(
     // Verify the provided authorization tokens
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
-            "status": 400,
+            "status": "400",
             "response": "Invalid request"
         }).to_string()
     }
@@ -57,12 +57,12 @@ async fn insert_class_unit(
     // Insert the unit data into the database
     return match db.insert_class_unit(&bearer, &unit_id, &class_id, &unit_name).await {
         true => serde_json::json!({
-            "status": 200,
+            "status": "200",
             "response": "Unit created successfully",
             "unit_id": unit_id
         }).to_string(),
         false => serde_json::json!({
-            "status": 400,
+            "status": "400",
             "response": "Failed to create unit"
         }).to_string()
     }
@@ -79,7 +79,7 @@ async fn delete_class_unit(
     let class_id: &str = match req.match_info().get("class_id") {
         Some(id) => id,
         None => return serde_json::json!({
-            "status": 400,
+            "status": "400",
             "response": "Invalid request"
         }).to_string()
     };
@@ -88,7 +88,7 @@ async fn delete_class_unit(
     let unit_id: &str = match req.match_info().get("unit_id") {
         Some(id) => id,
         None => return serde_json::json!({
-            "status": 400,
+            "status": "400",
             "response": "Invalid request"
         }).to_string()
     };
@@ -100,7 +100,7 @@ async fn delete_class_unit(
     // Verify the provided authorization tokens
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
-            "status": 400,
+            "status": "400",
             "response": "Invalid request"
         }).to_string()
     }
@@ -108,11 +108,11 @@ async fn delete_class_unit(
     // Insert the unit data into the database
     return match db.delete_class_unit(&bearer, class_id, unit_id).await {
         true => serde_json::json!({
-            "status": 200,
+            "status": "200",
             "response": "Unit deleted successfully"
         }).to_string(),
         false => serde_json::json!({
-            "status": 400,
+            "status": "400",
             "response": "Failed to delete unit"
         }).to_string()
     }
@@ -128,7 +128,7 @@ async fn update_class_unit(
     let body: serde_json::Value = match global::get_body(&body) {
         Ok(body) => body,
         Err(_) => return serde_json::json!({
-            "status": 400,
+            "status": "400",
             "response": "Invalid request body"
         }).to_string()
     };
@@ -137,7 +137,7 @@ async fn update_class_unit(
     let class_id: &str = match req.match_info().get("class_id") {
         Some(id) => id,
         None => return serde_json::json!({
-            "status": 400,
+            "status": "400",
             "response": "Invalid request"
         }).to_string()
     };
@@ -146,7 +146,7 @@ async fn update_class_unit(
     let unit_id: &str = match req.match_info().get("unit_id") {
         Some(id) => id,
         None => return serde_json::json!({
-            "status": 400,
+            "status": "400",
             "response": "Invalid request"
         }).to_string()
     };
@@ -158,7 +158,7 @@ async fn update_class_unit(
     // Verify the provided authorization tokens
     if !lib::auth::verify(&bearer, &access_token) {
         return serde_json::json!({
-            "status": 400,
+            "status": "400",
             "response": "Invalid request"
         }).to_string()
     }
@@ -166,11 +166,11 @@ async fn update_class_unit(
     // Update the unit data in the database
     return match db.update_class_unit(&bearer, class_id, unit_id, body).await {
         true => serde_json::json!({
-            "status": 200,
+            "status": "200",
             "response": "Unit updated successfully"
         }).to_string(),
         false => serde_json::json!({
-            "status": 400,
+            "status": "400",
             "response": "Failed to update unit"
         }).to_string()
     }
