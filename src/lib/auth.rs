@@ -6,7 +6,7 @@ use std::sync::Mutex;
 // The SUPER_SECRET_CODE is what's used to prevent
 // users trying to abuse the api from being able
 // to generate their own auth tokens
-static SUPER_SECRET_CODE: &str = "super_secret_code";
+static SUPER_SECRET_CODE: &str = "SUPER_SECRET_CODE";
 
 // The TOKEN_STORAGE is used to store previously used
 // tokens so that abusers can't access the api using
@@ -107,7 +107,7 @@ fn storage_handler(bearer_storage: &mut Vec<String>, access_token: &str, time: &
         // the first value of the array to the
         // current time as a string
         bearer_storage.clear();
-        bearer_storage[0] = time.to_string();
+        bearer_storage.push(time.to_string());
 
         // Return true to ignore using the below
         // return satatement
