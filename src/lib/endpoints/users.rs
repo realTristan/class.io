@@ -1,7 +1,7 @@
 use crate::lib::{
-    self, global, handlers::Database
+    self, handlers::Database, http
 };
-use actix_web::{web, HttpRequest, Responder};
+use actix_web::{web, HttpRequest, HttpResponse};
 
 // The GET /user/<bearer> endpoint is used
 // to get an users dashboard settings through their
@@ -9,51 +9,55 @@ use actix_web::{web, HttpRequest, Responder};
 // dashboard page. To ensure the security of the endpoint,
 //  a valid auth token is required.
 #[actix_web::get("/user/{user_id}")]
-pub async fn get_user_data(req: HttpRequest, db: web::Data<Database>) -> impl Responder 
+pub async fn get_user_data(req: HttpRequest, db: web::Data<Database>) -> HttpResponse 
 {
-    // Get the class id
+    // Get the user id from the url parameters
     let user_id: &str = match req.match_info().get("user_id") {
         Some(id) => id,
-        None => return serde_json::json!({
-            "status": "400",
-            "response": "Invalid user id"
-        }).to_string()
+        None => return http::response(
+            http::Status::BAD_REQUEST,
+            serde_json::json!({
+                "response": "Invalid request"
+            })
+        )
     };
 
     // Get the bearer and access token from the request headers.
-    let bearer: String = global::get_header(&req, "authorization");
-    let access_token: String = global::get_header(&req, "access_token");
+    let bearer: String = http::header(&req, "authorization");
+    let access_token: String = http::header(&req, "access_token");
 
     // Verify the provided authorization tokens
     if !lib::auth::verify(&bearer, &access_token) {
-        return serde_json::json!({
-            "status": "400",
-            "response": "Invalid request"
-        }).to_string()
+        return http::response(
+            http::Status::BAD_REQUEST,
+            serde_json::json!({
+                "response": "Invalid request"
+            })
+        )
     }
 
     // Once the request has been verified, query the
     // database for the provided user_id. Once found,
     // return all the data from said user.
-    let user = match db.query_user_by_id(&user_id).await {
-        Some(v) => v,
-        None => return serde_json::json!({
-            "status": "400",
-            "response": "Failed to fetch user data"
-        }).to_string()
+    return match db.query_user_by_id(&user_id).await {
+        Some(user) => http::response(
+            http::Status::BAD_REQUEST,
+            serde_json::json!({
+                "status": "200",
+                "response": {
+                    "user_name": user.user_name,
+                    "user_id": user_id,
+                    "classes": "array of the users class_ids (select from classes where user_id = user_id)"
+                }
+            })
+        ),
+        None => http::response(
+            http::Status::BAD_REQUEST,
+            serde_json::json!({
+                "response": "Failed to fetch user data"
+            })
+        )
     };
-
-    // Return a formatted string as a json map
-    // so the frontend can successfully read the
-    // response data.
-    return serde_json::json!({
-        "status": "200",
-        "response": {
-            "user_name": user.user_name,
-            "user_id": user_id,
-            "classes": "array of the users class_ids (select from classes where user_id = user_id)"
-        }
-    }).to_string()
 }
 
 // The POST /user/{bearer} endpoint is used
@@ -64,58 +68,59 @@ pub async fn get_user_data(req: HttpRequest, db: web::Data<Database>) -> impl Re
 #[actix_web::post("/user")]
 pub async fn update_user_data(
     req: HttpRequest, db: web::Data<Database>, body: web::Bytes
-) -> impl Responder {
+) -> HttpResponse {
     // Get the request body
-    let body: serde_json::Value = match global::get_body(&body) {
+    let body: serde_json::Value = match http::body(&body) {
         Ok(body) => body,
-        Err(_) => return serde_json::json!({
-            "status": "400",
-            "response": "Invalid request body"
-        }).to_string()
+        Err(_) => return http::response(
+            http::Status::BAD_REQUEST,
+            serde_json::json!({
+                "response": "Invalid request body"
+            })
+        )
     };
 
     // Get the user name from the request body
     let user_name: String = match body.get("user_name") {
         Some(name) => name.to_string(),
-        None => return serde_json::json!({
-            "status": "400",
-            "response": "Invalid user_name"
-        }).to_string()
+        None => return http::response(
+            http::Status::BAD_REQUEST,
+            serde_json::json!({
+                "response": "Invalid request body"
+            })
+        )
     };
     
 
     // Get the bearer and access token from the request headers.
-    let bearer: String = global::get_header(&req, "authorization");
-    let access_token: String = global::get_header(&req, "access_token");
+    let bearer: String = http::header(&req, "authorization");
+    let access_token: String = http::header(&req, "access_token");
 
     // Verify the provided authorization tokens
     if !lib::auth::verify(&bearer, &access_token) {
-        return serde_json::json!({
-            "status": "400",
-            "response": "Invalid request"
-        }).to_string()
-    }
-
-    // If the incoming request doesn't contain
-    // a new user_name, return an empty json map
-    if user_name.len() < 1 {
-        return serde_json::json!({
-            "status": "400",
-            "response": "Invalid request body"
-        }).to_string()
+        return http::response(
+            http::Status::BAD_REQUEST,
+            serde_json::json!({
+                "response": "Invalid request"
+            })
+        )
     }
 
     // Update the username and return whether the update
     // was successful or not
     return match db.update_user_name(&bearer, &user_name).await {
-        true => serde_json::json!({
-            "status": "200",
-            "response": "Successfully updated user data"
-        }).to_string(),
-        false => serde_json::json!({
-            "status": "400",
-            "response": "Failed to update user data"
-        }).to_string()
+        true => http::response(
+            http::Status::OK,
+            serde_json::json!({
+                "response": "Updated user data"
+            })
+        ),
+        false => http::response(
+            http::Status::BAD_REQUEST,
+            serde_json::json!({
+                "response": "Failed to update user data"
+            })
+        )
     }
 }
 
@@ -128,58 +133,70 @@ pub async fn update_user_data(
 #[actix_web::put("/user")]
 async fn insert_user_data(
     req: HttpRequest, db: web::Data<Database>, body: web::Bytes
-) -> impl Responder {
+) -> HttpResponse {
 
     // Get the request body
-    let body: serde_json::Value = match global::get_body(&body) {
+    let body: serde_json::Value = match http::body(&body) {
         Ok(body) => body,
-        Err(_) => return serde_json::json!({
-            "status": "400",
-            "response": "Invalid request body"
-        }).to_string()
+        Err(_) => return http::response(
+            http::Status::BAD_REQUEST,
+            serde_json::json!({
+                "response": "Invalid request body"
+            })
+        )
     };
 
     // Get the user name from the request body
     let user_name: String = match body.get("user_name") {
         Some(name) => name.to_string(),
-        None => return serde_json::json!({
-            "status": "400",
-            "response": "Invalid user_name"
-        }).to_string()
+        None => return http::response(
+            http::Status::BAD_REQUEST,
+            serde_json::json!({
+                "response": "Invalid request body"
+            })
+        )
     };
 
     // Get the user email from the request body
     let email = match body.get("email") {
         Some(email) => email.to_string(),
-        None => return serde_json::json!({
-            "status": "400",
-            "response": "Invalid email"
-        }).to_string()
+        None => return http::response(
+            http::Status::BAD_REQUEST,
+            serde_json::json!({
+                "response": "Invalid request body"
+            })
+        )
     };
 
     // Get the bearer and access token from the request headers.
-    let bearer: String = global::get_header(&req, "authorization");
-    let access_token: String = global::get_header(&req, "access_token");
+    let bearer: String = http::header(&req, "authorization");
+    let access_token: String = http::header(&req, "access_token");
 
     // Verify the provided authorization tokens
     if !lib::auth::verify(&bearer, &access_token) {
-        return serde_json::json!({
-            "status": "400",
-            "response": "Invalid request"
-        }).to_string()
+        return http::response(
+            http::Status::BAD_REQUEST,
+            serde_json::json!({
+                "response": "Invalid request"
+            })
+        )
     }
 
     // Insert the user into the database
     // Along with this insertion is the bearer, user_name
     // user's email and the time of registration
     return match db.insert_user(&bearer, &user_name, &email).await {
-        true => serde_json::json!({
-            "status": "200",
-            "response": "Successfully inserted user data"
-        }).to_string(),
-        false => serde_json::json!({
-            "status": "400",
-            "response": "Failed to insert user data"
-        }).to_string()
+        true => http::response(
+            http::Status::OK,
+            serde_json::json!({
+                "response": "Inserted user data"
+            })
+        ),
+        false => http::response(
+            http::Status::BAD_REQUEST,
+            serde_json::json!({
+                "response": "Failed to insert user data"
+            })
+        )
     }
 }

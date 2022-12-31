@@ -5,3 +5,4 @@ pub mod database;
 pub mod global;
 pub mod structs;
 pub mod testing;
+pub mod http;
