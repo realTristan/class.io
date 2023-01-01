@@ -4,7 +4,252 @@
 # About
 - This project was built primarily for the backend portion of this application. The frontend is just extra.
 - I love writing backend applications and wanted to try doing it with Rust. I instantly fell inlove with not only the speed of Rust, but it's simplicity and security when writing code.
-- The database uses sqlite with sqlx (https://github.com/launchbadge/sqlx/tree/main/examples/sqlite/todos)
+- The database uses sqlite by sqlx (https://github.com/launchbadge/sqlx/tree/main/examples/sqlite/todos)
+
+# API Documentation
+## Security Measures
+- Any PUT, POST, or DELETE requests require a bearer token. Only columns with the same "owner_bearer", "submitter_bearer", etc. as the provided authorization header bearer token will be affected.
+- An access_token is required for all requests to ensure no abusers can use the api. (This makes our api 100% private)
+- ID's are used for any data fetching to ensure any bearer tokens are not revealed.
+
+## Users
+### Insert new user
+```cpp
+HTTP PUT /users/
+HEADERS: {
+    authorization: sha256(firebase_token)
+    access_token: sha256("{bearer}:{time_in_seconds}:{secret_code}")
+}
+BODY: {
+    user_name: String,
+    email: String
+}
+```
+
+### Update user data
+```cpp
+HTTP PUT /users/
+HEADERS: {
+    authorization: sha256(firebase_token)
+    access_token: sha256("{bearer}:{time_in_seconds}:{secret_code}")
+}
+BODY: {
+    user_name: String
+}
+```
+
+### Get user data
+```cpp
+HTTP GET /users/{user_id}
+HEADERS: {
+    authorization: sha256(firebase_token)
+    access_token: sha256("{bearer}:{time_in_seconds}:{secret_code}")
+}
+RESPONSE: {
+    user_name: String,
+    user_id: String
+}
+```
+
+## Classes
+### Get class data
+```cpp
+HTTP GET /class/{class_id}
+HEADERS: {
+    authorization: sha256(firebase_token)
+    access_token: sha256("{bearer}:{time_in_seconds}:{secret_code}")
+}
+RESPONSE: {
+    class_id: int,
+    owner_id: int,
+    class_name: String,
+    enable_whitelist: bool,
+    units: [
+        unit_name: String,
+        locked: bool,
+        lessons: [
+            title: String,
+            description: String,
+            video: String,
+            work: String,
+            work_solutions: String
+        ]
+    ],
+    whitelist: [
+        whitelisted_user_name: String,
+        whitelisted_user_id: String
+    ],
+    announcements: [
+        author_name: String,
+        title: String,
+        description: String,
+        attachment: String
+    ]
+}
+```
+
+### Update class data
+```cpp
+HTTP PUT /class/{class_id}
+HEADERS: {
+    authorization: sha256(firebase_token)
+    access_token: sha256("{bearer}:{time_in_seconds}:{secret_code}")
+}
+BODY: {
+    enable_whitelist: bool, (data.enable_whitelist as bool)
+    class_name: String
+}
+```
+
+### Create new class
+```cpp
+HTTP PUT /class/
+HEADERS: {
+    authorization: sha256(firebase_token)
+    access_token: sha256("{bearer}:{time_in_seconds}:{secret_code}")
+}
+BODY: {
+    class_name: String
+}
+```
+
+## Units
+### Create new unit
+```cpp
+HTTP PUT /class/{class_id}/units/
+HEADERS: {
+    authorization: sha256(firebase_token)
+    access_token: sha256("{bearer}:{time_in_seconds}:{secret_code}")
+}
+BODY: {
+    unit_name: String
+}
+```
+
+### Delete a unit
+```cpp
+HTTP DELETE /class/{class_id}/units/{unit_id}/
+HEADERS: {
+    authorization: sha256(firebase_token)
+    access_token: sha256("{bearer}:{time_in_seconds}:{secret_code}")
+}
+```
+
+### Update a unit
+```cpp
+HTTP PUT /class/{class_id}/units/"
+HEADERS: {
+    authorization: sha256(firebase_token)
+    access_token: sha256("{bearer}:{time_in_seconds}:{secret_code}")
+}
+BODY: {
+    unit_name: String,
+    locked: bool (data.locked as bool)
+}
+```
+
+## Announcements
+### Create new announcement
+```cpp
+HTTP PUT /class/{class_id}/announcements/
+HEADERS: {
+    authorization: sha256(firebase_token)
+    access_token: sha256("{bearer}:{time_in_seconds}:{secret_code}")
+}
+BODY: {
+    author_name: String,
+    title: String,
+    description: String,
+    attachment: String
+}
+```
+
+### Delete an announcement
+```cpp
+HTTP DELETE /class/{class_id}/announcements/{announcement_id}
+HEADERS: {
+    authorization: sha256(firebase_token)
+    access_token: sha256("{bearer}:{time_in_seconds}:{secret_code}")
+}
+```
+
+## Submissions
+### Get class submissions
+```cpp
+HTTP GET /class/{class_id}/submissions/
+HEADERS: {
+    authorization: sha256(firebase_token)
+    access_token: sha256("{bearer}:{time_in_seconds}:{secret_code}")
+}
+RESPONSE: {
+    submissions: [
+        submitter_bearer: String,
+        submission_id: String,
+        submission_date: int,
+        data: String
+    ]
+}
+```
+
+### Get user submissions
+```cpp
+HTTP GET /class/{class_id}/student/submissions/
+HEADERS: {
+    authorization: sha256(firebase_token)
+    access_token: sha256("{bearer}:{time_in_seconds}:{secret_code}")
+}
+RESPONSE: {
+    submissions: [
+        submitter_bearer: String,
+        submission_id: String,
+        submission_date: int,
+        data: String
+    ]
+}
+```
+
+### Create new submission
+```cpp
+HTTP PUT /class/{class_id}/submissions/
+HEADERS: {
+    authorization: sha256(firebase_token)
+    access_token: sha256("{bearer}:{time_in_seconds}:{secret_code}")
+}
+BODY: {
+    data: String
+}
+```
+
+### Delete a submission
+```cpp
+HTTP DELETE /class/{class_id}/submissions/{submission_id}/
+HEADERS: {
+    authorization: sha256(firebase_token)
+    access_token: sha256("{bearer}:{time_in_seconds}:{secret_code}")
+}
+```
+
+## Whitelist
+### Add a student to class whitelist
+```cpp
+HTTP PUT /class/{class_id}/whitelist/
+HEADERS: {
+    authorization: sha256(firebase_token)
+    access_token: sha256("{bearer}:{time_in_seconds}:{secret_code}")
+}
+BODY: {
+    user_id: String
+}
+```
+
+### Remove a student from class whitelist
+```cpp
+HTTP DELETE /class/{class_id}/whitelist/{user_id}/
+HEADERS: {
+    authorization: sha256(firebase_token)
+    access_token: sha256("{bearer}:{time_in_seconds}:{secret_code}")
+}
+```
 
 # API Showcase
  
@@ -15,7 +260,6 @@
     "class_id": "e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020", 
     "class_name": "test_class_name", 
     "enable_whitelist": false,
-    "rsl":false, 
     "units": [
         {
             "unit_name": "test_unit_name", 
@@ -46,7 +290,7 @@
 ```
 
 # Todo
-<h3>Frontend</h3>
+### Frontend
 
 - Add a section to select the unit
 - Add a section to submit homework answers
