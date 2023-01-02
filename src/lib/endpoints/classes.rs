@@ -55,7 +55,7 @@ async fn get_class_data(req: HttpRequest, db: web::Data<Database>) -> HttpRespon
 // modify any one of the Class struct's data.
 // This endpoint is utilized within the class dashboard
 // and requires a special bearer token to work.
-#[actix_web::post("/class/{class_id}")]
+#[actix_web::put("/class/{class_id}")]
 async fn update_class_data(
     req: HttpRequest, db: web::Data<Database>, body: web::Bytes
 ) -> HttpResponse {

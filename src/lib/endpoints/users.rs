@@ -3,12 +3,9 @@ use crate::lib::{
 };
 use actix_web::{web, HttpRequest, HttpResponse};
 
-// The GET /user/<bearer> endpoint is used
-// to get an users dashboard settings through their
-// bearer. This function is necessary for the frontend
-// dashboard page. To ensure the security of the endpoint,
-//  a valid auth token is required.
-#[actix_web::get("/user/{user_id}")]
+// The GET /users/{user_id} endpoint is used
+// to get an users data using their unique user_id
+#[actix_web::get("/users/{user_id}")]
 pub async fn get_user_data(req: HttpRequest, db: web::Data<Database>) -> HttpResponse 
 {
     // Get the user id from the url parameters
@@ -60,12 +57,12 @@ pub async fn get_user_data(req: HttpRequest, db: web::Data<Database>) -> HttpRes
     };
 }
 
-// The POST /user/{bearer} endpoint is used
+// The PUT /user endpoint is used
 // to get an users dashboard settings through their
 // bearer. This function is necessary for the frontend
 // dashboard page. To ensure the security of the endpoint,
 // a valid auth token is required.
-#[actix_web::post("/user")]
+#[actix_web::put("/users/{user_id}")]
 pub async fn update_user_data(
     req: HttpRequest, db: web::Data<Database>, body: web::Bytes
 ) -> HttpResponse {
@@ -130,7 +127,7 @@ pub async fn update_user_data(
 // provided email and the current date as the registration time.
 // This endpoint is called whenever an user logs into the website
 // using firebase google auth.
-#[actix_web::put("/user")]
+#[actix_web::put("/users")]
 async fn insert_user_data(
     req: HttpRequest, db: web::Data<Database>, body: web::Bytes
 ) -> HttpResponse {

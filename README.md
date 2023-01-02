@@ -28,7 +28,7 @@ BODY: {
 
 ### Update user data
 ```cpp
-HTTP PUT /users/
+HTTP PUT /users/{user_id}
 HEADERS: {
     authorization: sha256(firebase_token)
     access_token: sha256("{bearer}:{time_in_seconds}:{secret_code}")
@@ -96,7 +96,7 @@ HEADERS: {
     access_token: sha256("{bearer}:{time_in_seconds}:{secret_code}")
 }
 BODY: {
-    enable_whitelist: bool, (data.enable_whitelist as bool)
+    enable_whitelist: bool,
     class_name: String
 }
 ```
@@ -144,7 +144,7 @@ HEADERS: {
 }
 BODY: {
     unit_name: String,
-    locked: bool (data.locked as bool)
+    locked: bool
 }
 ```
 
