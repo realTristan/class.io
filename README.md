@@ -7,11 +7,6 @@
 * The database uses sqlite by sqlx (https://github.com/launchbadge/sqlx/tree/main/examples/sqlite/todos)
 
 # API Documentation
-## Security
-* Any PUT, POST, or DELETE requests require a bearer token. Only columns with the same "owner_bearer", "submitter_bearer", etc. as the provided authorization header bearer token will be affected.
-* An access_token is required for all requests to ensure no abusers can use the api. (This makes our api 100% private)
-* ID's are used for any data fetching to ensure any bearer tokens are not revealed.
-
 ## Users
 ### Insert new user
 ```cpp
