@@ -2,15 +2,15 @@
 ![Capture](https://user-images.githubusercontent.com/75189508/193428491-28348d48-5a33-4975-8dfa-9c339f8f9db4.PNG)
 
 # About
-- This project was built primarily for the backend portion of this application. The frontend is just extra.
-- I love writing backend applications and wanted to try doing it with Rust. I instantly fell inlove with not only the speed of Rust, but it's simplicity and security when writing code.
-- The database uses sqlite by sqlx (https://github.com/launchbadge/sqlx/tree/main/examples/sqlite/todos)
+* This project was built primarily for the backend portion of this application. The frontend is just extra.
+* I love writing backend applications and wanted to try doing it with Rust. I instantly fell inlove with not only the speed of Rust, but it's simplicity and security when writing code.
+* The database uses sqlite by sqlx (https://github.com/launchbadge/sqlx/tree/main/examples/sqlite/todos)
 
 # API Documentation
-## Security Measures
-- Any PUT, POST, or DELETE requests require a bearer token. Only columns with the same "owner_bearer", "submitter_bearer", etc. as the provided authorization header bearer token will be affected.
-- An access_token is required for all requests to ensure no abusers can use the api. (This makes our api 100% private)
-- ID's are used for any data fetching to ensure any bearer tokens are not revealed.
+## Security
+* Any PUT, POST, or DELETE requests require a bearer token. Only columns with the same "owner_bearer", "submitter_bearer", etc. as the provided authorization header bearer token will be affected.
+* An access_token is required for all requests to ensure no abusers can use the api. (This makes our api 100% private)
+* ID's are used for any data fetching to ensure any bearer tokens are not revealed.
 
 ## Users
 ### Insert new user
