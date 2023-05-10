@@ -56,10 +56,10 @@ pub async fn get_user_data(req: HttpRequest, db: web::Data<Database>) -> HttpRes
     };
 }
 
-// The PUT /user endpoint is used to get an users dashboard settings through their
+// The POST /user endpoint is used to get an users dashboard settings through their
 // bearer. This function is necessary for the frontend dashboard page. To ensure the 
 // security of the endpoint, a valid auth token is required.
-#[actix_web::put("/users/{user_id}")]
+#[actix_web::post("/users/{user_id}")]
 pub async fn update_user_data(
     req: HttpRequest,
     db: web::Data<Database>,

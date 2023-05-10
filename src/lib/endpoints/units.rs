@@ -89,7 +89,7 @@ async fn insert_class_unit(
 
 // The update_class_unit() endpoint is used to
 // modify any data within the unit's database row.
-#[actix_web::put("/class/{class_id}/units/{unit_id}")]
+#[actix_web::post("/class/{class_id}/units/{unit_id}")]
 async fn update_class_unit(
     req: HttpRequest,
     db: web::Data<Database>,

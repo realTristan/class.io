@@ -1,10 +1,9 @@
 use crate::lib::{self, utils, handlers::Database, http};
 use actix_web::{web, HttpRequest, HttpResponse};
 
-// The get_class_submissions() endpoint is used to
-// get all the work submissions for the provided class
-// hash. This endpoint is used in the website dashboard
-// so that teachers can see all the work their students
+// The get_class_submissions() endpoint is used to get all the work 
+// submissions for the provided class hash. This endpoint is used in the 
+// website dashboard so that teachers can see all the work their students
 // have submitted.
 #[actix_web::get("/class/{class_id}/submissions")]
 async fn get_class_submissions(req: HttpRequest, db: web::Data<Database>) -> HttpResponse {
@@ -50,11 +49,9 @@ async fn get_class_submissions(req: HttpRequest, db: web::Data<Database>) -> Htt
     };
 }
 
-// The get_user_submissions() endpoint is used to
-// retrieve all the submissions from a specific
-// user hash from within the database. This endpoint
-// is called for the student to see all of their
-// previous work submissions.
+// The get_user_submissions() endpoint is used to retrieve all the submissions 
+// from a specific user hash from within the database. This endpoint is called 
+// for the student to see all of their previous work submissions.
 #[actix_web::get("/class/{class_id}/student/submissions")]
 async fn get_user_submissions(req: HttpRequest, db: web::Data<Database>) -> HttpResponse {
     // Get the class id
@@ -99,10 +96,8 @@ async fn get_user_submissions(req: HttpRequest, db: web::Data<Database>) -> Http
     };
 }
 
-// The insert_class_submission() endpoint is used
-// to insert a new submission into the database.
-// This endpoint requires a bearer token, therefore
-// the student submitting their work must be signed in.
+// The insert_class_submission() endpoint is used to insert a new submission into the database.
+// This endpoint requires a bearer token, therefore the student submitting their work must be signed in.
 #[actix_web::put("/class/{class_id}/submissions")]
 async fn insert_class_submission(
     req: HttpRequest,
@@ -183,9 +178,8 @@ async fn insert_class_submission(
     };
 }
 
-// The delete_class_submission() function is used to
-// delete a submission from the database. This endpoint
-// is called when the signed in student wants to undo
+// The delete_class_submission() function is used to delete a submission from 
+// the database. This endpoint is called when the signed in student wants to undo
 // their work submission.
 #[actix_web::delete("/class/{class_id}/submissions/{submission_id}")]
 async fn delete_class_submission(req: HttpRequest, db: web::Data<Database>) -> HttpResponse {

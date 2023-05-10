@@ -1,10 +1,8 @@
 use crate::lib::{self, utils, handlers::Database, http};
 use actix_web::{web, HttpRequest, HttpResponse};
 
-// The insert_class_announcement() endpoint is used
-// to insert a new announcement into the database.
-// A unique announcement identifier is created
-// for if the user wants to later delete the post.
+// The insert_class_announcement() endpoint is used to insert a new announcement into the database.
+// A unique announcement identifier is created for if the user wants to later delete the post.
 #[actix_web::put("/class/{class_id}/announcements")]
 async fn insert_class_announcement(
     req: HttpRequest,
@@ -75,11 +73,10 @@ async fn insert_class_announcement(
     };
 }
 
-// The delete_class_announcement() endpoint is used
-// to delete an announcement from the database. This
-// function requires a bearer token which means the
+// The delete_class_announcement() endpoint is used to delete an announcement 
+// from the database. This function requires a bearer token which means the
 // user making the announcement must be signed in.
-#[actix_web::delete("/class/{class_id}/announcements{announcement_id}")]
+#[actix_web::delete("/class/{class_id}/announcements/{announcement_id}")]
 async fn delete_class_announcement(req: HttpRequest, db: web::Data<Database>) -> HttpResponse {
     // Get the class id
     let class_id: &str = match req.match_info().get("class_id") {

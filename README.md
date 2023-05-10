@@ -28,7 +28,7 @@ BODY: {
 
 ### Update user data
 ```cpp
-HTTP PUT /users/{user_id}
+HTTP POST /users/{user_id}
 HEADERS: {
     authorization: sha256(firebase_token)
     access_token: sha256("{bearer}:{time_in_seconds}:{secret_code}")
@@ -90,7 +90,7 @@ RESPONSE: {
 
 ### Update class data
 ```cpp
-HTTP PUT /class/{class_id}
+HTTP POST /class/{class_id}
 HEADERS: {
     authorization: sha256(firebase_token)
     access_token: sha256("{bearer}:{time_in_seconds}:{secret_code}")
@@ -137,7 +137,7 @@ HEADERS: {
 
 ### Update a unit
 ```cpp
-HTTP PUT /class/{class_id}/units/"
+HTTP POST /class/{class_id}/units/"
 HEADERS: {
     authorization: sha256(firebase_token)
     access_token: sha256("{bearer}:{time_in_seconds}:{secret_code}")
