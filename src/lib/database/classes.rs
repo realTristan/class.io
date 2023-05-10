@@ -1,7 +1,5 @@
 use crate::lib::{
-    self, structs::{
-        Class, Announcement, Whitelist, Unit, Lesson
-    }
+    self, structs::{Class, Announcement, Whitelist, Unit, Lesson}
 };
 
 // Database Implementation
@@ -9,8 +7,7 @@ impl lib::handlers::Database {
     // The class_exists() function is used to check whether
     // the provided class hash already exists. This function
     // is called in the insert_class_data() function.
-    async fn class_exists(&self, class_id: &str) -> bool 
-    {
+    async fn class_exists(&self, class_id: &str) -> bool {
         // Query the database
         let query = sqlx::query!(
             "SELECT * FROM classes WHERE class_id=?", class_id
@@ -26,9 +23,11 @@ impl lib::handlers::Database {
     // class identifier, format the bearer with the current
     // time in nanoseconds.
     pub async fn insert_class_data(
-        &self, bearer: &str, class_id: &str, class_name: &str
+        &self, 
+        bearer: &str, 
+        class_id: &str, 
+        class_name: &str,
     ) -> bool {
-
         // If the class already exists, return the function.
         if self.class_exists(class_id).await {
             return false;
@@ -59,8 +58,7 @@ impl lib::handlers::Database {
     // the class data within the database. This function
     // is required to disperse the query string from any
     // invalid/empty values.
-    fn generate_class_update_query(&self, data: serde_json::Value) -> String 
-    {
+    fn generate_class_update_query(&self, data: serde_json::Value) -> String {
         // Create a new string
         let mut query: String = String::new();
 
@@ -84,9 +82,11 @@ impl lib::handlers::Database {
     // The function requires a generated class_update_query
     // which can be generated using the function above.
     pub async fn update_class_data(
-        &self, bearer: &str, class_id: &str, data: serde_json::Value
+        &self, 
+        bearer: &str, 
+        class_id: &str,
+        data: serde_json::Value,
     ) -> bool {
-
         // Generate a new query string. This query string accounts
         // for empty values so that nothing gets corrupted.
         let query_data: String = self.generate_class_update_query(data);
@@ -109,8 +109,7 @@ impl lib::handlers::Database {
     // revolving around the provided class_id. This includes
     // the class's primary data (shown below) and the class's
     // units and lessons.
-    pub async fn get_class_data(&self, class_id: &str) -> Option<serde_json::Value>
-    {
+    pub async fn get_class_data(&self, class_id: &str) -> Option<serde_json::Value> {
         // Get the class's general data
         let class: Class = match self.get_class_general_data(class_id).await {
             Some(r) => r,
@@ -137,8 +136,7 @@ impl lib::handlers::Database {
     // The get_class_general_data() function is used to get
     // all the primary class data. All the data names
     // are shown within the below comment.
-    async fn get_class_general_data(&self, class_id: &str) -> Option<Class> 
-    {
+    async fn get_class_general_data(&self, class_id: &str) -> Option<Class> {
         // Get the class's general data. This includes the class:
         // class_name, whitelist[bool], rls[bool], and class_id
         let query = sqlx::query_as!(Class,
@@ -156,8 +154,7 @@ impl lib::handlers::Database {
     // The get_class_units() function is used to
     // easily get all the units corresponding with
     // the provided class_id.
-    pub async fn get_class_units(&self, class_id: &str) -> Vec<serde_json::Value>
-    {
+    pub async fn get_class_units(&self, class_id: &str) -> Vec<serde_json::Value> {
         // Query the database
         let query = sqlx::query_as!(Unit,
             "SELECT unit_id, unit_name, locked FROM units WHERE class_id=?",
@@ -183,8 +180,7 @@ impl lib::handlers::Database {
     // The function then converts the query data into a readable 
     // json map that will eventually be returned with the 
     // outgoing response body
-    async fn get_unit_lessons(&self, unit_id: &str) -> Vec<serde_json::Value>
-    {
+    async fn get_unit_lessons(&self, unit_id: &str) -> Vec<serde_json::Value> {
         // Query the database
         let query = sqlx::query_as!(Lesson,
             "SELECT title, description, video, work, work_solutions FROM lessons WHERE unit_id=?",
@@ -210,8 +206,7 @@ impl lib::handlers::Database {
     // The get_class_announcements() function is used
     // to get all the announcements a teacher has
     // made within provided class_id.
-    pub async fn get_class_announcements(&self, class_id: &str) -> Vec<serde_json::Value>
-    {
+    pub async fn get_class_announcements(&self, class_id: &str) -> Vec<serde_json::Value> {
         // Fetch all the announcements that the
         // class owner has created.
         let query = sqlx::query_as!(Announcement, 
@@ -236,8 +231,7 @@ impl lib::handlers::Database {
     // The get_class_whitelist() function is used to return
     // an array containing all the users that are allowed to
     // see the content within the provided class_id
-    pub async fn get_class_whitelist(&self, class_id: &str) -> Vec<serde_json::Value>
-    {
+    pub async fn get_class_whitelist(&self, class_id: &str) -> Vec<serde_json::Value> {
         // Fetch all the whitelisted users that have
         // access to the provided class.
         let query = sqlx::query_as!(Whitelist, 

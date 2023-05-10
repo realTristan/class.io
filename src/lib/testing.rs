@@ -4,8 +4,7 @@ impl handlers::Database {
     // The insert_test_class() function is used for endpoint
     // debugging as it is required that atleast one class be
     // present in order to properly test.
-    pub async fn insert_test_class(&self) 
-    {
+    pub async fn insert_test_class(&self) {
         println!("Test User Hash: 22f3d5b9c91b570a4f1848c5d147b4709d2fb96");
         println!("Test Class Hash: e8bc5598c2f61d2c5e7f8ad1d447fd1ea6ad5020");
 

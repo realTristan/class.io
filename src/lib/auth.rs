@@ -1,5 +1,5 @@
 // Library Usages
-use super::global;
+use super::utils;
 use std::collections::HashMap;
 use std::sync::Mutex;
 
@@ -18,7 +18,7 @@ lazy_static::lazy_static! {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
-//                                                                                  // 
+//                                                                                  //
 //  HOW TOKENS WORK:                                                                //
 //                                                                                  //
 //      bearer = "SHA256 Encrypted Firebase Token"                                  //
@@ -27,7 +27,6 @@ lazy_static::lazy_static! {
 //                                                                                  //
 //                                                                                  //
 //////////////////////////////////////////////////////////////////////////////////////
-
 
 // The verify() function is used to check whether the
 // provided auth token is valid. It does this by
@@ -43,7 +42,7 @@ pub fn verify(bearer: &str, access_token: &str) -> bool {
     // is used to check how long ago the auth token was
     // generated. Doing this prevents users from consecutively
     // using a single auth token if trying to abuse the api
-    let time: u64 = global::get_time().as_secs();
+    let time: u64 = utils::get_time().as_secs();
 
     // Convert the token storage into a mutable variable.
     // This is required so that we can append the access_token

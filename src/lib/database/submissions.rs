@@ -1,12 +1,11 @@
-use crate::lib::{self, global, structs::Submission};
+use crate::lib::{self, utils, structs::Submission};
 
 // Database Implementation
 impl lib::handlers::Database {
     // The class_submission_exists() function is used to check whether
     // the provided submission hash already exists. This function
     // is called in the insert_class_submission() function.
-    async fn class_submission_exists(&self, submission_id: &str) -> bool 
-    {
+    async fn class_submission_exists(&self, submission_id: &str) -> bool {
         // Query the database
         let query = sqlx::query!(
             "SELECT * FROM submissions WHERE submission_id=?",
@@ -22,15 +21,20 @@ impl lib::handlers::Database {
     // using the provided class hash. The function generates
     // a unique submission hash before inserting the data, which
     // is used within the delete_class_submission() function
-    pub async fn insert_class_submission(&self, class_id: &str,  submission_id: &str, submitter_bearer: &str, data: &str) -> bool 
-    {
+    pub async fn insert_class_submission(
+        &self, 
+        class_id: &str,
+        submission_id: &str,
+        submitter_bearer: &str,
+        data: &str
+    ) -> bool {
         // If the submission already exists, return
         if self.class_submission_exists(submission_id).await {
             return false;
         }
 
         // Get the current date to put into the database
-        let date: i64 = global::get_time().as_secs() as i64;
+        let date: i64 = utils::get_time().as_secs() as i64;
 
         // Insert the data into the database
         let query = sqlx::query!(
@@ -50,7 +54,10 @@ impl lib::handlers::Database {
     // is called when a student wants to unsubmit a portion
     // of their work.
     pub async fn delete_class_submission(
-        &self, submitter_bearer: &str, class_id: &str, submission_id: &str
+        &self, 
+        submitter_bearer: &str, 
+        class_id: &str, 
+        submission_id: &str
     ) -> bool {
         // Query the database, deleting all data revolving around
         // the provided submission hash
@@ -73,8 +80,7 @@ impl lib::handlers::Database {
     // The get_submission_json() function is used to return
     // a string json map with all the submission data
     // that was retrieved from the database.
-    fn get_submission_json(&self, submissions: Vec<Submission>) -> Vec<serde_json::Value> 
-    {
+    fn get_submission_json(&self, submissions: Vec<Submission>) -> Vec<serde_json::Value> {
         return submissions.iter().map(|s| {
             serde_json::json!({
                 "submitter_bearer": s.submitter_bearer,
@@ -89,8 +95,7 @@ impl lib::handlers::Database {
     // return all the submissions for the provided class.
     // This function is used in the dashboard of the website
     // where the teachers can mark the students submitted work.
-    pub async fn get_class_submissions(&self, class_id: &str) -> Option<Vec<serde_json::Value>> 
-    {
+    pub async fn get_class_submissions(&self, class_id: &str) -> Option<Vec<serde_json::Value>> {
         // Query the database, selecting the submitter_bearer, submission_date
         // and the submission data from the submissions column
         let query = sqlx::query_as!(Submission, 
@@ -110,8 +115,7 @@ impl lib::handlers::Database {
     // class. This function is used for the students to see
     // what work they have previously submitted. This function is the
     // basis towards students being able to insert and delete submissions.
-    pub async fn get_user_submissions(&self, class_id: &str, bearer: &str) -> Option<Vec<serde_json::Value>>
-    {
+    pub async fn get_user_submissions(&self, class_id: &str, bearer: &str) -> Option<Vec<serde_json::Value>> {
         // Query the database selecting the submitter_bearer, submission_id, submission_date
         // and the submission data from the submissions column.
         let query = sqlx::query_as!(Submission,

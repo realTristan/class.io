@@ -6,8 +6,7 @@ impl lib::handlers::Database {
     // The insert_class_unit() function is used to insert a new
     // unit into the database for the provided class. Students who
     // visit the class through the website, will see this unit appear.
-    pub async fn insert_class_unit(&self, bearer: &str, unit_id: &str, class_id: &str, unit_name: &str) -> bool 
-    {
+    pub async fn insert_class_unit(&self, bearer: &str, unit_id: &str, class_id: &str, unit_name: &str) -> bool {
         // If the unit already exists, return false
         if self.unit_exists(unit_id).await {
             return false;
@@ -29,8 +28,7 @@ impl lib::handlers::Database {
     // The unit_exists() function is used to check whether
     // the provided unit hash already exists. This function
     // is called in the insert_class_unit() function.
-    async fn unit_exists(&self, unit_id: &str) -> bool 
-    {
+    async fn unit_exists(&self, unit_id: &str) -> bool {
         // Query the database
         let query = sqlx::query!("SELECT * FROM units WHERE unit_id=?", unit_id)
             .fetch_one(&self.conn)
@@ -44,9 +42,11 @@ impl lib::handlers::Database {
     // from the units column wherever the provided unit_id
     // is present. A maximum of 12 units is allowed per class.
     pub async fn delete_class_unit(
-        &self, bearer: &str, class_id: &str, unit_id: &str
+        &self, 
+        bearer: &str, 
+        class_id: &str, 
+        unit_id: &str
     ) -> bool {
-
         // Query the database
         let query = sqlx::query!(
             "DELETE FROM units WHERE unit_id=? AND owner_bearer=? AND class_id=?",
@@ -88,7 +88,11 @@ impl lib::handlers::Database {
     // Json<UnitDataBody> values. In order to prevent null values
     // being updated, the function first determines which values are null.
     pub async fn update_class_unit(
-        &self, bearer: &str, class_id: &str, unit_id: &str, data: serde_json::Value
+        &self, 
+        bearer: &str, 
+        class_id: &str, 
+        unit_id: &str, 
+        data: serde_json::Value
     ) -> bool {
         // Generate the query update data
         let query_data: String = self.generate_unit_update_query(data).await;

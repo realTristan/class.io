@@ -1,10 +1,7 @@
 mod lib;
-use lib::{
-    endpoints, handlers::Database
-};
-use actix_web::{
-    web::Data, App, HttpServer
-};
+use actix_web::{web::Data, App, HttpServer};
+use lib::{endpoints, handlers::Database};
+use actix_ratelimit::{MemoryStore, MemoryStoreActor, RateLimiter};
 
 // Main Actix-Web function
 #[actix_web::main]
@@ -16,9 +13,15 @@ async fn main() -> std::io::Result<()> {
     // db.insert_test_class().await;
 
     // Establish a connection to http://127.0.0.1:8080/
+    let store = MemoryStore::new();
     HttpServer::new(move || {
         App::new()
             .wrap(actix_cors::Cors::permissive())
+            .wrap(
+                RateLimiter::new(MemoryStoreActor::from(store.clone()).start())
+                    .with_interval(std::time::Duration::from_secs(60))
+                    .with_max_requests(10),
+            )
             .app_data(Data::new(db.clone()))
             // User data
             .service(endpoints::users::get_user_data)
